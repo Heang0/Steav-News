@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K-POP NEWS</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="logo">K-POP<br />NEWS</div>
+
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="group.html">Groups</a>
+      <a href="contact.html">Contact</a>
+      
+      <a href="#">Playlists</a>
+    </nav>
+  </header>
+
+  <section class="carousel-container">
+    <div class="carousel" id="carousel">
+      <div class="carousel-slide active">
+        <img src="/images/banner-1.jpg" alt="Ad 1" />
+        <a href="#" class="banner-btn">Shop Now</a>
+      </div>
+      <div class="carousel-slide">
+        <img src="/images/banner-2.jpg" alt="Ad 2" />
+        <a href="#" class="banner-btn">Learn More</a>
+      </div>
+      <div class="carousel-slide">
+        <img src="/images/banner-3.jpg" alt="Ad 3" />
+        <a href="#" class="banner-btn">See More</a>
+      </div>
+    </div>
+    <div class="carousel-nav">
+      <button class="nav-button prev" onclick="prevSlide()">&#10094;</button>
+      <button class="nav-button next" onclick="nextSlide()">&#10095;</button>
+    </div>
+  </section>
+
+  <main class="main-content-grid">
+    <section class="news-section">
+      <h2>Latest Articles</h2>
+      <div class="news-cards">
+        </div>
+    </section>
+
+    <aside class="trending">
+      <h2>Trending Now</h2>
+      <ul id="trendingList">
+        </ul>
+    </aside>
+  </main>
+
+  <!-- <footer>
+    <p>&copy; 2025 K-POP NEWS. All rights reserved.</p>
+  </footer> -->
+
+  <script>
+    // Navbar toggle for mobile
+    function toggleMenu() {
+      const nav = document.getElementById("navLinks");
+      nav.classList.toggle("open");
+    }
+
+    // Carousel functionality
+    let currentSlide = 0;
+    const slides = document.querySelectorAll(".carousel-slide");
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+      // Remove 'active' from all slides
+      slides.forEach(slide => slide.classList.remove("active"));
+      // Add 'active' to the current slide
+      slides[index].classList.add("active");
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      showSlide(currentSlide);
+    }
+
+    // Initialize carousel to show the first slide
+    showSlide(currentSlide);
+
+    // Auto-advance carousel
+    setInterval(nextSlide, 5000); // Change slide every 5 seconds
+
+    // Fetch and display latest articles
+    fetch('/api/articles')
+      .then(res => res.json())
+      .then(articles => {
+        const container = document.querySelector(".news-cards");
+        container.innerHTML = ""; // Clear existing static content
+        articles.forEach(article => {
+          const card = document.createElement("a");
+          card.href = `article.html?id=${article._id}`;
+          card.classList.add("card");
+          // Use article.createdAt for date, as it's stored as a proper Date object
+          const articleDate = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          card.innerHTML = `
+            <div class="card-image">
+              <img src="${article.image}" alt="${article.title}" />
+            </div>
+            <div class="card-content">
+              <p class="card-date">${articleDate}</p>
+              <h3>${article.title}</h3>
+            </div>`;
+          container.appendChild(card);
+        });
+      })
+      .catch(err => console.error("Failed to fetch articles:", err));
+
+    // Fetch and display trending articles for the "Trending Now" section
+    fetch('/api/trending')
+      .then(res => res.json())
+      .then(trendingArticles => {
+        const trendingList = document.getElementById("trendingList");
+        trendingList.innerHTML = ""; // Clear existing static content
+        trendingArticles.forEach(item => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <a href="article.html?id=${item._id}">
+              <img src="${item.image}" alt="${item.title}" />
+              <span>${item.title}</span>
+            </a>`;
+          trendingList.appendChild(li);
+        });
+      })
+      .catch(err => console.error("Failed to fetch trending articles:", err));
+  </script>
+</body>
+
+</html>

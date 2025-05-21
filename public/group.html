@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>K-POP Groups</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">K-POP<br />NEWS</div>
+
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="groups.html">Groups</a>
+            <a href="contact.html">Contact</a>
+            </nav>
+    </header>
+
+    <main class="main-content-grid">
+        <section class="news-articles">
+            <h2>All K-POP Groups</h2>
+            <div id="groupsContainer" class="cards-grid">
+                </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 K-POP NEWS. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.getElementById("navLinks");
+            nav.classList.toggle("open");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const groupsContainer = document.getElementById('groupsContainer');
+
+            fetch('/api/groups')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(groups => {
+                    if (groups.length === 0) {
+                        groupsContainer.innerHTML = '<p>No K-POP groups found. Please add some data to your MongoDB "groups" collection.</p>';
+                        return;
+                    }
+                    groups.forEach(group => {
+                        const groupCard = document.createElement('a');
+                        groupCard.href = `group-detail.html?id=${group._id}`;
+                        groupCard.classList.add('card');
+
+                        groupCard.innerHTML = `
+                            <div class="card-image">
+                                <img src="${group.imageUrl || '/images/default_group.jpg'}" alt="${group.name} Logo" />
+                            </div>
+                            <div class="card-content">
+                                <h3>${group.name}</h3>
+                                <p class="card-date">${group.company || 'Unknown Company'}</p>
+                            </div>
+                        `;
+                        groupsContainer.appendChild(groupCard);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching groups:", error);
+                    groupsContainer.innerHTML = '<p>Failed to load groups. Please check your server and network connection and ensure your "groups" collection has data.</p>';
+                });
+        });
+    </script>
+</body>
+</html>

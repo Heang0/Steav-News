@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - K-POP NEWS</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* General styles for the container */
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .admin-container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #e60000;
+      margin-bottom: 25px;
+    }
+
+    /* Login Form Specific Styles */
+    #loginSection {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+    }
+    #loginSection h2 {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #e60000;
+    }
+    #loginSection input {
+        width: 100%;
+        max-width: 300px;
+        padding: 10px 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    #loginSection button {
+        padding: 10px 20px;
+        background-color: #e60000;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease;
+    }
+    #loginSection button:hover {
+        background-color: #cc0000;
+    }
+
+    /* Form Section Specific Styles */
+    #adminFormSection {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="url"],
+    .form-group input[type="file"] { /* Note: type="date" removed from this line */
+      width: calc(100% - 20px); /* Adjust for padding */
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .form-group input[type="checkbox"] {
+      margin-right: 10px;
+    }
+    .form-group .file-upload-options {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 5px;
+    }
+    .form-group .file-upload-options label {
+        display: inline-block;
+        margin-bottom: 0;
+    }
+
+    /* Rich Text Editor Styles */
+    .editor-toolbar {
+      background-color: #eee;
+      padding: 10px;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-wrap: wrap; /* Allow buttons to wrap */
+      gap: 5px; /* Spacing between buttons */
+      margin-bottom: -1px; /* Overlap border with content */
+    }
+    .editor-toolbar button {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      transition: background-color 0.2s ease;
+    }
+    .editor-toolbar button:hover {
+      background-color: #e0e0e0;
+    }
+    #content {
+      border: 1px solid #ddd;
+      min-height: 250px;
+      padding: 15px;
+      border-radius: 0 0 8px 8px;
+      background-color: white;
+      outline: none; /* Remove outline on focus */
+      overflow-y: auto; /* Enable scrolling for long content */
+      margin-bottom: 20px;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      padding: 12px 25px;
+      background-color: #e60000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      align-self: center; /* Center the button */
+      transition: background-color 0.3s ease;
+    }
+    .submit-btn:hover {
+      background-color: #cc0000;
+    }
+
+    /* Logout Button */
+    #logoutBtn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    #logoutBtn:hover {
+        background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div id="loginSection">
+      <h2>Admin Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
+    </div>
+
+    <div id="adminFormSection" style="display: none;">
+      <button id="logoutBtn">Logout</button>
+      <h2>Add New News Article</h2>
+      <form id="newsForm">
+        <div class="form-group">
+          <label for="title">Article Title:</label>
+          <input type="text" id="title" name="title" required>
+        </div>
+
+        <div class="form-group">
+            <label>Thumbnail Image:</label>
+            <div class="file-upload-options">
+                <input type="file" id="thumbnailFileInput" name="thumbnail" accept="image/*">
+                <span>OR</span>
+                <input type="url" id="thumbnailUrlInput" name="imageUrl" placeholder="Enter image URL">
+            </div>
+            <small>Upload a file or provide a URL for the article's main thumbnail.</small>
+        </div>
+
+
+        <div class="form-group">
+          <label for="date">Date:</label>
+          <input type="text" id="date" name="date" placeholder="YYYY-MM-DD" required>
+        </div>
+
+        <div class="form-group">
+          <label for="content">Article Content:</label>
+          <div class="editor-toolbar">
+            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
+            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
+            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
+            <button type="button" onclick="formatDoc('insertOrderedList')">OL</button>
+            <button type="button" onclick="formatDoc('insertUnorderedList')">UL</button>
+            <button type="button" onclick="formatDoc('createLink', prompt('Enter URL:'))">Link</button>
+            <button type="button" onclick="formatDoc('unlink')">Unlink</button>
+            <button type="button" onclick="formatDoc('insertImage', prompt('Enter image URL:'))">Image (URL)</button>
+            
+            <button type="button" id="uploadInlineImageBtn">Upload Image</button>
+            <input type="file" id="inlineImageUpload" accept="image/*" style="display:none;">
+          </div>
+          <div id="content" name="content" contenteditable="true" style="border: 1px solid #ddd; min-height: 200px; padding: 10px; border-radius: 0 0 8px 8px;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="trending">
+            <input type="checkbox" id="trending" name="trending" value="true">
+            Mark as Trending
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn">Publish Article</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Rich Text Editor functions
+    function formatDoc(command, value = null) {
+      document.execCommand(command, false, value);
+    }
+
+    // Login/Logout and UI management
+    const loginSection = document.getElementById('loginSection');
+    const adminFormSection = document.getElementById('adminFormSection');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    async function updateUI() {
+      const sessionId = localStorage.getItem('adminSessionId');
+      if (sessionId) {
+        loginSection.style.display = 'none';
+        adminFormSection.style.display = 'flex'; // Use flex to maintain layout
+      } else {
+        loginSection.style.display = 'flex'; // Use flex for login layout
+        adminFormSection.style.display = 'none';
+      }
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      const username = usernameInput.value;
+      const password = passwordInput.value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('adminSessionId', data.sessionId);
+          alert(data.message);
+          updateUI();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        alert('An error occurred during login. Please try again.');
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('adminSessionId');
+      alert('Logged out successfully.');
+      updateUI();
+    });
+
+    // Form submission
+    const newsForm = document.getElementById('newsForm');
+    const thumbnailFileInput = document.getElementById('thumbnailFileInput');
+    const thumbnailUrlInput = document.getElementById('thumbnailUrlInput');
+
+    newsForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('title', document.getElementById('title').value);
+      formData.append('date', document.getElementById('date').value); // Date is now text input
+      formData.append('content', document.getElementById("content").innerHTML); // Get HTML content from editor
+      formData.append('trending', document.getElementById('trending').checked);
+
+      // Handle thumbnail image: file upload takes precedence over URL
+      if (thumbnailFileInput.files.length > 0) {
+        formData.append('thumbnail', thumbnailFileInput.files[0]);
+      } else if (thumbnailUrlInput.value) {
+        formData.append('imageUrl', thumbnailUrlInput.value);
+      }
+
+      const sessionId = localStorage.getItem('adminSessionId');
+      if (!sessionId) {
+          alert("You are not logged in. Please log in again.");
+          updateUI(); // Ensure login form is shown
+          return;
+      }
+
+      try {
+        const res = await fetch("/api/news", {
+          method: 'POST',
+          headers: {
+            'X-Session-ID': sessionId // Send session ID for authentication
+          },
+          body: formData // Multer handles content type for FormData
+        });
+
+        if (res.ok) {
+          alert('✅ Article published successfully!');
+          e.target.reset(); // Clear text inputs
+          document.getElementById("content").innerHTML = ''; // Clear rich text editor
+          thumbnailFileInput.value = ''; // Clear file input
+          thumbnailUrlInput.value = ''; // Clear URL input
+        } else {
+          const errorData = await res.json().catch(() => ({ error: 'Could not parse error response.' }));
+          alert(`❌ Failed to publish: ${errorData.error || 'Unknown error'}. Please check console.`);
+          console.error("Publish error:", errorData);
+          if (res.status === 401) { // If server says unauthorized, clear session
+              localStorage.removeItem('adminSessionId');
+              updateUI();
+          }
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        alert('❌ An error occurred during publishing. Please check your network and server.');
+      }
+    });
+
+    // Inline Image Upload Logic
+    const uploadInlineImageBtn = document.getElementById('uploadInlineImageBtn');
+    const inlineImageUploadInput = document.getElementById('inlineImageUpload');
+    const contentEditor = document.getElementById('content'); // Your main rich text editor div
+
+    uploadInlineImageBtn.addEventListener('click', () => {
+        inlineImageUploadInput.click(); // Trigger the hidden file input
+    });
+
+    inlineImageUploadInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('inlineImage', file); // 'inlineImage' must match the field name in multer.single() on server.js
+
+        const sessionId = localStorage.getItem('adminSessionId');
+        if (!sessionId) {
+            alert("You are not logged in. Please log in again to upload images.");
+            updateUI();
+            return;
+        }
+
+        // Save current cursor position before fetch (for contenteditable)
+        const selection = window.getSelection();
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+        try {
+            // Optional: You could show a small loading indicator here
+            
+            const res = await fetch('/api/upload-inline-image', {
+                method: 'POST',
+                headers: {
+                    'X-Session-ID': sessionId // Send session ID for authentication
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Restore cursor position if needed
+                if (range) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                
+                // Insert the image using its returned URL
+                document.execCommand('insertImage', false, data.url);
+                alert(data.message); // "Image uploaded successfully!"
+            } else {
+                alert(`Upload failed: ${data.message || 'Unknown error.'}`);
+            }
+        } catch (error) {
+            console.error('Error during inline image upload:', error);
+            alert('An error occurred during image upload. Please try again.');
+        } finally {
+            // Clear the file input so the same file can be selected again if needed
+            inlineImageUploadInput.value = '';
+        }
+    });
+
+
+    // Initial UI update on page load
+    updateUI();
+  </script>
+</body>
+</html>

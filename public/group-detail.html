@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Group Details</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">K-POP<br />NEWS</div>
+
+        <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <a href="groups.html">Groups</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
+
+    <main class="main-content-grid">
+        <section class="group-detail-container">
+            <div id="groupDetails">
+                <p>Loading group details...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 K-POP NEWS. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const nav = document.getElementById("navLinks");
+            nav.classList.toggle("open");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const groupId = params.get('id');
+            const groupDetailsContainer = document.getElementById('groupDetails');
+
+            if (!groupId) {
+                groupDetailsContainer.innerHTML = '<p>No group ID provided. Please navigate from the <a href="groups.html">Groups page</a>.</p>';
+                return;
+            }
+
+            fetch(`/api/groups/${groupId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error('Group not found.');
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(group => {
+                    if (!group) {
+                        groupDetailsContainer.innerHTML = '<p>Group details could not be loaded. It might not exist.</p>';
+                        return;
+                    }
+
+                    let membersHtml = '';
+                    if (group.members && group.members.length > 0) {
+                        membersHtml = `
+                            <div class="members-section">
+                                <h2>Members</h2>
+                                <div class="members-grid">
+                                    ${group.members.map(member => `
+                                        <div class="member-card">
+                                            <img src="${member.imageUrl || '/images/default_member.jpg'}" alt="${member.name}" />
+                                            <h3>${member.name} (${member.stageName})</h3>
+                                            <p>${member.position}</p>
+                                            <p>Born: ${new Date(member.birthDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        membersHtml = '<p>No member information available for this group.</p>';
+                    }
+
+                    groupDetailsContainer.innerHTML = `
+                        <div class="group-header">
+                            <img src="${group.imageUrl || '/images/default_group.jpg'}" alt="${group.name} Logo" class="group-logo" />
+                            <h1>${group.name}</h1>
+                            <div class="group-meta">
+                                <p><strong>Company:</strong> ${group.company || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div class="group-description">
+                            <p>${group.description || 'No description available.'}</p>
+                        </div>
+                        ${membersHtml}
+                    `;
+                    document.title = `${group.name} - K-POP NEWS`;
+                })
+                .catch(error => {
+                    console.error("Error fetching group details:", error);
+                    groupDetailsContainer.innerHTML = `<p>Failed to load group details: ${error.message}.</p>`;
+                });
+        });
+    </script>
+</body>
+</html>

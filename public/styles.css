@@ -1,0 +1,572 @@
+/* ========================= CSS Reset ========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========================= Base Styles ========================= */
+body {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* More professional font stack */
+  background: #f8f9fa;
+  color: #333; /* Darker text for better readability */
+  line-height: 1.6;
+  transition: background-color 0.3s ease;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Global Link Styles (remove underline, set black color) */
+a {
+  text-decoration: none; /* Removes underline */
+  color: #333; /* Default link color to black/dark grey */
+  transition: color 0.3s ease; /* Smooth transition for hover */
+}
+
+a:hover {
+  color: #e60000; /* Subtle red on hover for interactivity */
+}
+
+/* ========================= Navbar ========================= */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e60000; /* K-Pop red */
+  color: white;
+  padding: 1rem 2rem;
+  position: relative;
+  box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-weight: 700; /* Bolder font */
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem; /* Increased space between nav items */
+}
+
+.nav-links a {
+  color: white; /* Nav links remain white */
+  font-weight: 500;
+  padding: 0.5rem 0;
+  position: relative; /* For underline animation */
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  background: white;
+  left: 0;
+  bottom: 0;
+  transition: width 0.3s ease-in-out;
+}
+
+.nav-links a:hover::after {
+  width: 100%; /* White underline on hover */
+}
+
+.hamburger {
+  display: none; /* Hidden by default on larger screens */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Mobile Navbar */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #e60000;
+    padding: 1rem 2rem;
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  .nav-links.open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+    .nav-links a {
+    padding: 0.4rem 1rem; /* Reduced top/bottom padding to lessen menu height */
+    text-align: center;
+    color: white;
+    font-size: 1.1rem;
+  }
+
+  .hamburger {
+    display: block;
+  }
+}
+
+/* ========================= Carousel Section ========================= */
+.carousel-container {
+  max-width: 1300px; /* Increased width */
+  margin: 0 auto;
+  padding-top: 60px; /* Adjusted padding to precisely clear fixed navbar */
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel {
+  display: flex; /* Keeps slides in a row for JS to slide */
+  position: relative;
+  width: 100%;
+  padding-bottom: 40%; /* Maintain aspect ratio (e.g., 16:9 or 2.5:1 for 40%) - ADJUST AS NEEDED for your images' aspect ratio */
+  height: 0; /* Important for padding-bottom trick */
+  overflow: hidden; /* Hide overflowing slides */
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+  position: absolute; /* Position slides over each other */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.7s ease-in-out; /* Smooth fade effect */
+  display: flex; /* For centering content within slide */
+  justify-content: center;
+  align-items: center;
+  z-index: 1; /* Default stacking order */
+}
+
+.carousel-slide.active {
+  opacity: 1; /* Active slide is visible */
+  z-index: 2; /* Bring active slide to front */
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner-btn {
+  position: absolute;
+  top: 50%; /* Vertically centered */
+  left: 50%;
+  transform: translate(-50%, -50%); /* True horizontal and vertical centering */
+  padding: 10px 25px;
+  background-color: #fff;
+  color: #e60000;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 3; /* Ensure button is above slide */
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  padding: 0 10px; /* Adjusted padding to bring buttons closer to edges but still visible */
+  z-index: 3; /* Ensure nav buttons are clickable */
+}
+
+.nav-button {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 8px 10px; /* Reduced padding */
+  cursor: pointer;
+  margin-top: 60px;
+  font-size: 1.2rem; /* Slightly smaller font size */
+  border-radius: 5px; /* Softer corners */
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* ========================= Main Content Grid (News + Trending) ========================= */
+.main-content-grid {
+  display: grid;
+  /* Laptop layout: 3fr for news, 1fr for trending */
+  grid-template-columns: 3fr 1fr;
+  grid-template-areas: "news trending"; /* Explicitly define areas for desktop */
+  gap: 30px; /* Space between news and trending sections */
+  max-width: 1300px; /* Increased width, matches carousel max-width */
+  margin: 40px auto; /* Centered with top/bottom margin */
+  padding: 0 20px; /* Horizontal padding */
+}
+
+/* Assign grid areas */
+.news-section {
+  grid-area: news;
+  padding: 0; /* Already has padding from parent grid */
+  background-color: #fff; /* White background for the news section */
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px; /* Inner padding for the news section */
+}
+
+.trending {
+  grid-area: trending;
+  background: #fff; /* White background for the trending section */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+}
+
+h2 {
+  color: #e60000;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.news-cards {
+  display: grid;
+  /* Laptop/Desktop: flexible columns, aiming for 3-4 */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted minmax for more columns */
+  gap: 25px; /* Increased gap between cards */
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* More subtle shadow */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex; /* Flexbox for internal card content */
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Lift effect on hover */
+}
+
+/* Image aspect ratio container */
+.card-image {
+  position: relative;
+  width: 100%;
+  padding-bottom: 60%; /* This creates a 16:9 aspect ratio (height is 60% of width) */
+  overflow: hidden; /* Hide anything outside this ratio */
+  border-bottom: 1px solid #eee; /* Separator for image */
+}
+
+.card-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+}
+
+.card-content {
+  padding: 15px;
+  flex-grow: 1; /* Allows content to expand */
+}
+
+.card-date {
+  font-size: 0.85rem;
+  color: #888; /* Lighter color for date/category */
+  margin-bottom: 5px;
+}
+
+.card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* ========================= Trending Section (in Index.html and Article.html) ========================= */
+.trending h2 {
+  font-size: 1.6rem;
+  text-align: left; /* Align heading left */
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.trending ul {
+  list-style: none; /* Remove bullet points */
+  padding: 0;
+}
+
+.trending li {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trending li a {
+  display: flex; /* Make the whole link a flex container */
+  align-items: center;
+  gap: 10px;
+  color: #333; /* Trending link text color */
+}
+
+/* Consistent rectangular size for trending images */
+.trending li img {
+  width: 90px; /* Fixed width */
+  height: 50px; /* Fixed height for a rectangular shape (e.g., closer to 16:9) */
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.trending li span {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* ========================= Footer ========================= */
+footer {
+  background: #333;
+  color: white;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: 40px;
+  font-size: 0.9rem;
+}
+
+/* ========================= Article Page (article.html) ========================= */
+.article-page {
+  display: flex;
+  gap: 30px; /* Increased gap */
+  max-width: 1300px; /* Increased width, matches main-content-grid */
+  margin: 20px auto;
+  padding: 20px;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  padding-top: 100px; /* Space from fixed navbar */
+}
+
+.article-detail {
+  flex: 1; /* Adjusted: Takes remaining space */
+  min-width: 300px; /* Minimum width before wrapping */
+  background: #fff;
+  padding: 30px; /* More padding */
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.article-page .trending { /* Specific styles for trending in article page */
+  width: 280px; /* Fixed width for trending sidebar */
+  flex-shrink: 0; /* Prevent it from shrinking */
+  background: #fff; /* White background for the trending section */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+}
+
+
+.article-detail h1 {
+  font-size: 2.5rem;
+  color: #222; /* Darker heading */
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.article-detail p em {
+  display: block; /* Ensures date is on its own line */
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.article-detail img {
+  margin: 1.5rem 0; /* More spacing for main image */
+  border-radius: 8px;
+}
+
+.article-detail div { /* Targets the div containing content */
+  font-size: 1.1rem;
+  line-height: 1.8; /* Improved line height for readability */
+  color: #333;
+}
+
+.article-detail div p {
+  margin-bottom: 1em; /* Space between paragraphs */
+}
+
+/* ========================= Responsive Adjustments ========================= */
+@media (min-width: 1200px) {
+  /* This media query ensures that carousel-container takes the set max-width. */
+  .carousel {
+    height: 360px; /* Adjust banner height for larger screens */
+  }
+}
+
+@media (max-width: 992px) {
+  /* Tablet and Mobile layout: Stacking order for main content */
+  .main-content-grid {
+    grid-template-columns: 1fr; /* Single column layout */
+    grid-template-areas:
+      "trending" /* Trending appears first */
+      "news";     /* Then News */
+    padding: 0 15px; /* Adjust horizontal padding */
+  }
+
+  .news-section,
+  .trending {
+    margin-bottom: 30px; /* Add space between stacked sections */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ensure consistent shadow */
+  }
+
+  /* Carousel - Remove horizontal padding for full width on tablets */
+  .carousel-container {
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 0; /* Remove border-radius for edge-to-edge look */
+    box-shadow: none; /* Remove shadow for edge-to-edge look */
+  }
+
+  .carousel {
+    padding-bottom: 50%; /* Adjust aspect ratio for tablets/smaller desktops */
+  }
+
+  .card-image {
+    padding-bottom: 65%; /* Slightly taller aspect ratio for tablets */
+  }
+
+  /* Adjust carousel navigation buttons for edge-to-edge */
+  .carousel-nav {
+    padding: 0 5px; /* Reduced padding for tablets, slightly off the edge */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile specific adjustments */
+  .carousel-container {
+    padding-top: 60px; /* Unified padding-top for mobile to clear fixed navbar */
+    margin: 0 auto; /* Connect banner to navbar on mobile */
+    padding-left: 0; /* Ensure banner takes full width on mobile */
+    padding-right: 0; /* Ensure banner takes full width on mobile */
+    border-radius: 0; /* Remove border-radius for edge-to-edge look */
+    box-shadow: none; /* Remove shadow for edge-to-edge look */
+  }
+
+  .carousel {
+    padding-bottom: 65%; /* Increased height for phone banner */
+  }
+
+  .news-section h2,
+  .trending h2 {
+    font-size: 1.7rem; /* Smaller headings */
+  }
+
+  .main-content-grid {
+    padding: 0 10px; /* Slightly less padding for very small screens for main content */
+  }
+
+  .news-cards {
+    /* Two cards per row on phones */
+    grid-template-columns: repeat(2, 1fr); /* Force two columns */
+    gap: 15px; /* Reduce gap for smaller screens */
+  }
+
+  .card h3 {
+    font-size: 0.9rem; /* Smaller card titles */
+  }
+
+  .card-image {
+    padding-bottom: 56.25%; /* Standard 16:9 aspect ratio for phone images */
+  }
+
+  /* Article Page specific trending adjustments for mobile */
+  .article-page .trending {
+    width: auto; /* Allow trending to take full width on mobile when stacked */
+    flex-shrink: 1; /* Allow it to shrink if needed */
+  }
+
+  /* Adjust carousel navigation buttons for edge-to-edge */
+  .carousel-nav {
+    padding: 0 5px; /* Reduced padding for phones, slightly off the edge */
+  }
+}
+
+@media (max-width: 480px) {
+  /* Very small mobile screens */
+  .navbar {
+    padding: 0.8rem 1rem;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+  }
+
+  .carousel-container {
+    padding-left: 0; /* Ensure banner takes full width on very small screens */
+    padding-right: 0; /* Ensure banner takes full width on very small screens */
+    border-radius: 0; /* Remove border-radius for edge-to-edge look */
+    box-shadow: none; /* Remove shadow for edge-to-edge look */
+  }
+
+  .carousel {
+    padding-bottom: 55%; /* Increased height for very small phones */
+  }
+
+  .banner-btn {
+    padding: 8px 18px;
+    font-size: 0.9rem;
+  }
+
+  .nav-button {
+    padding: 6px 8px; /* Even smaller padding for very small screens */
+    font-size: 1rem; /* Smaller font size for very small screens */
+  }
+
+  .main-content-grid {
+    padding: 0 5px; /* Even less padding for very small screens for main content */
+  }
+
+  .news-cards {
+    /* Ensure two cards per row on very small phones */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px; /* Adjust gap for very small screens */
+  }
+
+  .card-image {
+    padding-bottom: 56.25%; /* Maintain 16:9 aspect ratio */
+  }
+
+  /* Adjust carousel navigation buttons for edge-to-edge */
+  .carousel-nav {
+    padding: 0 3px; /* Minimal padding for very small phones */
+  }
+}
+
