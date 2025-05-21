@@ -4,6 +4,7 @@ const path = require("path");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const multer = require("multer");
+const fs = require('fs').promises; // Import fs.promises for async file operations
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -15,14 +16,13 @@ app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 app.use(cors());
 app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
-app.use(express.static(path.join(__dirname, "../public"))); // Serve static files from the 'public' directory
 
 
 // MongoDB connection details
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 const dbName = "kpop_news";
-const collectionName = "articles";
+const collectionName = "articles"; // This collection is used for both articles and trending
 
 // --- Authentication Middleware ---
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -34,31 +34,31 @@ const isAuthenticated = (req, res, next) => {
     if (sessionId === process.env.ADMIN_SESSION_ID) {
         next(); // User is authenticated
     } else {
-        res.status(401).json({ message: 'Unauthorized: Invalid session ID.' });
+        res.status(401).json({ message: "Unauthorized: Invalid session ID." });
     }
 };
 
 // --- Multer Configuration for Thumbnail Image Upload ---
 const thumbnailStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // This path points to 'your_project_root/public/uploads'
-        // Ensure this directory exists and Node.js has write permissions
-        cb(null, path.join(__dirname, "../public/uploads"));
+        const uploadPath = path.join(__dirname, "../public/uploads");
+        require('fs').mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
-        // Use the original name with a timestamp to avoid conflicts
         cb(null, Date.now() + '-' + file.originalname);
     }
 });
 const uploadThumbnail = multer({ storage: thumbnailStorage });
 
-// --- NEW: Multer Configuration for INLINE Image Uploads ---
+// --- Multer Configuration for INLINE Image Uploads ---
 const inlineImageStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, "../public/uploads")); // Same upload directory
+        const uploadPath = path.join(__dirname, "../public/uploads");
+        require('fs').mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
-        // IMPORTANT: Encode the filename to handle spaces and special characters in URLs
         cb(null, 'inline-' + Date.now() + '-' + encodeURIComponent(file.originalname));
     }
 });
@@ -74,14 +74,77 @@ async function startServer() {
 
         // Get a reference to the database and collection
         const db = client.db(dbName);
-        const newsCollection = db.collection(collectionName);
+        const newsCollection = db.collection(collectionName); // Assuming 'articles' is the correct collection name
+
+        // Route to serve your main HTML page
+        app.get("/", (req, res) => {
+            res.sendFile(path.join(__dirname, "../public", "index.html"));
+        });
+
+        // --- NEW: Dynamic Route for Article Detail Pages (for Open Graph Meta Tags) ---
+        // This MUST be placed BEFORE `app.use(express.static(...))` if `article.html` is in `public`
+        app.get("/article.html", async (req, res) => {
+            try {
+                const articleId = req.query.id;
+                if (!articleId) {
+                    return res.status(400).send("Article ID is required.");
+                }
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).send("Invalid Article ID format.");
+                }
+
+                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
+
+                if (!article) {
+                    // Serve a 404 page if article not found (consider creating public/404.html)
+                    return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+                }
+
+                // Read the article.html template
+                let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8');
+
+                // Construct full absolute URL for Open Graph image and URL
+                const protocol = req.protocol || 'http'; // Get current protocol (http or https)
+                const host = req.headers.host; // Get current host (e.g., k-pop-news.onrender.com)
+
+                // Ensure absolute path for images (e.g., https://yourdomain.com/uploads/image.jpg)
+                const absoluteImageUrl = article.image ? `${protocol}://${host}${article.image}` : `${protocol}://${host}/images/default_og_image.jpg`; // Ensure default_og_image.jpg exists in public/images
+                const absoluteArticleUrl = `${protocol}://${host}/article.html?id=${article._id}`;
+
+                // Extract a plain text description from content (remove HTML tags and limit length)
+                const plainTextContent = article.content ? article.content.replace(/<[^>]*>/g, '').substring(0, 150) + "..." : "Read the latest K-POP news here.";
+
+
+                // Replace placeholders with actual article data
+                htmlContent = htmlContent.replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${article.title || "K-POP News Article"}">`);
+                htmlContent = htmlContent.replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${plainTextContent}">`);
+                htmlContent = htmlContent.replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${absoluteImageUrl}">`);
+                htmlContent = htmlContent.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${absoluteArticleUrl}">`);
+
+                // Also update Twitter card meta tags
+                htmlContent = htmlContent.replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`);
+                htmlContent = htmlContent.replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${plainTextContent}">`);
+                htmlContent = htmlContent.replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${absoluteImageUrl}">`);
+
+
+                // Send the modified HTML
+                res.status(200).send(htmlContent);
+
+            } catch (err) {
+                console.error("❌ Error serving dynamic article page:", err);
+                res.status(500).send("Failed to load article page.");
+            }
+        });
+
+        // Serve static files from the 'public' directory (this line stays in its original position)
+        app.use(express.static(path.join(__dirname, "../public")));
+
 
         // --- Authentication Endpoint ---
         app.post('/api/login', (req, res) => {
             const { username, password } = req.body;
             if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                // In a real app, generate a more secure, unique session ID
-                const sessionId = process.env.ADMIN_SESSION_ID || 'static-admin-session-id'; // Set ADMIN_SESSION_ID in your .env file
+                const sessionId = process.env.ADMIN_SESSION_ID || 'static-admin-session-id';
                 res.status(200).json({ message: 'Login successful', sessionId: sessionId });
             } else {
                 res.status(401).json({ message: 'Invalid credentials' });
@@ -91,7 +154,6 @@ async function startServer() {
         // --- API Route to Get All Articles (Newest First) ---
         app.get("/api/articles", async (req, res) => {
             try {
-                // Sort by createdAt date in descending order (newest first)
                 const articles = await newsCollection.find({}).sort({ createdAt: -1 }).toArray();
                 res.status(200).json(articles);
             } catch (err) {
@@ -100,13 +162,14 @@ async function startServer() {
             }
         });
 
-        // --- NEW: API Route to Get Trending Articles (Newest First) ---
+        // --- API Route to Get Trending Articles (Newest First) ---
         app.get("/api/trending", async (req, res) => {
             try {
                 // Find articles where 'trending' is true, sort by createdAt (newest first), limit to top 5
+                // Ensure your articles in MongoDB have a boolean 'trending' field.
                 const trendingArticles = await newsCollection.find({ trending: true })
                                                             .sort({ createdAt: -1 })
-                                                            .limit(5) // Limit to, for example, 5 trending articles
+                                                            .limit(5)
                                                             .toArray();
                 res.status(200).json(trendingArticles);
             } catch (err) {
@@ -119,7 +182,6 @@ async function startServer() {
         app.get("/api/articles/:id", async (req, res) => {
             try {
                 const articleId = req.params.id;
-                // Validate if articleId is a valid ObjectId string
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
@@ -135,53 +197,43 @@ async function startServer() {
         });
 
         // --- API Route to Add New Article (Authentication Required) ---
+        // Note: The collection used here is `newsCollection` which is set to `articles`.
         app.post("/api/news", isAuthenticated, uploadThumbnail.single('thumbnail'), async (req, res) => {
             try {
-                // Destructure form data from req.body
                 const { title, date, content, trending, imageUrl } = req.body;
-
                 let imagePath = '';
-                // Check if a file was uploaded or a URL was provided
+
                 if (req.file) {
-                    // If a file was uploaded, use its path
                     imagePath = `/uploads/${req.file.filename}`;
                 } else if (imageUrl) {
-                    // If an image URL was provided, use it directly
                     imagePath = imageUrl;
                 } else {
-                    // If neither, send an error (or set a default image)
                     return res.status(400).json({ error: "Thumbnail image (file or URL) is required." });
                 }
 
-                // Create the new article object
                 const newArticle = {
                     title,
-                    image: imagePath, // Use the path from upload or the provided URL
-                    date, // Date as string from input
+                    image: imagePath,
+                    date, // This might be a string from your form, consider parsing to Date if needed
                     content,
-                    createdAt: new Date(), // Add a timestamp for creation
-                    trending: trending === 'true' // Convert string 'true'/'false' from FormData to boolean
+                    createdAt: new Date(), // Always set creation date for consistent sorting
+                    trending: trending === 'true' // Ensure trending is a boolean
                 };
 
-                // Insert the new article into the MongoDB collection
                 const result = await newsCollection.insertOne(newArticle);
-                // Send a 201 Created status and the result of the insertion
                 res.status(201).json(result);
             } catch (err) {
-                // Log any errors during article insertion to the console
                 console.error("❌ Error inserting article:", err);
-                // Send a 500 Internal Server Error response to the client
                 res.status(500).json({ error: "Failed to create article" });
             }
         });
 
-        // --- NEW: API Route for Inline Image Upload (Authentication Required) ---
+        // --- API Route for Inline Image Upload (Authentication Required) ---
         app.post("/api/upload-inline-image", isAuthenticated, uploadInlineImage.single('inlineImage'), (req, res) => {
             try {
                 if (!req.file) {
                     return res.status(400).json({ message: "No image file provided." });
                 }
-                // Construct the public URL for the uploaded image using the encoded filename
                 const imageUrl = `/uploads/${req.file.filename}`;
                 res.status(200).json({ url: imageUrl, message: "Image uploaded successfully!" });
             } catch (error) {
@@ -195,7 +247,6 @@ async function startServer() {
             console.log(`🚀 Server is running on http://localhost:${port}`);
         });
     } catch (err) {
-        // Log any MongoDB connection errors to the console
         console.error("❌ MongoDB connection error:", err);
     }
 }
