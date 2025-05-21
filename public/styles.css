@@ -52,6 +52,7 @@ a:hover {
   font-weight: 700; /* Bolder font */
   font-size: 1.5rem;
   line-height: 1.2;
+  margin-left: 10px;
 }
 
 .nav-links {
@@ -86,8 +87,9 @@ a:hover {
   background: none;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-size: 2rem;
   cursor: pointer;
+  margin-right: 10px;
 }
 
 /* Mobile Navbar */
@@ -570,3 +572,187 @@ footer {
   }
 }
 
+/* ========================= Footer Styles ========================= */
+.site-footer {
+    background-color: #333; /* Dark background */
+    color: #fff; /* White text */
+    padding: 40px 20px;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 50px; /* Space above the footer */
+    clear: both; /* Ensures it clears any floated content above it */
+    width: 100%; /* Ensures it takes full width */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow at the top */
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column; /* Stack logo, then sections wrapper */
+    align-items: center; /* Center items horizontally */
+    width: 100%;
+    max-width: 1200px; /* Limit content width */
+    margin: 0 auto 20px auto; /* Center the content container itself, add space below */
+}
+
+.footer-logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e60000; /* K-Pop red for logo */
+    margin-bottom: 20px; /* Space below logo */
+    text-align: center; /* Ensure logo text is centered */
+    width: 100%; /* Allow logo to take full available width for centering */
+}
+
+.footer-sections-wrapper { /* Styles for the wrapper of links and social */
+    display: flex;
+    flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
+    justify-content: center; /* Center the quick links and social sections */
+    width: 100%;
+    max-width: 600px; /* Limit their combined width to keep them grouped */
+    gap: 30px; /* Space between the 'links' and 'social' columns on larger screens */
+}
+
+.footer-links, .footer-social {
+    margin: 0 15px; /* Adjust margin for spacing within the wrapper */
+    text-align: left; /* Align text within these sections */
+    flex-grow: 1; /* Allow sections to grow */
+    min-width: 150px; /* Minimum width for each section */
+}
+
+.footer-links h3, .footer-social h3 {
+    color: #e60000; /* K-Pop red for headings */
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links ul li {
+    margin-bottom: 8px;
+}
+
+.footer-links a, .footer-social a {
+    color: #bbb; /* Lighter grey for links */
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover, .footer-social a:hover {
+    color: #fff; /* White on hover */
+}
+
+/* Font Awesome Icon Styling */
+.social-icons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+}
+
+.social-icons a {
+    color: #bbb; /* Icon color (initially grey) */
+    font-size: 28px; /* Size of the icon */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.social-icons a:hover {
+    color: #e60000; /* K-Pop red on hover */
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    border-top: 1px solid #555;
+    padding-top: 20px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+    color: #aaa;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .footer-sections-wrapper {
+        flex-direction: column; /* Stack links and social vertically on small screens */
+        align-items: center; /* Center them */
+        gap: 0; /* Remove gap when stacked */
+    }
+    .footer-links, .footer-social {
+        text-align: center; /* Center text within these sections on small screens */
+        margin: 10px 0; /* Adjust margin */
+    }
+    .footer-links ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px; /* Space between inline list items */
+    }
+    .footer-links ul li {
+        margin-bottom: 0; /* Remove extra margin for inline items */
+    }
+    .social-icons {
+        justify-content: center; /* Center social icons on small screens */
+    }
+}
+
+/* For larger screens (override small screen stacking) */
+@media (min-width: 769px) {
+    .footer-sections-wrapper {
+        flex-direction: row; /* Make links and social appear in a row */
+        justify-content: center; /* Center the whole section */
+        gap: 40px; /* Space between links and social */
+    }
+    .footer-links, .footer-social {
+        text-align: left; /* Keep text aligned left within their columns */
+        min-width: unset; /* Allow natural width */
+    }
+}
+
+/* --- Privacy Content Area --- */
+.privacy-content {
+    padding: 40px 20px; /* Default padding for desktop */
+    max-width: 900px; /* Max width for content */
+    margin: 20px auto; /* Center content horizontally */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.privacy-content h2 {
+    color: #e60000;
+    margin-bottom: 20px;
+    font-size: 2em;
+    text-align: center; /* Center the main heading */
+}
+
+.privacy-content h3 {
+    color: #e60000;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.privacy-content h4, .privacy-content h5 {
+    color: #e60000;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.privacy-content p {
+    margin-bottom: 15px;
+    line-height: 1.7;
+    text-align: justify; /* Justify text for better readability */
+}
+
+.privacy-content ul {
+    list-style: disc;
+    margin-left: 25px;
+    margin-bottom: 15px;
+}
+
+.privacy-content ul li {
+    margin-bottom: 8px;
+}
