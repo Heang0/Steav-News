@@ -7,7 +7,8 @@
 
 /* ========================= Base Styles ========================= */
 body {
-  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* More professional font stack */
+  /* Set Khmer fonts as primary for all body text */
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
   background: #f8f9fa;
   color: #333; /* Darker text for better readability */
   line-height: 1.6;
@@ -39,13 +40,12 @@ a:hover {
   background: #e60000; /* K-Pop red */
   color: white;
   padding: 1rem 2rem;
-  position: relative;
+  position: fixed; /* Make it fixed to the viewport */
+  top: 0; /* Stick it to the top */
+  left: 0; /* Extend to the left edge */
+  right: 0; /* Extend to the right edge */
+  z-index: 1000; /* Ensure it stays on top of other content */
   box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
 }
 
 .logo {
@@ -95,9 +95,10 @@ a:hover {
 /* Mobile Navbar */
 @media (max-width: 768px) {
   .nav-links {
+    display: none; /* Hide by default on small screens */
     flex-direction: column;
     position: absolute;
-    top: 100%;
+    top: 60px; /* Below navbar */
     left: 0;
     width: 100%;
     background: #e60000;
@@ -110,12 +111,13 @@ a:hover {
   }
 
   .nav-links.open {
+    display: flex; /* Show when open */
     transform: translateY(0);
     opacity: 1;
     pointer-events: auto;
   }
 
-    .nav-links a {
+  .nav-links a {
     padding: 0.4rem 1rem; /* Reduced top/bottom padding to lessen menu height */
     text-align: center;
     color: white;
@@ -395,11 +397,13 @@ footer {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent shadow */
 }
 
-
+/* Styling for the Article Title (h1 inside articleContainer) */
 .article-detail h1 {
-  font-size: 2.5rem;
-  color: #222; /* Darker heading */
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif; /* Khmer font for title */
+  font-size: 1.8em; /* Reduced title size */
+  color: #333; /* Changed to black/dark grey as requested */
   margin-bottom: 10px;
+  text-align: left; /* Default alignment */
   line-height: 1.2;
 }
 
@@ -411,14 +415,19 @@ footer {
 }
 
 .article-detail img {
-  margin: 1.5rem 0; /* More spacing for main image */
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto; /* More spacing for main image */
   border-radius: 8px;
 }
 
-.article-detail div { /* Targets the div containing content */
-  font-size: 1.1rem;
-  line-height: 1.8; /* Improved line height for readability */
-  color: #333;
+/* Specific styling for the article content text */
+.article-detail div[style*="line-height"] { /* Target the div containing article content */
+    font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
+    font-size: 1.2rem; /* Increased font size as requested */
+    line-height: 1.8; /* Adjusted line-height for readability */
+    color: #333;
 }
 
 .article-detail div p {

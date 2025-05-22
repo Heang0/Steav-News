@@ -4,18 +4,40 @@ const path = require("path");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const multer = require("multer");
-const fs = require('fs').promises; // Import fs.promises for async file operations
+// const fs = require('fs').promises; // REMOVE THIS LINE: fs.promises is no longer directly used for uploads
+
+// ADD THESE TWO LINES FOR CLOUDINARY INTEGRATION
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Serve uploaded images statically from the public/uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+// --- CONFIGURE CLOUDINARY (ADD THIS SECTION) ---
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+// --- END CLOUDINARY CONFIG ---
+
+
+// // OPTIONAL: REVIEW THIS LINE
+// // If ALL your images (thumbnails, inline, etc.) will now come from Cloudinary,
+// // and you have no other static images in public/uploads you need to serve,
+// // you can REMOVE or COMMENT OUT the following line:
+// app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+// // If you still have manually placed images in public/uploads (e.g., 'default_og_image.jpg' if it's there),
+// // or other static files in public/uploads, then keep this line.
+// // Otherwise, it's not strictly needed for Cloudinary-hosted images.
+
 
 // Middleware setup - Using express's built-in body parsers
 app.use(cors());
 app.use(express.json({ limit: '1mb' })); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
+app.use(express.static(path.join(__dirname, "../public"))); // Serve static files from the 'public' directory
 
 
 // MongoDB connection details
@@ -38,29 +60,25 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-// --- Multer Configuration for Thumbnail Image Upload ---
-const thumbnailStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, "../public/uploads");
-        require('fs').mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
-        cb(null, uploadPath);
+// --- REPLACE MULTER CONFIGURATION FOR THUMBNAIL WITH CLOUDINARY STORAGE ---
+const thumbnailStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "kpop_news_thumbnails", // OPTIONAL: A folder in Cloudinary to organize your thumbnails
+        format: async (req, file) => 'jpg', // Set a default format, or use file.mimetype
+        public_id: (req, file) => `thumbnail-${Date.now()}-${file.originalname.split('.')[0]}`
     },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
 });
 const uploadThumbnail = multer({ storage: thumbnailStorage });
 
-// --- Multer Configuration for INLINE Image Uploads ---
-const inlineImageStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, "../public/uploads");
-        require('fs').mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
-        cb(null, uploadPath);
+// --- REPLACE MULTER CONFIGURATION FOR INLINE IMAGE UPLOADS WITH CLOUDINARY STORAGE ---
+const inlineImageStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "kpop_news_inline_images", // OPTIONAL: A folder for inline images
+        format: async (req, file) => 'jpg',
+        public_id: (req, file) => `inline-${Date.now()}-${file.originalname.split('.')[0]}`
     },
-    filename: function (req, file, cb) {
-        cb(null, 'inline-' + Date.now() + '-' + encodeURIComponent(file.originalname));
-    }
 });
 const uploadInlineImage = multer({ storage: inlineImageStorage });
 
@@ -101,14 +119,14 @@ async function startServer() {
                 }
 
                 // Read the article.html template
-                let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8');
+                let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8'); // Keep fs.readFile here if you need to read static HTML files
 
                 // Construct full absolute URL for Open Graph image and URL
                 const protocol = req.protocol || 'http'; // Get current protocol (http or https)
                 const host = req.headers.host; // Get current host (e.g., k-pop-news.onrender.com)
 
-                // Ensure absolute path for images (e.g., https://yourdomain.com/uploads/image.jpg)
-                const absoluteImageUrl = article.image ? `${protocol}://${host}${article.image}` : `${protocol}://${host}/images/default_og_image.jpg`; // Ensure default_og_image.jpg exists in public/images
+                // --- IMPORTANT CHANGE: Use Cloudinary URL directly for absoluteImageUrl ---
+                const absoluteImageUrl = article.image ? article.image : `${protocol}://${host}/images/default_og_image.jpg`;
                 const absoluteArticleUrl = `${protocol}://${host}/article.html?id=${article._id}`;
 
                 // Extract a plain text description from content (remove HTML tags and limit length)
@@ -168,9 +186,9 @@ async function startServer() {
                 // Find articles where 'trending' is true, sort by createdAt (newest first), limit to top 5
                 // Ensure your articles in MongoDB have a boolean 'trending' field.
                 const trendingArticles = await newsCollection.find({ trending: true })
-                                                            .sort({ createdAt: -1 })
-                                                            .limit(5)
-                                                            .toArray();
+                                                              .sort({ createdAt: -1 })
+                                                              .limit(5)
+                                                              .toArray();
                 res.status(200).json(trendingArticles);
             } catch (err) {
                 console.error("❌ Error fetching trending articles:", err);
@@ -200,20 +218,23 @@ async function startServer() {
         // Note: The collection used here is `newsCollection` which is set to `articles`.
         app.post("/api/news", isAuthenticated, uploadThumbnail.single('thumbnail'), async (req, res) => {
             try {
-                const { title, date, content, trending, imageUrl } = req.body;
-                let imagePath = '';
+                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Renamed imageUrl from body to avoid conflict
+                let imagePath = "/images/default_og_image.jpg"; // Default fallback if no file or external URL provided
 
+                // --- IMPORTANT CHANGE: Get Cloudinary URL from req.file.path ---
                 if (req.file) {
-                    imagePath = `/uploads/${req.file.filename}`;
-                } else if (imageUrl) {
-                    imagePath = imageUrl;
+                    imagePath = req.file.path; // Multer-Cloudinary puts the Cloudinary URL here
+                } else if (bodyImageUrl) { // Fallback if an external URL was passed in the body (less common with direct uploads)
+                    imagePath = bodyImageUrl;
                 } else {
-                    return res.status(400).json({ error: "Thumbnail image (file or URL) is required." });
+                    // If neither a file was uploaded nor an external URL provided, it will use the default_og_image.jpg
+                    // You might want to make this `return res.status(400).json({ error: "Thumbnail image is required." });`
+                    // if you strictly require an image for every article.
                 }
 
                 const newArticle = {
                     title,
-                    image: imagePath,
+                    image: imagePath, // This will now store the Cloudinary URL
                     date, // This might be a string from your form, consider parsing to Date if needed
                     content,
                     createdAt: new Date(), // Always set creation date for consistent sorting
@@ -234,8 +255,9 @@ async function startServer() {
                 if (!req.file) {
                     return res.status(400).json({ message: "No image file provided." });
                 }
-                const imageUrl = `/uploads/${req.file.filename}`;
-                res.status(200).json({ url: imageUrl, message: "Image uploaded successfully!" });
+                // --- IMPORTANT CHANGE: Cloudinary URL is in req.file.path ---
+                const imageUrl = req.file.path; // Multer-Cloudinary puts the Cloudinary URL here
+                res.status(200).json({ url: imageUrl, message: "Image uploaded successfully! This URL is permanent." });
             } catch (error) {
                 console.error("❌ Error uploading inline image:", error);
                 res.status(500).json({ message: "Failed to upload image." });
