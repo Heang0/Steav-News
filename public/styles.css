@@ -274,8 +274,8 @@ h2 {
     flex-direction: column;
     text-decoration: none;
     color: inherit;
-    /* ADD THIS LINE: */
-    min-height: 250px; /* This will ensure the card always has a minimum height */
+    /* >>> IMPORTANT: ADD OR CONFIRM THIS LINE <<< */
+    min-height: 250px; /* This ensures the card has a minimum visible height for the image */
 }
 
 .card:hover {
