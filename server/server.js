@@ -70,11 +70,12 @@ const thumbnailStorage = new CloudinaryStorage({
 const uploadThumbnail = multer({ storage: thumbnailStorage });
 
 // --- REPLACE MULTER CONFIGURATION FOR INLINE IMAGE UPLOADS WITH CLOUDINARY STORAGE ---
+// In your server.js
 const inlineImageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "kpop_news_inline_images", // OPTIONAL: A folder for inline images
-        format: async (req, file) => 'jpg',
+        folder: "kpop_news_inline_images",
+        // REMOVE OR COMMENT OUT THIS LINE: format: async (req, file) => 'jpg',
         public_id: (req, file) => `inline-${Date.now()}-${file.originalname.split('.')[0]}`
     },
 });
