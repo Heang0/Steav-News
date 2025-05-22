@@ -94,9 +94,37 @@ async function startServer() {
         const newsCollection = db.collection(collectionName); // Assuming 'articles' is the correct collection name
 
         // Route to serve your main HTML page
-        app.get("/", (req, res) => {
-            res.sendFile(path.join(__dirname, "../public", "index.html"));
-        });
+     app.get("/", async (req, res) => {
+  try {
+    const latestArticle = await client.db("kpop_news").collection("articles")
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .toArray();
+
+    const article = latestArticle[0];
+
+    let html = await fs.readFile(path.join(__dirname, "../public/index.html"), "utf8");
+
+    const protocol = req.protocol || "https";
+    const host = req.headers.host;
+    const ogImage = article?.image || `${protocol}://${host}/images/default_og_image.jpg`;
+    const ogTitle = article?.title || "STEAV NEWS  Updates";
+    const ogDescription = article?.content?.replace(/<[^>]*>/g, '').substring(0, 150) || "Latest Steav news!";
+    const ogUrl = `${protocol}://${host}/`;
+
+    // Inject OG meta tags
+    html = html.replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${ogTitle}">`);
+    html = html.replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${ogDescription}">`);
+    html = html.replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${ogImage}">`);
+    html = html.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${ogUrl}">`);
+
+    res.send(html);
+  } catch (err) {
+    console.error("❌ Failed to load dynamic homepage:", err);
+    res.sendFile(path.join(__dirname, "../public/index.html"));
+  }
+});
 
         // --- NEW: Dynamic Route for Article Detail Pages (for Open Graph Meta Tags) ---
         // This MUST be placed BEFORE `app.use(express.static(...))` if `article.html` is in `public`
@@ -214,39 +242,34 @@ async function startServer() {
         });
 
         // --- API Route to Add New Article (Authentication Required) ---
-        // Note: The collection used here is `newsCollection` which is set to `articles`.
-        app.post("/api/news", isAuthenticated, uploadThumbnail.single('thumbnail'), async (req, res) => {
-            try {
-                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Renamed imageUrl from body to avoid conflict
-                let imagePath = "/images/default_og_image.jpg"; // Default fallback if no file or external URL provided
+// --- API Route to Add New Article (Authentication Required) ---
+app.post("/api/news", isAuthenticated, uploadThumbnail.single('thumbnail'), async (req, res) => {
+    try {
+        const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body;
+        let imagePath = "/images/default_og_image.jpg"; // Default path
 
-                // --- IMPORTANT CHANGE: Get Cloudinary URL from req.file.path ---
-                if (req.file) {
-                    imagePath = req.file.path; // Multer-Cloudinary puts the Cloudinary URL here
-                } else if (bodyImageUrl) { // Fallback if an external URL was passed in the body (less common with direct uploads)
-                    imagePath = bodyImageUrl;
-                } else {
-                    // If neither a file was uploaded nor an external URL provided, it will use the default_og_image.jpg
-                    // You might want to make this `return res.status(400).json({ error: "Thumbnail image is required." });`
-                    // if you strictly require an image for every article.
-                }
+        if (req.file) {
+            imagePath = req.file.path; // THIS IS CORRECT for Cloudinary
+        } else if (bodyImageUrl) {
+            imagePath = bodyImageUrl;
+        }
 
-                const newArticle = {
-                    title,
-                    image: imagePath, // This will now store the Cloudinary URL
-                    date, // This might be a string from your form, consider parsing to Date if needed
-                    content,
-                    createdAt: new Date(), // Always set creation date for consistent sorting
-                    trending: trending === 'true' // Ensure trending is a boolean
-                };
+        const newArticle = {
+            title,
+            date,
+            content,
+            trending: trending === 'on', // Convert checkbox value to boolean
+            image: imagePath, // This should store the Cloudinary URL
+            createdAt: new Date() // Add creation timestamp
+        };
 
-                const result = await newsCollection.insertOne(newArticle);
-                res.status(201).json(result);
-            } catch (err) {
-                console.error("❌ Error inserting article:", err);
-                res.status(500).json({ error: "Failed to create article" });
-            }
-        });
+        const result = await newsCollection.insertOne(newArticle);
+        res.status(201).json(result);
+    } catch (err) {
+        console.error("❌ Error inserting article:", err);
+        res.status(500).json({ error: "Failed to create article" });
+    }
+});
 
         // --- API Route for Inline Image Upload (Authentication Required) ---
         app.post("/api/upload-inline-image", isAuthenticated, uploadInlineImage.single('inlineImage'), (req, res) => {

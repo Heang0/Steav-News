@@ -265,13 +265,17 @@ h2 {
 }
 
 .card {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* More subtle shadow */
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  display: flex; /* Flexbox for internal card content */
-  flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    /* ADD THIS LINE: */
+    min-height: 250px; /* This will ensure the card always has a minimum height */
 }
 
 .card:hover {
