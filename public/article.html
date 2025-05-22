@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
-  <!-- 🧠 These tags must match your server.js replacements exactly -->
   <meta property="og:title" content="">
   <meta property="og:description" content="">
   <meta property="og:image" content="">
@@ -34,8 +35,8 @@
     </nav>
   </header>
 
-  <main class="article-page">
-    <section class="article-detail" id="articleContainer">
+<main class="article-page">
+  <div class="article-main-content-wrapper"> <section class="article-detail" id="articleContainer">
       <h1>Loading Article...</h1>
       <p><em>Loading date...</em></p>
       <img src="/images/placeholder.jpg" alt="Loading image" style="width:100%; border-radius:8px; margin:1rem 0;" />
@@ -43,12 +44,48 @@
         <p>Please wait while the article loads.</p>
       </div>
     </section>
-    <aside class="trending">
-      <h2>Trending Now</h2>
-      <ul id="trendingList">
-        <li>Loading trending articles...</li> </ul>
-    </aside>
-  </main>
+
+    <section class="article-interaction">
+        <div class="action-buttons-group">
+            <button id="likeButton" class="action-button">
+                <i class="fas fa-thumbs-up"></i> Like (<span id="likeCount">0</span>)
+            </button>
+            <div class="share-buttons">
+                <a id="facebookShare" href="#" target="_blank" class="share-button facebook">
+                    <i class="fab fa-facebook-f"></i> Share
+                </a>
+                <a id="twitterShare" href="#" target="_blank" class="share-button twitter">
+                    <i class="fab fa-twitter"></i> Tweet
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="comments-section">
+        <h2>Comments</h2>
+        <div id="commentsList">
+            <p>Loading comments...</p>
+        </div>
+        <form id="commentForm">
+            <h3>Leave a Comment</h3>
+            <div class="form-group">
+                <label for="commentAuthor">Name (Optional):</label>
+                <input type="text" id="commentAuthor" name="author" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="commentText">Comment:</label>
+                <textarea id="commentText" name="commentText" rows="5" required placeholder="Write your comment here..."></textarea>
+            </div>
+            <button type="submit" class="submit-comment-button">Post Comment</button>
+        </form>
+    </section>
+  </div> <aside class="trending">
+    <h2>Trending Now</h2>
+    <ul id="trendingList">
+      <li>Loading trending articles...</li>
+    </ul>
+  </aside>
+</main>
 
   <footer id="mainFooter" class="site-footer">
     <div class="footer-content">
@@ -87,6 +124,43 @@
     document.addEventListener('DOMContentLoaded', () => {
       const articleId = new URLSearchParams(window.location.search).get('id');
       const articleContainer = document.getElementById('articleContainer');
+      const commentsList = document.getElementById('commentsList'); // Get comments list element
+
+      // --- Function to fetch and display comments ---
+      const fetchComments = () => {
+          if (!articleId) {
+              commentsList.innerHTML = '<p>No article to display comments for.</p>';
+              return;
+          }
+          fetch(`/api/articles/${articleId}/comments`)
+              .then(response => response.json())
+              .then(comments => {
+                  commentsList.innerHTML = ''; // Clear loading message
+                  if (comments.length === 0) {
+                      commentsList.innerHTML = '<p>No comments yet. Be the first!</p>';
+                  } else {
+                      comments.forEach(comment => {
+                          const commentDiv = document.createElement('div');
+                          commentDiv.classList.add('comment-item');
+                          const commentDate = new Date(comment.createdAt).toLocaleString();
+                          // Basic sanitization for displaying user input
+                          const safeAuthor = comment.author ? comment.author.replace(/</g, "&lt;").replace(/>/g, "&gt;") : 'Anonymous';
+                          const safeCommentText = comment.commentText ? comment.commentText.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+                          commentDiv.innerHTML = `
+                              <p class="comment-meta"><strong>${safeAuthor}</strong> on ${commentDate}</p>
+                              <p class="comment-content-text">${safeCommentText}</p>
+                          `;
+                          commentsList.appendChild(commentDiv);
+                      });
+                  }
+              })
+              .catch(error => {
+                  console.error("Error fetching comments:", error);
+                  commentsList.innerHTML = '<p style="color: red;">Failed to load comments.</p>';
+              });
+      };
+
 
       if (articleId) {
         fetch(`/api/articles/${articleId}`)
@@ -107,11 +181,106 @@
               <p><em>Published: ${displayDate}</em></p>
               <img src="${article.image}" style="width:100%; border-radius:8px; margin:1rem 0;" alt="${article.title}" />
               <div style="line-height:1.6;">${article.content}</div>`;
+
+            // --- Display initial like count ---
+            document.getElementById('likeCount').textContent = article.likes || 0;
+
+            // --- Social Sharing Setup ---
+            const currentArticleUrl = window.location.href;
+            const facebookShare = document.getElementById('facebookShare');
+            if (facebookShare) {
+                facebookShare.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentArticleUrl)}`;
+            }
+            const twitterShare = document.getElementById('twitterShare');
+            if (twitterShare) {
+                twitterShare.href = `https://twitter.com/intent/tweet/?url=${encodeURIComponent(currentArticleUrl)}&text=${encodeURIComponent(article.title || "Check out this article!")}`;
+            }
+
+            // --- Fetch comments after article is loaded ---
+            fetchComments();
+
           })
           .catch(error => {
             console.error("Error fetching article:", error);
             articleContainer.innerHTML = `<p style="color: red;">Failed to load article. ${error.message}</p>`;
+            commentsList.innerHTML = '<p>Cannot load comments without article data.</p>'; // Update comments section too
           });
+
+        // --- Handle Like Button Click ---
+        const likeButton = document.getElementById('likeButton');
+        if (likeButton) {
+            likeButton.addEventListener('click', () => {
+                fetch(`/api/articles/${articleId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // If status is 404 or 500, throw an error
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    // Optimistically update the count on success
+                    const currentLikes = parseInt(document.getElementById('likeCount').textContent);
+                    document.getElementById('likeCount').textContent = currentLikes + 1;
+                    likeButton.disabled = true; // Disable after liking once
+                    likeButton.classList.add('liked'); // Add a class for visual feedback
+                })
+                .catch(error => {
+                    console.error('Error liking article:', error);
+                    alert('Failed to like article. Please try again or you might have already liked this.');
+                });
+            });
+        }
+
+        // --- Handle Comment Form Submission ---
+        const commentForm = document.getElementById('commentForm');
+        if (commentForm) {
+            commentForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Stop default form submission
+
+                const authorInput = document.getElementById('commentAuthor');
+                const commentTextInput = document.getElementById('commentText');
+                const author = authorInput.value;
+                const commentText = commentTextInput.value;
+
+                if (commentText.trim() === '') {
+                    alert('Comment cannot be empty.');
+                    return;
+                }
+
+                fetch(`/api/articles/${articleId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ author, commentText }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(newComment => {
+                    // Clear the form fields
+                    authorInput.value = '';
+                    commentTextInput.value = '';
+                    // Re-fetch comments to show the new one
+                    fetchComments();
+                })
+                .catch(error => {
+                    console.error('Error posting comment:', error);
+                    alert('Failed to post comment. Please try again.');
+                });
+            });
+        }
+
+
       } else {
         articleContainer.innerHTML = '<p>No article ID provided.</p>';
       }

@@ -384,46 +384,49 @@ footer {
 }
 
 /* ========================= Article Page (article.html) ========================= */
+/* ========================= Article Page (article.html) - FULLY UPDATED WITH TRENDING ON RIGHT (DESKTOP) ========================= */
+
 .article-page {
   display: flex;
-  gap: 30px; /* Increased gap */
-  max-width: 1300px; /* Increased width, matches main-content-grid */
+  flex-direction: column; /* Default: stack all direct children vertically for mobile/smaller screens */
+  gap: 30px; /* Consistent spacing between main sections */
+  max-width: 1300px;
   margin: 20px auto;
   padding: 20px;
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
   padding-top: 100px; /* Space from fixed navbar */
 }
 
-.article-detail {
-  flex: 1; /* Adjusted: Takes remaining space */
-  min-width: 300px; /* Minimum width before wrapping */
-  background: #fff;
-  padding: 30px; /* More padding */
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+/* NEW WRAPPER FOR MAIN ARTICLE CONTENT, INTERACTION, AND COMMENTS */
+.article-main-content-wrapper {
+  display: flex;
+  flex-direction: column; /* Stack its children (article-detail, interaction, comments) vertically */
+  gap: 30px; /* Gap between article-detail, interaction, and comments sections */
+  width: 100%; /* Takes full width on smaller screens */
+  box-sizing: border-box; /* Include padding/border in width */
 }
 
-.article-page .trending { /* Specific styles for trending in article page */
-  width: 280px; /* Fixed width for trending sidebar */
-  flex-shrink: 0; /* Prevent it from shrinking */
-  background: #fff; /* White background for the trending section */
-  padding: 20px;
+.article-detail {
+  width: 100%; /* Ensure article detail takes full width of its parent wrapper */
+  min-width: unset; /* Remove min-width constraint as it's now full width */
+  background: #fff;
+  padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  /* 'order' properties are removed from individual sections as they are now handled by parent flex containers */
 }
 
 /* Styling for the Article Title (h1 inside articleContainer) */
 .article-detail h1 {
-  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif; /* Khmer font for title */
-  font-size: 1.8em; /* Reduced title size */
-  color: #333; /* Changed to black/dark grey as requested */
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
+  font-size: 1.8em;
+  color: #333;
   margin-bottom: 10px;
-  text-align: left; /* Default alignment */
+  text-align: left;
   line-height: 1.2;
 }
 
 .article-detail p em {
-  display: block; /* Ensures date is on its own line */
+  display: block;
   font-size: 0.9rem;
   color: #888;
   margin-bottom: 20px;
@@ -433,22 +436,295 @@ footer {
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 1.5rem auto; /* More spacing for main image */
+  margin: 1.5rem auto;
   border-radius: 8px;
 }
 
 /* Specific styling for the article content text */
-.article-detail div[style*="line-height"] { /* Target the div containing article content */
+.article-detail div[style*="line-height"] {
     font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', sans-serif;
-    font-size: 1.2rem; /* Increased font size as requested */
-    line-height: 1.8; /* Adjusted line-height for readability */
+    font-size: 1.2rem;
+    line-height: 1.8;
     color: #333;
 }
 
 .article-detail div p {
-  margin-bottom: 1em; /* Space between paragraphs */
+  margin-bottom: 1em;
 }
 
+/* ========================= Article Interaction Section ========================= */
+.article-interaction {
+    margin-top: 0; /* Gap handles spacing */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.action-buttons-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.action-button,
+.share-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: white;
+}
+
+/* Like Button */
+.action-button {
+    background-color: #e60000; /* K-Pop Red */
+    color: white;
+}
+
+.action-button:hover {
+    background-color: #cc0000;
+    transform: translateY(-2px);
+}
+
+.action-button.liked {
+    background-color: #5cb85c; /* Green when liked */
+    cursor: default;
+    color: white;
+}
+
+.action-button.liked:hover {
+    background-color: #5cb85c;
+    transform: none;
+}
+
+/* Share Buttons */
+.share-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.share-button.facebook {
+    background-color: #3b5998;
+}
+
+.share-button.facebook:hover {
+    background-color: #2d4373;
+    transform: translateY(-2px);
+}
+
+.share-button.twitter {
+    background-color: #1da1f2;
+}
+
+.share-button.twitter:hover {
+    background-color: #0c85d0;
+    transform: translateY(-2px);
+}
+
+/* ========================= Comments Section ========================= */
+.comments-section {
+    margin-top: 0; /* Gap handles spacing */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.comments-section h2 {
+    color: #e60000;
+    text-align: left;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Adjustments for comments list height to reduce scrolling */
+#commentsList {
+    max-height: 400px; /* Set a maximum height for the comments display area */
+    overflow-y: auto; /* Add a scrollbar if comments exceed the max-height */
+    padding-right: 10px; /* Add some padding to avoid scrollbar touching content */
+}
+
+.comment-item {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.comment-meta {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.comment-meta strong {
+    color: #333;
+}
+
+.comment-content-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Comment Form */
+#commentForm {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+#commentForm h3 {
+    color: #e60000;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    /* max-height: 200px; Uncomment and adjust if you want to limit how tall the input box can grow */
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    border-color: #e60000;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.2);
+}
+
+.submit-comment-button {
+    background-color: #e60000;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.submit-comment-button:hover {
+    background-color: #cc0000;
+    transform: translateY(-2px);
+}
+
+/* Trending section specific to article page */
+.article-page .trending {
+  width: 100%; /* Default: takes full width when stacked on smaller screens */
+  flex-shrink: 0; /* Prevent it from shrinking unnecessarily */
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 0; /* Reset any specific margin-top, gap handles spacing */
+}
+
+/* --- DESKTOP LAYOUT: Trending on Right Side --- */
+@media (min-width: 993px) { /* Apply these styles for screens wider than 992px (laptops/desktops) */
+    .article-page {
+        flex-direction: row; /* Change main container to a row layout */
+        align-items: flex-start; /* Align items to the top */
+    }
+
+    .article-main-content-wrapper {
+        flex: 1; /* Main content wrapper takes up available space */
+        min-width: 0; /* Allow it to shrink if necessary */
+    }
+
+    .article-page .trending {
+        width: 280px; /* Fixed width for trending sidebar on desktop */
+        margin-left: 30px; /* Add margin to the left of trending sidebar */
+    }
+}
+
+/* --- Other Responsive Adjustments (Keep as is) --- */
+@media (max-width: 768px) {
+    .article-interaction,
+    .comments-section {
+        padding: 15px;
+    }
+
+    .action-button,
+    .share-button {
+        font-size: 0.95rem;
+        padding: 8px 15px;
+    }
+
+    .comments-section h2 {
+        font-size: 1.6rem;
+    }
+
+    #commentForm h3 {
+        font-size: 1.3rem;
+    }
+
+    .submit-comment-button {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .action-buttons-group,
+    .share-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .action-button,
+    .share-button,
+    .submit-comment-button {
+        width: 100%;
+    }
+}
 /* ========================= Responsive Adjustments ========================= */
 @media (min-width: 1200px) {
   /* This media query ensures that carousel-container takes the set max-width. */

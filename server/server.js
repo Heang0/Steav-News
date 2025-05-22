@@ -35,6 +35,7 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 const dbName = "kpop_news";
 const collectionName = "articles"; // This collection is used for both articles and trending
+const commentsCollectionName = "comments"; // New collection for comments
 
 // --- Authentication Middleware ---
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -80,6 +81,7 @@ async function startServer() {
 
         const db = client.db(dbName);
         const newsCollection = db.collection(collectionName);
+        const commentsCollection = db.collection(commentsCollectionName); // Get comments collection
 
         // Route to serve your main HTML page
         app.get("/", (req, res) => {
@@ -213,7 +215,8 @@ async function startServer() {
                     date,
                     content,
                     createdAt: new Date(),
-                    trending: trending === 'true'
+                    trending: trending === 'true',
+                    likes: 0 // Initialize likes for new articles
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
@@ -237,6 +240,76 @@ async function startServer() {
                 res.status(500).json({ message: "Failed to upload image." });
             }
         });
+
+        // --- NEW API Routes for Liking Articles ---
+        app.post("/api/articles/:id/like", async (req, res) => {
+            try {
+                const articleId = req.params.id;
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).json({ error: "Invalid article ID format" });
+                }
+                const result = await newsCollection.updateOne(
+                    { _id: new ObjectId(articleId) },
+                    { $inc: { likes: 1 } } // Increment the 'likes' field by 1
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ error: "Article not found" });
+                }
+                res.status(200).json({ message: "Article liked!", likesUpdated: result.modifiedCount > 0 });
+            } catch (err) {
+                console.error("❌ Error liking article:", err);
+                res.status(500).json({ error: "Failed to like article" });
+            }
+        });
+
+        // --- NEW API Routes for Comments ---
+        app.get("/api/articles/:id/comments", async (req, res) => {
+            try {
+                const articleId = req.params.id;
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).json({ error: "Invalid article ID format" });
+                }
+                const commentsCollection = client.db(dbName).collection(commentsCollectionName);
+                const comments = await commentsCollection.find({ articleId: new ObjectId(articleId) })
+                                                         .sort({ createdAt: 1 }) // Show oldest first
+                                                         .toArray();
+                res.status(200).json(comments);
+            } catch (err) {
+                console.error("❌ Error fetching comments:", err);
+                res.status(500).json({ error: "Failed to fetch comments" });
+            }
+        });
+
+        app.post("/api/articles/:id/comments", async (req, res) => {
+            try {
+                const articleId = req.params.id;
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).json({ error: "Invalid article ID format" });
+                }
+                const { author, commentText } = req.body;
+                // Basic validation
+                if (!commentText || commentText.trim() === '') {
+                    return res.status(400).json({ error: "Comment text cannot be empty." });
+                }
+                if (author && author.length > 50) { // Limit author name length
+                    return res.status(400).json({ error: "Author name too long." });
+                }
+
+                const commentsCollection = client.db(dbName).collection(commentsCollectionName);
+                const newComment = {
+                    articleId: new ObjectId(articleId),
+                    author: author && author.trim() !== '' ? author.trim() : "Anonymous", // Use Anonymous if author is empty
+                    commentText: commentText.trim(),
+                    createdAt: new Date(),
+                };
+                const result = await commentsCollection.insertOne(newComment);
+                res.status(201).json(newComment); // Return the inserted comment structure
+            } catch (err) {
+                console.error("❌ Error adding comment:", err);
+                res.status(500).json({ error: "Failed to add comment" });
+            }
+        });
+
 
         // Start the Express server
         app.listen(port, () => {
