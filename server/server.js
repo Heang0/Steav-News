@@ -4,12 +4,10 @@ const path = require("path");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const multer = require("multer");
-// const fs = require('fs').promises; // REMOVE THIS LINE: fs.promises is no longer directly used for uploads
+const fs = require('fs').promises; // <<< UNCOMMENT/ADD THIS LINE BACK
 
-// ADD THESE TWO LINES FOR CLOUDINARY INTEGRATION
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-
 
 const app = express();
 const port = process.env.PORT || 5000;
