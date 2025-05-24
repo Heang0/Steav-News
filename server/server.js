@@ -25,9 +25,6 @@ cloudinary.config({
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
-// !!! IMPORTANT: The `express.static` middleware that serves the 'public' directory
-//    is now moved to inside the `startServer` function, AFTER the dynamic '/article.html' route.
-//    DO NOT uncomment or re-add it here.
 
 
 // MongoDB connection details
@@ -59,7 +56,12 @@ const thumbnailStorage = new CloudinaryStorage({
         public_id: (req, file) => `thumbnail-${Date.now()}-${file.originalname.split('.')[0]}`
     },
 });
-const uploadThumbnail = multer({ storage: thumbnailStorage });
+// Multer instance for thumbnail with file size limit and error handling
+const uploadThumbnail = multer({
+    storage: thumbnailStorage,
+    limits: { fileSize: 1024 * 1024 * 5 } // 5 MB file size limit
+}).single('thumbnail');
+
 
 // --- MULTER CONFIGURATION FOR INLINE IMAGE UPLOADS WITH CLOUDINARY STORAGE ---
 const inlineImageStorage = new CloudinaryStorage({
@@ -70,7 +72,11 @@ const inlineImageStorage = new CloudinaryStorage({
         public_id: (req, file) => `inline-${Date.now()}-${file.originalname.split('.')[0]}`
     },
 });
-const uploadInlineImage = multer({ storage: inlineImageStorage });
+// Multer instance for inline image with file size limit and error handling
+const uploadInlineImage = multer({
+    storage: inlineImageStorage,
+    limits: { fileSize: 1024 * 1024 * 5 } // 5 MB file size limit
+}).single('inlineImage');
 
 
 // Function to connect to MongoDB and start the server
@@ -125,6 +131,7 @@ async function startServer() {
                 htmlContent = htmlContent.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${absoluteArticleUrl}">`);
 
                 // Also update Twitter card meta tags
+                htmlContent = htmlContent.replace(/<meta name="twitter:card" content="[^"]*">/, `<meta name="twitter:card" content="summary_large_image">`);
                 htmlContent = htmlContent.replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`);
                 htmlContent = htmlContent.replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${plainTextContent}">`);
                 htmlContent = htmlContent.replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${absoluteImageUrl}">`);
@@ -155,9 +162,26 @@ async function startServer() {
         });
 
         // --- API Route to Get All Articles (Newest First) ---
+        // MODIFIED: Added search, category, tag filtering
         app.get("/api/articles", async (req, res) => {
             try {
-                const articles = await newsCollection.find({}).sort({ createdAt: -1 }).toArray();
+                const { search, category, tag } = req.query;
+                const query = {};
+
+                if (search) {
+                    query.$or = [
+                        { title: { $regex: search, $options: 'i' } },
+                        { content: { $regex: search, $options: 'i' } }
+                    ];
+                }
+                if (category) {
+                    query.category = category;
+                }
+                if (tag) {
+                    query.tags = tag; // Matches if the tag exists in the tags array
+                }
+
+                const articles = await newsCollection.find(query).sort({ createdAt: -1 }).toArray();
                 res.status(200).json(articles);
             } catch (err) {
                 console.error("❌ Error fetching articles:", err);
@@ -180,17 +204,23 @@ async function startServer() {
         });
 
         // --- API Route to Get a Single Article by ID ---
+        // MODIFIED: Added views increment
         app.get("/api/articles/:id", async (req, res) => {
             try {
                 const articleId = req.params.id;
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
-                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
-                if (!article) {
+                // Find article and increment views counter
+                const article = await newsCollection.findOneAndUpdate(
+                    { _id: new ObjectId(articleId) },
+                    { $inc: { views: 1 } }, // Increment 'views' by 1
+                    { returnDocument: 'after' } // Return the updated document
+                );
+                if (!article.value) { // For findOneAndUpdate, the updated document is in 'value'
                     return res.status(404).json({ error: "Article not found" });
                 }
-                res.status(200).json(article);
+                res.status(200).json(article.value);
             } catch (err) {
                 console.error("❌ Error fetching single article:", err);
                 res.status(500).json({ error: "Failed to fetch article" });
@@ -198,9 +228,19 @@ async function startServer() {
         });
 
         // --- API Route to Add New Article (Authentication Required) ---
-        app.post("/api/news", isAuthenticated, uploadThumbnail.single('thumbnail'), async (req, res) => {
+        // MODIFIED: Added category, tags, and views initialization
+        app.post("/api/news", isAuthenticated, (req, res, next) => { // Added multer error handling middleware
+            uploadThumbnail(req, res, function (err) {
+                if (err instanceof multer.MulterError) {
+                    return res.status(500).json({ error: `File upload error: ${err.message}` });
+                } else if (err) {
+                    return res.status(500).json({ error: `An unknown error occurred during upload: ${err.message}` });
+                }
+                next(); // Proceed to actual route handler
+            });
+        }, async (req, res) => {
             try {
-                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body;
+                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Removed category, tags from destructuring
                 let imagePath = "/images/default_og_image.jpg"; // Default fallback if no file or external URL provided
 
                 if (req.file) {
@@ -216,7 +256,10 @@ async function startServer() {
                     content,
                     createdAt: new Date(),
                     trending: trending === 'true',
-                    likes: 0 // Initialize likes for new articles
+                    likes: 0, // Initialize likes
+                    views: 0, // NEW: Initialize views
+                    // category: category || 'General', // REMOVED: category from article creation
+                    // tags: tags ? tags.split(',').map(tag => tag.trim()).filter(t => t !== '') : [] // REMOVED: tags from article creation
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
@@ -228,7 +271,17 @@ async function startServer() {
         });
 
         // --- API Route for Inline Image Upload (Authentication Required) ---
-        app.post("/api/upload-inline-image", isAuthenticated, uploadInlineImage.single('inlineImage'), (req, res) => {
+        // MODIFIED: Added multer error handling middleware
+        app.post("/api/upload-inline-image", isAuthenticated, (req, res, next) => {
+            uploadInlineImage(req, res, function (err) {
+                if (err instanceof multer.MulterError) {
+                    return res.status(500).json({ message: `Inline image upload error: ${err.message}` });
+                } else if (err) {
+                    return res.status(500).json({ message: `An unknown error occurred during inline image upload: ${err.message}` });
+                }
+                next(); // Proceed to actual route handler
+            });
+        }, (req, res) => {
             try {
                 if (!req.file) {
                     return res.status(400).json({ message: "No image file provided." });
@@ -236,12 +289,12 @@ async function startServer() {
                 const imageUrl = req.file.path;
                 res.status(200).json({ url: imageUrl, message: "Image uploaded successfully! This URL is permanent." });
             } catch (error) {
-                console.error("❌ Error uploading inline image:", error);
+                console.error("❌ Error processing inline image upload:", error);
                 res.status(500).json({ message: "Failed to upload image." });
             }
         });
 
-        // --- NEW API Routes for Liking Articles ---
+        // --- API Routes for Liking Articles ---
         app.post("/api/articles/:id/like", async (req, res) => {
             try {
                 const articleId = req.params.id;
@@ -255,24 +308,29 @@ async function startServer() {
                 if (result.matchedCount === 0) {
                     return res.status(404).json({ error: "Article not found" });
                 }
-                res.status(200).json({ message: "Article liked!", likesUpdated: result.modifiedCount > 0 });
+                // Fetch the updated article to return the new like count
+                const updatedArticle = await newsCollection.findOne({ _id: new ObjectId(articleId) }, { projection: { likes: 1 } });
+                res.status(200).json({ message: "Article liked!", likes: updatedArticle.likes || 0 });
             } catch (err) {
                 console.error("❌ Error liking article:", err);
                 res.status(500).json({ error: "Failed to like article" });
             }
         });
 
-        // --- NEW API Routes for Comments ---
+        // --- API Routes for Comments ---
         app.get("/api/articles/:id/comments", async (req, res) => {
             try {
                 const articleId = req.params.id;
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
-                const commentsCollection = client.db(dbName).collection(commentsCollectionName);
-                const comments = await commentsCollection.find({ articleId: new ObjectId(articleId) })
-                                                         .sort({ createdAt: 1 }) // Show oldest first
-                                                         .toArray();
+                // Changed to fetch comments from the article document directly, as per frontend JS
+                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) }, { projection: { comments: 1 } });
+                if (!article) {
+                    return res.status(404).json({ message: 'Article not found.' });
+                }
+                // Ensure comments array exists, sort by createdAt for consistent display (oldest first)
+                const comments = article.comments ? article.comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) : [];
                 res.status(200).json(comments);
             } catch (err) {
                 console.error("❌ Error fetching comments:", err);
@@ -286,27 +344,104 @@ async function startServer() {
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
-                const { author, commentText } = req.body;
+                const { author, text } = req.body; // Changed 'commentText' to 'text' to match frontend JS
                 // Basic validation
-                if (!commentText || commentText.trim() === '') {
+                if (!text || text.trim() === '') {
                     return res.status(400).json({ error: "Comment text cannot be empty." });
                 }
                 if (author && author.length > 50) { // Limit author name length
                     return res.status(400).json({ error: "Author name too long." });
                 }
 
-                const commentsCollection = client.db(dbName).collection(commentsCollectionName);
                 const newComment = {
-                    articleId: new ObjectId(articleId),
+                    _id: new ObjectId(), // Unique ID for the comment
                     author: author && author.trim() !== '' ? author.trim() : "Anonymous", // Use Anonymous if author is empty
-                    commentText: commentText.trim(),
+                    text: text.trim(), // Changed 'commentText' to 'text'
                     createdAt: new Date(),
                 };
-                const result = await commentsCollection.insertOne(newComment);
+                const result = await newsCollection.updateOne( // Store comments directly in the article document
+                    { _id: new ObjectId(articleId) },
+                    { $push: { comments: newComment } }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ error: "Article not found." });
+                }
                 res.status(201).json(newComment); // Return the inserted comment structure
             } catch (err) {
                 console.error("❌ Error adding comment:", err);
                 res.status(500).json({ error: "Failed to add comment" });
+            }
+        });
+
+
+        // --- NEW: API Route to Update an Article (Authentication Required) ---
+        // MODIFIED: Added multer error handling middleware and removed category/tags from update
+        app.put("/api/articles/:id", isAuthenticated, (req, res, next) => {
+            uploadThumbnail(req, res, function (err) {
+                if (err instanceof multer.MulterError) {
+                    return res.status(500).json({ error: `File upload error: ${err.message}` });
+                } else if (err) {
+                    return res.status(500).json({ error: `An unknown error occurred during upload: ${err.message}` });
+                }
+                next(); // Proceed to actual route handler
+            });
+        }, async (req, res) => {
+            try {
+                const articleId = req.params.id;
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).json({ error: "Invalid article ID format." });
+                }
+
+                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Removed category, tags from destructuring
+                const updateDoc = {
+                    title,
+                    date,
+                    content,
+                    trending: trending === 'true',
+                    // category: category || 'General', // REMOVED: category from article update
+                    // tags: tags ? tags.split(',').map(tag => tag.trim()).filter(t => t !== '') : [] // REMOVED: tags from article update
+                };
+
+                // Handle image update: file upload takes precedence
+                if (req.file) {
+                    updateDoc.image = req.file.path; // Cloudinary URL
+                } else if (bodyImageUrl) {
+                    updateDoc.image = bodyImageUrl;
+                }
+
+                const result = await newsCollection.updateOne(
+                    { _id: new ObjectId(articleId) },
+                    { $set: updateDoc }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ error: "Article not found." });
+                }
+                res.status(200).json({ message: "Article updated successfully!" });
+            } catch (err) {
+                console.error("❌ Error updating article:", err);
+                res.status(500).json({ error: "Failed to update article." });
+            }
+        });
+
+        // --- NEW: API Route to Delete an Article (Authentication Required) ---
+        app.delete("/api/articles/:id", isAuthenticated, async (req, res) => {
+            try {
+                const articleId = req.params.id;
+                if (!ObjectId.isValid(articleId)) {
+                    return res.status(400).json({ error: "Invalid article ID format." });
+                }
+
+                const result = await newsCollection.deleteOne({ _id: new ObjectId(articleId) });
+
+                if (result.deletedCount === 0) {
+                    return res.status(404).json({ error: "Article not found." });
+                }
+                res.status(200).json({ message: "Article deleted successfully!" });
+            } catch (err) {
+                console.error("❌ Error deleting article:", err);
+                res.status(500).json({ error: "Failed to delete article." });
             }
         });
 

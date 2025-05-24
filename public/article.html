@@ -36,7 +36,8 @@
   </header>
 
 <main class="article-page">
-  <div class="article-main-content-wrapper"> <section class="article-detail" id="articleContainer">
+  <div class="article-main-content-wrapper"> 
+    <section class="article-detail" id="articleContainer">
       <h1>Loading Article...</h1>
       <p><em>Loading date...</em></p>
       <img src="/images/placeholder.jpg" alt="Loading image" style="width:100%; border-radius:8px; margin:1rem 0;" />
@@ -79,7 +80,18 @@
             <button type="submit" class="submit-comment-button">Post Comment</button>
         </form>
     </section>
-  </div> <aside class="trending">
+
+    <section class="more-articles-section">
+      <h2>More to Explore</h2>
+      <div class="articles-carousel-wrapper">
+          <button class="carousel-control prev-btn">&#10094;</button> <div class="horizontal-carousel-content" id="moreArticlesCarouselContent">
+              <p>Loading more articles...</p>
+          </div>
+          <button class="carousel-control next-btn">&#10095;</button> </div>
+    </section>
+  </div> 
+  
+  <aside class="trending">
     <h2>Trending Now</h2>
     <ul id="trendingList">
       <li>Loading trending articles...</li>
@@ -103,7 +115,7 @@
         <div class="footer-social">
           <h3>Follow Us</h3>
           <div class="social-icons">
-            <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.facebook.com/steavnews" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
             <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
           </div>
@@ -124,41 +136,50 @@
     document.addEventListener('DOMContentLoaded', () => {
       const articleId = new URLSearchParams(window.location.search).get('id');
       const articleContainer = document.getElementById('articleContainer');
-      const commentsList = document.getElementById('commentsList'); // Get comments list element
+      const commentsList = document.getElementById('commentsList');
 
       // --- Function to fetch and display comments ---
-      const fetchComments = () => {
+      const fetchComments = async () => {
           if (!articleId) {
               commentsList.innerHTML = '<p>No article to display comments for.</p>';
               return;
           }
-          fetch(`/api/articles/${articleId}/comments`)
-              .then(response => response.json())
-              .then(comments => {
-                  commentsList.innerHTML = ''; // Clear loading message
-                  if (comments.length === 0) {
-                      commentsList.innerHTML = '<p>No comments yet. Be the first!</p>';
-                  } else {
-                      comments.forEach(comment => {
-                          const commentDiv = document.createElement('div');
-                          commentDiv.classList.add('comment-item');
-                          const commentDate = new Date(comment.createdAt).toLocaleString();
-                          // Basic sanitization for displaying user input
-                          const safeAuthor = comment.author ? comment.author.replace(/</g, "&lt;").replace(/>/g, "&gt;") : 'Anonymous';
-                          const safeCommentText = comment.commentText ? comment.commentText.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+          try {
+              const response = await fetch(`/api/articles/${articleId}/comments`);
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              const comments = await response.json();
+              commentsList.innerHTML = ''; // Clear loading message
 
-                          commentDiv.innerHTML = `
-                              <p class="comment-meta"><strong>${safeAuthor}</strong> on ${commentDate}</p>
-                              <p class="comment-content-text">${safeCommentText}</p>
-                          `;
-                          commentsList.appendChild(commentDiv);
+              if (comments.length === 0) {
+                  commentsList.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+              } else {
+                  comments.forEach(comment => {
+                      const commentDiv = document.createElement('div');
+                      commentDiv.classList.add('comment-item');
+                      const commentDate = new Date(comment.createdAt).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
                       });
-                  }
-              })
-              .catch(error => {
-                  console.error("Error fetching comments:", error);
-                  commentsList.innerHTML = '<p style="color: red;">Failed to load comments.</p>';
-              });
+                      // Basic sanitization for displaying user input
+                      const safeAuthor = comment.author ? comment.author.replace(/</g, "&lt;").replace(/>/g, "&gt;") : 'Anonymous';
+                      const safeCommentText = comment.text ? comment.text.replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+                      commentDiv.innerHTML = `
+                          <p class="comment-meta"><strong>${safeAuthor}</strong> on ${commentDate}</p>
+                          <p class="comment-content-text">${safeCommentText}</p>
+                      `;
+                      commentsList.appendChild(commentDiv);
+                  });
+              }
+          } catch (error) {
+              console.error("Error fetching comments:", error);
+              commentsList.innerHTML = '<p style="color: red;">Failed to load comments.</p>';
+          }
       };
 
 
@@ -171,10 +192,22 @@
             return response.json();
           })
           .then(article => {
-            // Use article.createdAt if available, otherwise fallback to article.date
+            document.title = article.title; // Update page title
+            // Update Open Graph and Twitter meta tags dynamically
+            document.querySelector('meta[property="og:title"]').setAttribute('content', article.title);
+            document.querySelector('meta[property="og:description"]').setAttribute('content', article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...');
+            document.querySelector('meta[property="og:image"]').setAttribute('content', article.image);
+            document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+            document.querySelector('meta[property="og:type"]').setAttribute('content', 'article'); // Ensure og:type is set
+            
+            document.querySelector('meta[name="twitter:card"]').setAttribute('content', 'summary_large_image'); // Ensure twitter:card is set
+            document.querySelector('meta[name="twitter:title"]').setAttribute('content', article.title);
+            document.querySelector('meta[name="twitter:description"]').setAttribute('content', article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...');
+            document.querySelector('meta[name="twitter:image"]').setAttribute('content', article.image);
+
             const displayDate = article.createdAt
               ? new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-              : (article.date || 'Unknown Date'); // Fallback for article.date too
+              : (article.date || 'Unknown Date');
 
             articleContainer.innerHTML = `
               <h1>${article.title}</h1>
@@ -186,14 +219,22 @@
             document.getElementById('likeCount').textContent = article.likes || 0;
 
             // --- Social Sharing Setup ---
-            const currentArticleUrl = window.location.href;
+            const currentArticleUrl = encodeURIComponent(window.location.href);
+            const articleTitleForShare = encodeURIComponent(article.title || "Check out this article!");
+
             const facebookShare = document.getElementById('facebookShare');
             if (facebookShare) {
-                facebookShare.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentArticleUrl)}`;
+                facebookShare.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${currentArticleUrl}&quote=${articleTitleForShare}`, '_blank', 'width=600,height=400');
+                });
             }
             const twitterShare = document.getElementById('twitterShare');
             if (twitterShare) {
-                twitterShare.href = `https://twitter.com/intent/tweet/?url=${encodeURIComponent(currentArticleUrl)}&text=${encodeURIComponent(article.title || "Check out this article!")}`;
+                twitterShare.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.open(`https://twitter.com/intent/tweet/?url=${currentArticleUrl}&text=${articleTitleForShare}`, '_blank', 'width=600,height=400');
+                });
             }
 
             // --- Fetch comments after article is loaded ---
@@ -203,13 +244,23 @@
           .catch(error => {
             console.error("Error fetching article:", error);
             articleContainer.innerHTML = `<p style="color: red;">Failed to load article. ${error.message}</p>`;
-            commentsList.innerHTML = '<p>Cannot load comments without article data.</p>'; // Update comments section too
+            commentsList.innerHTML = '<p>Cannot load comments without article data.</p>';
           });
 
         // --- Handle Like Button Click ---
         const likeButton = document.getElementById('likeButton');
         if (likeButton) {
+            // Check if user has already liked (from localStorage or cookie for simple demo)
+            const likedArticles = JSON.parse(localStorage.getItem('likedArticles')) || {};
+            if (likedArticles[articleId]) {
+                likeButton.classList.add('liked');
+                likeButton.disabled = true;
+            }
+
             likeButton.addEventListener('click', () => {
+                if (likeButton.classList.contains('liked')) {
+                    return; // Already liked, do nothing
+                }
                 fetch(`/api/articles/${articleId}/like`, {
                     method: 'POST',
                     headers: {
@@ -218,17 +269,18 @@
                 })
                 .then(response => {
                     if (!response.ok) {
-                        // If status is 404 or 500, throw an error
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
-                .then(() => {
-                    // Optimistically update the count on success
-                    const currentLikes = parseInt(document.getElementById('likeCount').textContent);
-                    document.getElementById('likeCount').textContent = currentLikes + 1;
-                    likeButton.disabled = true; // Disable after liking once
-                    likeButton.classList.add('liked'); // Add a class for visual feedback
+                .then((data) => { // Expecting 'likes' from backend
+                    document.getElementById('likeCount').textContent = data.likes;
+                    likeButton.disabled = true;
+                    likeButton.classList.add('liked');
+                    // Store liked status in localStorage
+                    const likedArticles = JSON.parse(localStorage.getItem('likedArticles')) || {};
+                    likedArticles[articleId] = true;
+                    localStorage.setItem('likedArticles', JSON.stringify(likedArticles));
                 })
                 .catch(error => {
                     console.error('Error liking article:', error);
@@ -240,43 +292,43 @@
         // --- Handle Comment Form Submission ---
         const commentForm = document.getElementById('commentForm');
         if (commentForm) {
-            commentForm.addEventListener('submit', (event) => {
-                event.preventDefault(); // Stop default form submission
+            commentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
 
                 const authorInput = document.getElementById('commentAuthor');
                 const commentTextInput = document.getElementById('commentText');
                 const author = authorInput.value;
-                const commentText = commentTextInput.value;
+                const text = commentTextInput.value; // Changed to 'text' to match server
 
-                if (commentText.trim() === '') {
+                if (text.trim() === '') {
                     alert('Comment cannot be empty.');
                     return;
                 }
 
-                fetch(`/api/articles/${articleId}/comments`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ author, commentText }),
-                })
-                .then(response => {
+                try {
+                    const response = await fetch(`/api/articles/${articleId}/comments`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ author, text }),
+                    });
+
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                     }
-                    return response.json();
-                })
-                .then(newComment => {
-                    // Clear the form fields
+                    
+                    // New comment posted successfully
                     authorInput.value = '';
                     commentTextInput.value = '';
-                    // Re-fetch comments to show the new one
-                    fetchComments();
-                })
-                .catch(error => {
+                    fetchComments(); // Re-fetch comments to show the new one
+                    alert('Comment posted successfully!');
+
+                } catch (error) {
                     console.error('Error posting comment:', error);
-                    alert('Failed to post comment. Please try again.');
-                });
+                    alert(`Failed to post comment: ${error.message}. Please try again.`);
+                }
             });
         }
 
@@ -290,7 +342,7 @@
         .then(res => res.json())
         .then(trendingArticles => {
           const trendingList = document.getElementById("trendingList");
-          trendingList.innerHTML = ""; // Clear existing content
+          trendingList.innerHTML = "";
           if (trendingArticles.length === 0) {
             trendingList.innerHTML = '<li>No trending articles found.</li>';
             return;
@@ -299,7 +351,7 @@
             const li = document.createElement('li');
             li.innerHTML = `
               <a href="article.html?id=${item._id}">
-                <img src="${item.image}" alt="${item.title}" />
+                <img src="${item.image}" alt="${item.title}" loading="lazy"/>
                 <span>${item.title}</span>
               </a>`;
             trendingList.appendChild(li);
@@ -309,7 +361,160 @@
           console.error("Failed to fetch trending articles:", err);
           document.getElementById("trendingList").innerHTML = '<li style="color: red;">Failed to load trending articles.</li>';
         });
+
+    // =========================================================
+    // NEW JAVASCRIPT FOR MORE ARTICLES (CAROUSEL WITH CONTROLS)
+    // =========================================================
+    const moreArticlesCarouselContent = document.getElementById('moreArticlesCarouselContent');
+    const prevCarouselBtn = document.querySelector('.more-articles-section .prev-btn');
+    const nextCarouselBtn = document.querySelector('.more-articles-section .next-btn');
+
+    let allMoreArticles = []; // Store fetched articles
+    let currentPageIndex = 0;
+    let cardsPerPage = 6; // Default: 2 rows * 3 columns
+
+    // Function to determine cards per page based on current screen width
+    function getCardsPerPage() {
+  const width = window.innerWidth;
+  if (width <= 480) return 4; // 2x2 grid = 4 cards per page
+  if (width <= 992) return 4;
+  return 6;
+}
+
+
+    // Function to render the carousel pages based on articles and cardsPerPage
+    function renderCarouselPages() {
+        moreArticlesCarouselContent.innerHTML = ''; // Clear existing content
+        cardsPerPage = getCardsPerPage(); // Re-calculate on render (e.g., window resize)
+
+        if (allMoreArticles.length === 0) {
+            moreArticlesCarouselContent.innerHTML = '<p style="text-align: center; width: 100%;">No more articles to display.</p>';
+            prevCarouselBtn.disabled = true;
+            nextCarouselBtn.disabled = true;
+            return;
+        }
+
+        let pageCount = Math.ceil(allMoreArticles.length / cardsPerPage);
+        
+        // Ensure currentPageIndex is valid after resize
+        if (currentPageIndex >= pageCount) {
+            currentPageIndex = pageCount - 1;
+        }
+        if (currentPageIndex < 0 && pageCount > 0) {
+            currentPageIndex = 0;
+        }
+
+
+        for (let i = 0; i < pageCount; i++) {
+            const pageDiv = document.createElement('div');
+            pageDiv.classList.add('carousel-page');
+            
+            const startIndex = i * cardsPerPage;
+            const endIndex = startIndex + cardsPerPage;
+            const articlesForPage = allMoreArticles.slice(startIndex, endIndex);
+
+            articlesForPage.forEach(article => {
+                const card = document.createElement("a");
+                card.href = `article.html?id=${article._id}`;
+                card.classList.add("card"); // Reuse existing card styles
+                const articleDate = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${article.image}" alt="${article.title}" loading="lazy"/>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-date">${articleDate}</p>
+                        <h3>${article.title}</h3>
+                    </div>`;
+                pageDiv.appendChild(card);
+            });
+            moreArticlesCarouselContent.appendChild(pageDiv);
+        }
+        updateCarouselControls(); // Update button state after loading slides
+        updateCarouselPosition(); // Set initial position
+    }
+
+    // Function to update carousel position (using transform to slide pages)
+    function updateCarouselPosition() {
+        const pages = moreArticlesCarouselContent.querySelectorAll('.carousel-page');
+        if (pages.length > 0) {
+            const offset = -currentPageIndex * 100; // Each slide is 100% of viewport width
+            // Instead of translateX on track, let's just make the active page visible
+            // This is handled by CSS classes now
+        }
+        updateCarouselControls();
+    }
+
+    // Function to update visibility and button states
+    function updateCarouselControls() {
+        const pages = moreArticlesCarouselContent.querySelectorAll('.carousel-page');
+        pages.forEach((page, index) => {
+            if (index === currentPageIndex) {
+                page.classList.add('active');
+            } else {
+                page.classList.remove('active');
+            }
+        });
+
+        prevCarouselBtn.disabled = currentPageIndex === 0;
+        nextCarouselBtn.disabled = currentPageIndex >= pages.length - 1;
+    }
+
+    // Event listeners for carousel controls
+    prevCarouselBtn.addEventListener('click', () => {
+        if (currentPageIndex > 0) {
+            currentPageIndex--;
+            updateCarouselControls();
+        }
     });
+
+    nextCarouselBtn.addEventListener('click', () => {
+        const pages = moreArticlesCarouselContent.querySelectorAll('.carousel-page');
+        if (currentPageIndex < pages.length - 1) {
+            currentPageIndex++;
+            updateCarouselControls();
+        }
+    });
+
+    // Fetch articles for the "More to Explore" section
+    async function fetchAndDisplayMoreArticles() {
+        if (!moreArticlesCarouselContent) return;
+
+        moreArticlesCarouselContent.innerHTML = '<p style="text-align: center; width: 100%;">Loading more articles...</p>';
+        try {
+            const response = await fetch(`/api/articles`); // Fetch all articles
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const allFetchedArticles = await response.json();
+
+            // Filter out the current article (if on an article page)
+            allMoreArticles = allFetchedArticles.filter(article => article._id !== articleId);
+
+            renderCarouselPages(); // Render the carousel with fetched articles
+        } catch (error) {
+            console.error("Error fetching more articles:", error);
+            moreArticlesCarouselContent.innerHTML = '<p style="color: red; text-align: center; width: 100%;">Failed to load more articles.</p>';
+        }
+    }
+
+    // Call the function to load more articles when the page loads
+    fetchAndDisplayMoreArticles();
+
+    // Optional: Re-render carousel pages on window resize to adjust cardsPerPage
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const newCardsPerPage = getCardsPerPage();
+            if (newCardsPerPage !== cardsPerPage) { // Only re-render if breakpoint crossed
+                currentPageIndex = 0; // Reset to first page
+                renderCarouselPages();
+            }
+        }, 250); // Debounce resize event
+    });
+
+    }); // End of DOMContentLoaded
   </script>
 </body>
 </html>
