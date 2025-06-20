@@ -80,7 +80,7 @@
     .form-group input[type="text"],
     .form-group input[type="url"],
     .form-group input[type="file"],
-    .form-group select { /* Added select */
+    .form-group select { /* Ensure select is styled */
       width: calc(100% - 20px);
       padding: 10px;
       border: 1px solid #ddd;
@@ -292,6 +292,7 @@
           </select>
         </div>
 
+
         <div class="form-group">
           <label for="date">Date:</label>
           <input type="text" id="date" name="date" placeholder="YYYY-MM-DD" required>
@@ -307,9 +308,7 @@
             <button type="button" onclick="formatDoc('insertUnorderedList')">UL</button>
             <button type="button" onclick="formatDoc('createLink', prompt('Enter URL:'))">Link</button>
             <button type="button" onclick="formatDoc('unlink')">Unlink</button>
-            <button type="button" onclick="formatDoc('insertImage', prompt('Enter image URL:'))">Image (URL)</button>
-            
-            <button type="button" id="uploadInlineImageBtn">Upload Image</button>
+            <button type="button" id="insertImageUrlBtn">Insert Image (URL)</button> <button type="button" id="uploadInlineImageBtn">Upload Image</button>
             <input type="file" id="inlineImageUpload" accept="image/*" style="display:none;">
           </div>
           <div id="content" name="content" contenteditable="true" style="border: 1px solid #ddd; min-height: 200px; padding: 10px; border-radius: 0 0 8px 8px;"></div>
@@ -404,7 +403,7 @@
     const newsForm = document.getElementById('newsForm');
     const thumbnailFileInput = document.getElementById('thumbnailFileInput');
     const thumbnailUrlInput = document.getElementById('thumbnailUrlInput');
-    const categoryInput = document.getElementById('category'); // ADDED
+    const categoryInput = document.getElementById('category'); // Re-added Category
 
     newsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -418,7 +417,7 @@
       formData.append('date', document.getElementById('date').value);
       formData.append('content', document.getElementById("content").innerHTML);
       formData.append('trending', document.getElementById('trending').checked);
-      formData.append('category', categoryInput.value); // ADDED
+      formData.append('category', categoryInput.value); // Ensure category is sent
 
       // Handle thumbnail image: file upload takes precedence over URL
       if (thumbnailFileInput.files.length > 0) {
@@ -472,10 +471,18 @@
     // Inline Image Upload Logic
     const uploadInlineImageBtn = document.getElementById('uploadInlineImageBtn');
     const inlineImageUploadInput = document.getElementById('inlineImageUpload');
+    const insertImageUrlBtn = document.getElementById('insertImageUrlBtn'); // NEW button for URL
     const contentEditor = document.getElementById('content');
 
     uploadInlineImageBtn.addEventListener('click', () => {
         inlineImageUploadInput.click();
+    });
+
+    insertImageUrlBtn.addEventListener('click', () => { // Event listener for NEW button
+        const imageUrl = prompt('Enter image URL:');
+        if (imageUrl) {
+            document.execCommand('insertImage', false, imageUrl);
+        }
     });
 
     inlineImageUploadInput.addEventListener('change', async (event) => {
@@ -569,8 +576,7 @@
                     <thead>
                         <tr style="background-color: #f2f2f2;">
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Title</th>
-                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Category</th> <!-- Added Category header -->
-                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Trending</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Category</th> <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Trending</th>
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Views</th>
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Actions</th>
                         </tr>
@@ -583,8 +589,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td style="padding: 10px; border: 1px solid #ddd;">${article.title}</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.category || 'N/A'}</td> <!-- Display Category -->
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.trending ? 'Yes' : 'No'}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.category || 'N/A'}</td> <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.trending ? 'Yes' : 'No'}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.views || 0}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
                             <button class="edit-btn" data-id="${article._id}">Edit</button>
@@ -636,7 +641,7 @@
             document.getElementById('date').value = article.date;
             document.getElementById('content').innerHTML = article.content;
             document.getElementById('trending').checked = article.trending;
-            categoryInput.value = article.category || 'កម្សាន្ត'; // Set category
+            document.getElementById('category').value = article.category || 'កម្សាន្ត'; // Set category
             
             publishUpdateBtn.textContent = 'Update Article';
             articleIdToEdit.value = article._id;
@@ -704,4 +709,4 @@
     }
   </script>
 </body>
-</html>
+</ht

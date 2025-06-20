@@ -11,20 +11,51 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
-  <meta property="og:title" content="">
-  <meta property="og:description" content="">
-  <meta property="og:image" content="">
-  <meta property="og:url" content="">
+  <meta property="og:title" content="STEAV NEWS Article">
+  <meta property="og:description" content="Read the latest news from STEAV NEWS.">
+  <meta property="og:image" content="https://placehold.co/1200x630/cccccc/ffffff?text=STEAV+NEWS">
+  <meta property="og:url" content="https://yourwebsite.com/article.html">
   <meta property="og:type" content="article">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="">
-  <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> <!-- Favicon added -->
-  <style>
+  <meta name="twitter:title" content="STEAV NEWS Article">
+  <meta name="twitter:description" content="Read the latest news from STEAV NEWS.">
+  <meta name="twitter:image" content="https://placehold.co/1200x675/cccccc/ffffff?text=STEAV+NEWS">
+  
+  <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> <style>
+    /* Global Article Content Font Application (for all screen sizes) */
+    .article-body-content {
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif !important;
+        font-size: 1.1rem; /* Base font size for content */
+        line-height: 1.8 !important; /* Base line height for content */
+        color: #333; /* Ensure text color is dark */
+    }
+    /* Ensure all child elements within article-body-content inherit or explicitly get font */
+    .article-body-content p,
+    .article-body-content span,
+    .article-body-content div,
+    .article-body-content strong,
+    .article-body-content em,
+    .article-body-content a,
+    .article-body-content ul,
+    .article-body-content ol,
+    .article-body-content li {
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif !important;
+        line-height: inherit !important; /* Inherit line-height */
+        font-size: inherit !important; /* Inherit font size (or set specific for headings) */
+    }
+    .article-body-content h1,
+    .article-body-content h2,
+    .article-body-content h3,
+    .article-body-content h4,
+    .article-body-content h5,
+    .article-body-content h6 {
+        font-weight: bold !important; /* Ensure headings are bold */
+    }
+
     /* Styles for navbar font specific to article.html to match index.html */
     .nav-links a {
+       font-size: 20px;
         font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
         font-weight: bold; /* Ensure bold weight */
     }
@@ -68,31 +99,31 @@
         font-size: 1.8rem;
         font-weight: bold;
         color: #e60000; /* K-Pop red for logo */
-        margin-bottom: 20px; /* Space below logo */
-        text-align: center; /* Ensure logo text is centered */
-        width: 100%; /* Allow logo to take full available width for centering */
+        margin-bottom: 20px;
+        text-align: center;
+        width: 100%;
     }
 
-    .footer-sections-wrapper { /* Styles for the wrapper of links and social */
+    .footer-sections-wrapper {
         display: flex;
-        flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
-        justify-content: center; /* Center the quick links and social sections */
+        flex-wrap: wrap;
+        justify-content: center;
         width: 100%;
-        max-width: 800px; /* Adjusted to match index.html desktop max-width */
-        gap: 30px; /* Space between the 'links' and 'social' columns on larger screens */
+        max-width: 800px;
+        gap: 30px;
     }
 
     .footer-links, .footer-social {
-        margin: 0 15px; /* Adjust margin for spacing within the wrapper */
-        text-align: left; /* Align text within these sections */
-        flex-grow: 1; /* Allow sections to grow */
-        min-width: 150px; /* Minimum width for each section */
+        margin: 0 15px;
+        text-align: left;
+        flex-grow: 1;
+        min-width: 150px;
     }
 
     .footer-links h3, .footer-social h3 {
-        color: #e60000; /* K-Pop red for headings */
+        color: #e60000;
         margin-bottom: 15px;
-        font-size: 1.2rem; /* Consistent heading font size */
+        font-size: 1.2rem;
     }
 
     .footer-links ul {
@@ -104,27 +135,27 @@
         margin-bottom: 8px;
     }
 
-    .footer-links ul li a { /* Specific target for Quick Links to match Navbar */
+    .footer-links ul li a {
         font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
         font-weight: bold;
-        font-size: 1.1rem; /* Slightly increased font size for better readability on desktop/laptop */
-        color: #bbb; /* Ensure color is consistent */
+        font-size: 1.1rem;
+        color: #bbb;
     }
 
     .footer-social .social-icons {
         display: flex;
-        justify-content: center; /* Changed to center for both desktop and mobile */
+        justify-content: center; /* Ensures centering on mobile */
         gap: 15px;
     }
 
     .social-icons a {
-        color: #bbb; /* Icon color (initially grey) */
-        font-size: 24px; /* Size of the icon */
+        color: #bbb;
+        font-size: 24px;
         transition: color 0.2s ease, transform 0.2s ease;
     }
 
     .social-icons a:hover {
-        color: #e60000; /* K-Pop red on hover */
+        color: #e60000;
         transform: translateY(-3px);
     }
 
@@ -133,65 +164,63 @@
         padding-top: 20px;
         margin-top: 20px;
         width: 100%;
-        max-width: 1200px; /* Match main content max-width */
-        margin-left: auto; /* Center horizontally */
-        margin-right: auto; /* Center horizontally */
-        text-align: center; /* Center the text content */
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
         color: #aaa;
     }
 
     /* Media Queries for Responsiveness (footer specific) */
     @media (max-width: 768px) {
         .footer-sections-wrapper {
-            flex-direction: column; /* Stack links and social vertically on small screens */
-            align-items: center; /* Center them */
-            gap: 0; /* Remove gap when stacked */
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
         }
         .footer-links, .footer-social {
-            text-align: center; /* Center text within these sections on small screens */
-            margin: 10px 0; /* Adjust margin */
+            text-align: center;
+            margin: 10px 0;
         }
         .footer-links ul {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 15px; /* Space between inline list items */
+            gap: 15px;
         }
         .footer-links ul li {
-            margin-bottom: 0; /* Remove extra margin for inline items */
+            margin-bottom: 0;
         }
-        /* No change needed for .social-icons here, as it's now centered by default */
     }
 
-    @media (min-width: 769px) { /* Adjustments for larger screens (laptop/desktop) */
+    @media (min-width: 769px) {
         .footer-sections-wrapper {
-            justify-content: space-around; /* Distribute items with space around */
-            align-items: flex-start; /* Align sections to their start (top) */
-            max-width: 800px; /* Limit overall width for better grouping */
-            margin: 0 auto; /* Center the wrapper */
-            padding: 0 20px; /* Add some padding if the wrapper is too wide */
-            flex-wrap: nowrap; /* Prevent wrapping on large screens */
+            justify-content: space-around;
+            align-items: flex-start;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            flex-wrap: nowrap;
         }
         .footer-links, .footer-social {
-            flex-basis: auto; /* Allow natural width */
-            min-width: unset; /* Remove min-width constraint */
-            flex-grow: 0; /* Don't grow unnecessarily */
-            text-align: left; /* Keep text aligned left */
+            flex-basis: auto;
+            min-width: unset;
+            flex-grow: 0;
+            text-align: left;
         }
         .social-icons {
-            justify-content: flex-start; /* Align social icons to the left on desktop */
+            justify-content: flex-start;
         }
-        /* Further adjust spacing and font for footer links on laptops */
         .footer-links ul {
-            display: block; /* Stack list items vertically again for desktop */
+            display: block;
         }
         .footer-links ul li {
-            margin-bottom: 10px; /* Space out vertical list items */
+            margin-bottom: 10px;
         }
     }
 
     /* Styles for 'More to Explore' section carousel cards to match 'Latest Articles' cards */
-    .more-articles-section { /* Added this style block to articles.html */
+    .more-articles-section {
         background-color: #fff;
         padding: 20px;
         margin-bottom: 20px;
@@ -199,57 +228,90 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
     .articles-carousel-wrapper .carousel-page {
-        grid-template-columns: repeat(3, 1fr); /* Desktop default: 3 columns */
-        gap: 15px; /* Consistent gap with index.html's news-cards on desktop */
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
     }
 
     .articles-carousel-wrapper .card {
-        min-height: 200px; /* Shorter card height for carousel */
+        min-height: 200px;
     }
 
     .articles-carousel-wrapper .card .card-image {
-        padding-bottom: 55%; /* Adjusted for consistent aspect ratio */
-        height: auto; /* Allow height to adjust based on padding-bottom */
+        padding-bottom: 55%;
+        height: auto;
     }
 
     .articles-carousel-wrapper .card .card-content {
-        padding: 8px; /* Compact content padding */
+        padding: 8px;
     }
 
     .articles-carousel-wrapper .card .card-content h3 {
-        font-size: 0.9rem; /* Reduced font size to match news cards mobile title */
-        line-height: 1.1em; /* Tighter line height */
-        height: 3.3em; /* 1.1 * 3 lines for 3-line title */
-        -webkit-line-clamp: 3; /* Limit to 3 lines */
+        font-size: 0.9rem;
+        line-height: 1.1em;
+        height: 3.3em;
+        -webkit-line-clamp: 3;
         margin-bottom: 5px;
     }
 
     .articles-carousel-wrapper .card .card-content p.card-date {
-        font-size: 0.7rem; /* Smaller date font */
+        font-size: 0.7rem;
     }
 
-    /* Mobile adjustments for articles-carousel-wrapper */
+    /* Mobile adjustments for articles-carousel-wrapper and main article sections */
     @media (max-width: 767px) {
-        .more-articles-section { /* Make section full width on mobile */
-            margin: 0;
-            width: 100%;
-            padding: 15px; /* Adjust padding for mobile */
+        /* Add padding-top to the main content area to clear the fixed navbar */
+        .article-page {
+            padding-top: 60px; /* Adjust this value based on your navbar's height */
+            padding-left: 0; /* Ensure no extra left/right padding */
+            padding-right: 0;
         }
+        .article-detail,
+        .article-interaction,
+        .comments-section,
+        .more-articles-section {
+            margin: 0; /* Remove horizontal margins */
+            width: 100%; /* Force full width */
+            padding: 15px; /* Add consistent padding inside the box */
+            box-sizing: border-box; /* Include padding in width calculation */
+            border-radius: 0; /* Remove border-radius to be edge-to-edge if desired, or keep 8px */
+        }
+        /* Specific alignment for article body content */
+        .article-body-content {
+            font-size: 1.1rem; /* Adjusted for better readability */
+            line-height: 1.8 !important; /* Force line height if editor overrides */
+            color: #333;
+            /* Ensure font is applied to all child elements with !important */
+            font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif !important;
+        }
+        .article-body-content p,
+        .article-body-content span,
+        .article-body-content div,
+        .article-body-content strong,
+        .article-body-content em,
+        .article-body-content a,
+        .article-body-content ul,
+        .article-body-content ol,
+        .article-body-content li {
+            font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif !important;
+            line-height: inherit !important;
+            font-size: inherit !important; /* Ensure inherited font size is also forced */
+        }
+
         .articles-carousel-wrapper .carousel-page {
-            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
-            gap: 5px; /* Even tighter gap on mobile for wider cards */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
         }
 
         .articles-carousel-wrapper .card {
-            min-height: 180px; /* Unified min-height with latest articles cards */
+            min-height: 180px;
         }
 
         .articles-carousel-wrapper .card .card-image {
-            padding-bottom: 55%; /* Consistent image aspect ratio */
+            padding-bottom: 55%;
         }
 
         .articles-carousel-wrapper .card .card-content h3 {
-            font-size: 0.9rem; /* Consistent font size on mobile */
+            font-size: 0.9rem;
             line-height: 1.1em;
             height: 3.3em;
             -webkit-line-clamp: 3;
@@ -260,11 +322,11 @@
         }
         
         .carousel-control.prev-btn {
-            left: 0; /* Adjust button position on mobile */
+            left: 0;
         }
 
         .carousel-control.next-btn {
-            right: 0; /* Adjust button position on mobile */
+            right: 0;
         }
     }
   </style>
@@ -289,10 +351,9 @@
   <div class="article-main-content-wrapper"> 
     <section class="article-detail" id="articleContainer">
       <h1>Loading Article...</h1>
-      <p><em>Loading date...</em></p>
+      <p><em>Published: <span id="articleDate">Loading date...</span></em></p>
       <img src="/images/placeholder.jpg" alt="Loading image" style="width:100%; border-radius:8px; margin:1rem 0;" />
-      <div>
-        <p>Please wait while the article loads.</p>
+      <div class="article-body-content"> <p>Please wait while the article loads.</p>
       </div>
     </section>
 
@@ -388,6 +449,7 @@
       const articleId = new URLSearchParams(window.location.search).get('id');
       const articleContainer = document.getElementById('articleContainer');
       const commentsList = document.getElementById('commentsList');
+      const articleDateSpan = document.getElementById('articleDate'); // Get the span for the date
       let currentArticleCategory = ''; // Variable to store the category of the current article
 
       // --- Function to fetch and display comments ---
@@ -463,11 +525,14 @@
               ? new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
               : (article.date || 'Unknown Date');
 
-            articleContainer.innerHTML = `
-              <h1>${article.title}</h1>
-              <p><em>Published: ${displayDate}</em></p>
-              <img src="${article.image}" style="width:100%; border-radius:8px; margin:1rem 0;" />
-              <div style="line-height:1.6;">${article.content}</div>`;
+            articleContainer.querySelector('h1').textContent = article.title; // Set title
+            articleDateSpan.textContent = displayDate; // Set date in its span
+            articleContainer.querySelector('img').src = article.image; // Set main image
+            articleContainer.querySelector('img').alt = article.title;
+
+            // Set content in the dedicated div
+            const articleBodyContentDiv = articleContainer.querySelector('.article-body-content');
+            articleBodyContentDiv.innerHTML = article.content;
 
             // --- Display initial like count ---
             document.getElementById('likeCount').textContent = article.likes || 0;
