@@ -199,7 +199,7 @@ a:hover {
   display: flex;
   justify-content: space-between;
   transform: translateY(-50%);
-  padding: 0 10px; /* Adjusted padding to bring buttons closer to edges but still visible */
+  padding: 0 50px; /* Adjusted padding to bring buttons closer to edges but still visible */
   z-index: 3; /* Ensure nav buttons are clickable */
 }
 
@@ -207,7 +207,7 @@ a:hover {
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
-  padding: 8px 10px; /* Reduced padding */
+  padding: 8px 15px; /* Reduced padding */
   cursor: pointer;
   margin-top: 60px;
   font-size: 1.2rem; /* Slightly smaller font size */
@@ -817,7 +817,7 @@ footer {
 
   /* Adjust carousel navigation buttons for edge-to-edge */
   .carousel-nav {
-    padding: 0 5px; /* Reduced padding for phones, slightly off the edge */
+    padding: 0 15px; /* Reduced padding for phones, slightly off the edge */
   }
 }
 
@@ -868,7 +868,7 @@ footer {
 
   /* Adjust carousel navigation buttons for edge-to-edge */
   .carousel-nav {
-    padding: 0 3px; /* Minimal padding for very small phones */
+    padding: 0 20px; /* Minimal padding for very small phones */
   }
 }
 

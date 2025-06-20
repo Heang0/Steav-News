@@ -34,6 +34,9 @@ const dbName = "kpop_news";
 const collectionName = "articles"; // This collection is used for both articles and trending
 const commentsCollectionName = "comments"; // New collection for comments
 
+// Define accepted categories
+const CATEGORIES = ["កម្សាន្ត", "សង្គម", "កីឡា", "ពិភពលោក"];
+
 // --- Authentication Middleware ---
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin6232';
@@ -109,6 +112,7 @@ async function startServer() {
                 const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
 
                 if (!article) {
+                    // Serve a generic 404 HTML page if the article is not found
                     return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
                 }
 
@@ -162,10 +166,10 @@ async function startServer() {
         });
 
         // --- API Route to Get All Articles (Newest First) ---
-        // MODIFIED: Added search, category, tag filtering
+        // MODIFIED: Added search, category filtering
         app.get("/api/articles", async (req, res) => {
             try {
-                const { search, category, tag } = req.query;
+                const { search, category } = req.query; // Removed tag
                 const query = {};
 
                 if (search) {
@@ -177,9 +181,7 @@ async function startServer() {
                 if (category) {
                     query.category = category;
                 }
-                if (tag) {
-                    query.tags = tag; // Matches if the tag exists in the tags array
-                }
+                // Removed tag filtering
 
                 const articles = await newsCollection.find(query).sort({ createdAt: -1 }).toArray();
                 res.status(200).json(articles);
@@ -188,6 +190,27 @@ async function startServer() {
                 res.status(500).json({ error: "Failed to fetch articles" });
             }
         });
+
+        // --- NEW API Route: Get one latest article for each specified category for homepage previews ---
+        app.get("/api/categories/homepage-previews", async (req, res) => {
+            try {
+                const categoryArticles = [];
+                for (const category of CATEGORIES) {
+                    const article = await newsCollection.findOne(
+                        { category: category },
+                        { sort: { createdAt: -1 } } // Get the latest one
+                    );
+                    if (article) {
+                        categoryArticles.push(article);
+                    }
+                }
+                res.status(200).json(categoryArticles);
+            } catch (err) {
+                console.error("❌ Error fetching category homepage previews:", err);
+                res.status(500).json({ error: "Failed to fetch category previews" });
+            }
+        });
+
 
         // --- API Route to Get Trending Articles (Newest First) ---
         app.get("/api/trending", async (req, res) => {
@@ -228,7 +251,7 @@ async function startServer() {
         });
 
         // --- API Route to Add New Article (Authentication Required) ---
-        // MODIFIED: Added category, tags, and views initialization
+        // MODIFIED: Added category and views initialization
         app.post("/api/news", isAuthenticated, (req, res, next) => { // Added multer error handling middleware
             uploadThumbnail(req, res, function (err) {
                 if (err instanceof multer.MulterError) {
@@ -240,13 +263,18 @@ async function startServer() {
             });
         }, async (req, res) => {
             try {
-                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Removed category, tags from destructuring
+                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Added category
                 let imagePath = "/images/default_og_image.jpg"; // Default fallback if no file or external URL provided
 
                 if (req.file) {
                     imagePath = req.file.path; // Multer-Cloudinary puts the Cloudinary URL here
                 } else if (bodyImageUrl) {
                     imagePath = bodyImageUrl;
+                }
+
+                // Validate category
+                if (category && !CATEGORIES.includes(category)) {
+                    return res.status(400).json({ error: "Invalid category provided." });
                 }
 
                 const newArticle = {
@@ -258,8 +286,7 @@ async function startServer() {
                     trending: trending === 'true',
                     likes: 0, // Initialize likes
                     views: 0, // NEW: Initialize views
-                    // category: category || 'General', // REMOVED: category from article creation
-                    // tags: tags ? tags.split(',').map(tag => tag.trim()).filter(t => t !== '') : [] // REMOVED: tags from article creation
+                    category: category || 'កម្សាន្ត', // Default to 'កម្សាន្ត' if not provided
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
@@ -376,7 +403,7 @@ async function startServer() {
 
 
         // --- NEW: API Route to Update an Article (Authentication Required) ---
-        // MODIFIED: Added multer error handling middleware and removed category/tags from update
+        // MODIFIED: Added multer error handling middleware and category to update
         app.put("/api/articles/:id", isAuthenticated, (req, res, next) => {
             uploadThumbnail(req, res, function (err) {
                 if (err instanceof multer.MulterError) {
@@ -393,14 +420,19 @@ async function startServer() {
                     return res.status(400).json({ error: "Invalid article ID format." });
                 }
 
-                const { title, date, content, trending, imageUrl: bodyImageUrl } = req.body; // Removed category, tags from destructuring
+                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Added category
+                
+                // Validate category
+                if (category && !CATEGORIES.includes(category)) {
+                    return res.status(400).json({ error: "Invalid category provided." });
+                }
+
                 const updateDoc = {
                     title,
                     date,
                     content,
                     trending: trending === 'true',
-                    // category: category || 'General', // REMOVED: category from article update
-                    // tags: tags ? tags.split(',').map(tag => tag.trim()).filter(t => t !== '') : [] // REMOVED: tags from article update
+                    category: category || 'កម្សាន្ត', // Default to 'កម្សាន្ត' if not provided
                 };
 
                 // Handle image update: file upload takes precedence
@@ -438,7 +470,7 @@ async function startServer() {
                 if (result.deletedCount === 0) {
                     return res.status(404).json({ error: "Article not found." });
                 }
-                res.status(200).json({ message: "Article deleted successfully!" });
+                res.status(200).json({ message: "Article deleted successfully!." });
             } catch (err) {
                 console.error("❌ Error deleting article:", err);
                 res.status(500).json({ error: "Failed to delete article." });

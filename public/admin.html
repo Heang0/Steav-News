@@ -79,7 +79,8 @@
     }
     .form-group input[type="text"],
     .form-group input[type="url"],
-    .form-group input[type="file"] {
+    .form-group input[type="file"],
+    .form-group select { /* Added select */
       width: calc(100% - 20px);
       padding: 10px;
       border: 1px solid #ddd;
@@ -281,6 +282,15 @@
             <small>Upload a file or provide a URL for the article's main thumbnail.</small>
         </div>
 
+        <div class="form-group">
+          <label for="category">Category:</label>
+          <select id="category" name="category" required>
+            <option value="កម្សាន្ត">កម្សាន្ត</option>
+            <option value="សង្គម">សង្គម</option>
+            <option value="កីឡា">កីឡា</option>
+            <option value="ពិភពលោក">ពិភពលោក</option>
+          </select>
+        </div>
 
         <div class="form-group">
           <label for="date">Date:</label>
@@ -394,8 +404,7 @@
     const newsForm = document.getElementById('newsForm');
     const thumbnailFileInput = document.getElementById('thumbnailFileInput');
     const thumbnailUrlInput = document.getElementById('thumbnailUrlInput');
-    // const categoryInput = document.getElementById('category'); // REMOVED
-    // const tagsInput = document.getElementById('tags'); // REMOVED
+    const categoryInput = document.getElementById('category'); // ADDED
 
     newsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -409,8 +418,7 @@
       formData.append('date', document.getElementById('date').value);
       formData.append('content', document.getElementById("content").innerHTML);
       formData.append('trending', document.getElementById('trending').checked);
-      // formData.append('category', categoryInput.value); // REMOVED
-      // formData.append('tags', tagsInput.value); // REMOVED
+      formData.append('category', categoryInput.value); // ADDED
 
       // Handle thumbnail image: file upload takes precedence over URL
       if (thumbnailFileInput.files.length > 0) {
@@ -441,8 +449,7 @@
           document.getElementById("content").innerHTML = '';
           thumbnailFileInput.value = '';
           thumbnailUrlInput.value = '';
-          // categoryInput.value = ''; // REMOVED
-          // tagsInput.value = ''; // REMOVED
+          categoryInput.value = 'កម្សាន្ត'; // Reset to default category
           publishUpdateBtn.textContent = 'Publish Article';
           articleIdToEdit.value = '';
 
@@ -562,6 +569,7 @@
                     <thead>
                         <tr style="background-color: #f2f2f2;">
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Title</th>
+                            <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Category</th> <!-- Added Category header -->
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Trending</th>
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Views</th>
                             <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Actions</th>
@@ -575,6 +583,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td style="padding: 10px; border: 1px solid #ddd;">${article.title}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.category || 'N/A'}</td> <!-- Display Category -->
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.trending ? 'Yes' : 'No'}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">${article.views || 0}</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
@@ -627,9 +636,8 @@
             document.getElementById('date').value = article.date;
             document.getElementById('content').innerHTML = article.content;
             document.getElementById('trending').checked = article.trending;
-            // categoryInput.value = article.category || ''; // REMOVED
-            // tagsInput.value = (article.tags && article.tags.join(', ')) || ''; // REMOVED
-
+            categoryInput.value = article.category || 'កម្សាន្ត'; // Set category
+            
             publishUpdateBtn.textContent = 'Update Article';
             articleIdToEdit.value = article._id;
             window.scrollTo(0, 0);

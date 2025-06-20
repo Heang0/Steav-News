@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STEAV NEWS - Article</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
@@ -21,6 +21,253 @@
   <meta name="twitter:title" content="">
   <meta name="twitter:description" content="">
   <meta name="twitter:image" content="">
+  <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> <!-- Favicon added -->
+  <style>
+    /* Styles for navbar font specific to article.html to match index.html */
+    .nav-links a {
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+        font-weight: bold; /* Ensure bold weight */
+    }
+    /* Increased width for trending section on desktop/laptop in article.html */
+    @media (min-width: 993px) { /* Apply these styles for screens wider than 992px (laptops/desktops) */
+        .article-page .trending {
+            width: 350px; /* Increased width for trending sidebar */
+        }
+        .article-main-content-wrapper {
+            flex: 1; /* Allow main content to shrink */
+            margin-right: 30px; /* Add margin to the right to create space if trending width increases */
+        }
+    }
+
+    /* Footer specific styles to match index.html for article.html */
+    .site-footer {
+        background-color: #333; /* Dark background */
+        color: #fff; /* White text */
+        padding: 40px 20px;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-top: 50px; /* Space above the footer */
+        clear: both; /* Ensures it clears any floated content above it */
+        width: 100%; /* Ensures it takes full width */
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow at the top */
+        display: flex; /* Use flexbox for the footer */
+        flex-direction: column; /* Stack children vertically */
+        align-items: center; /* Center children horizontally */
+    }
+
+    .footer-content {
+        display: flex;
+        flex-direction: column; /* Stack logo, then sections wrapper */
+        align-items: center; /* Center items horizontally */
+        width: 100%;
+        max-width: 1200px; /* Limit content width */
+        margin: 0 auto 20px auto; /* Center the content container itself, add space below */
+    }
+
+    .footer-logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #e60000; /* K-Pop red for logo */
+        margin-bottom: 20px; /* Space below logo */
+        text-align: center; /* Ensure logo text is centered */
+        width: 100%; /* Allow logo to take full available width for centering */
+    }
+
+    .footer-sections-wrapper { /* Styles for the wrapper of links and social */
+        display: flex;
+        flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
+        justify-content: center; /* Center the quick links and social sections */
+        width: 100%;
+        max-width: 800px; /* Adjusted to match index.html desktop max-width */
+        gap: 30px; /* Space between the 'links' and 'social' columns on larger screens */
+    }
+
+    .footer-links, .footer-social {
+        margin: 0 15px; /* Adjust margin for spacing within the wrapper */
+        text-align: left; /* Align text within these sections */
+        flex-grow: 1; /* Allow sections to grow */
+        min-width: 150px; /* Minimum width for each section */
+    }
+
+    .footer-links h3, .footer-social h3 {
+        color: #e60000; /* K-Pop red for headings */
+        margin-bottom: 15px;
+        font-size: 1.2rem; /* Consistent heading font size */
+    }
+
+    .footer-links ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links ul li {
+        margin-bottom: 8px;
+    }
+
+    .footer-links ul li a { /* Specific target for Quick Links to match Navbar */
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+        font-weight: bold;
+        font-size: 1.1rem; /* Slightly increased font size for better readability on desktop/laptop */
+        color: #bbb; /* Ensure color is consistent */
+    }
+
+    .footer-social .social-icons {
+        display: flex;
+        justify-content: center; /* Changed to center for both desktop and mobile */
+        gap: 15px;
+    }
+
+    .social-icons a {
+        color: #bbb; /* Icon color (initially grey) */
+        font-size: 24px; /* Size of the icon */
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .social-icons a:hover {
+        color: #e60000; /* K-Pop red on hover */
+        transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+        border-top: 1px solid #555;
+        padding-top: 20px;
+        margin-top: 20px;
+        width: 100%;
+        max-width: 1200px; /* Match main content max-width */
+        margin-left: auto; /* Center horizontally */
+        margin-right: auto; /* Center horizontally */
+        text-align: center; /* Center the text content */
+        color: #aaa;
+    }
+
+    /* Media Queries for Responsiveness (footer specific) */
+    @media (max-width: 768px) {
+        .footer-sections-wrapper {
+            flex-direction: column; /* Stack links and social vertically on small screens */
+            align-items: center; /* Center them */
+            gap: 0; /* Remove gap when stacked */
+        }
+        .footer-links, .footer-social {
+            text-align: center; /* Center text within these sections on small screens */
+            margin: 10px 0; /* Adjust margin */
+        }
+        .footer-links ul {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px; /* Space between inline list items */
+        }
+        .footer-links ul li {
+            margin-bottom: 0; /* Remove extra margin for inline items */
+        }
+        /* No change needed for .social-icons here, as it's now centered by default */
+    }
+
+    @media (min-width: 769px) { /* Adjustments for larger screens (laptop/desktop) */
+        .footer-sections-wrapper {
+            justify-content: space-around; /* Distribute items with space around */
+            align-items: flex-start; /* Align sections to their start (top) */
+            max-width: 800px; /* Limit overall width for better grouping */
+            margin: 0 auto; /* Center the wrapper */
+            padding: 0 20px; /* Add some padding if the wrapper is too wide */
+            flex-wrap: nowrap; /* Prevent wrapping on large screens */
+        }
+        .footer-links, .footer-social {
+            flex-basis: auto; /* Allow natural width */
+            min-width: unset; /* Remove min-width constraint */
+            flex-grow: 0; /* Don't grow unnecessarily */
+            text-align: left; /* Keep text aligned left */
+        }
+        .social-icons {
+            justify-content: flex-start; /* Align social icons to the left on desktop */
+        }
+        /* Further adjust spacing and font for footer links on laptops */
+        .footer-links ul {
+            display: block; /* Stack list items vertically again for desktop */
+        }
+        .footer-links ul li {
+            margin-bottom: 10px; /* Space out vertical list items */
+        }
+    }
+
+    /* Styles for 'More to Explore' section carousel cards to match 'Latest Articles' cards */
+    .more-articles-section { /* Added this style block to articles.html */
+        background-color: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .articles-carousel-wrapper .carousel-page {
+        grid-template-columns: repeat(3, 1fr); /* Desktop default: 3 columns */
+        gap: 15px; /* Consistent gap with index.html's news-cards on desktop */
+    }
+
+    .articles-carousel-wrapper .card {
+        min-height: 200px; /* Shorter card height for carousel */
+    }
+
+    .articles-carousel-wrapper .card .card-image {
+        padding-bottom: 55%; /* Adjusted for consistent aspect ratio */
+        height: auto; /* Allow height to adjust based on padding-bottom */
+    }
+
+    .articles-carousel-wrapper .card .card-content {
+        padding: 8px; /* Compact content padding */
+    }
+
+    .articles-carousel-wrapper .card .card-content h3 {
+        font-size: 0.9rem; /* Reduced font size to match news cards mobile title */
+        line-height: 1.1em; /* Tighter line height */
+        height: 3.3em; /* 1.1 * 3 lines for 3-line title */
+        -webkit-line-clamp: 3; /* Limit to 3 lines */
+        margin-bottom: 5px;
+    }
+
+    .articles-carousel-wrapper .card .card-content p.card-date {
+        font-size: 0.7rem; /* Smaller date font */
+    }
+
+    /* Mobile adjustments for articles-carousel-wrapper */
+    @media (max-width: 767px) {
+        .more-articles-section { /* Make section full width on mobile */
+            margin: 0;
+            width: 100%;
+            padding: 15px; /* Adjust padding for mobile */
+        }
+        .articles-carousel-wrapper .carousel-page {
+            grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+            gap: 5px; /* Even tighter gap on mobile for wider cards */
+        }
+
+        .articles-carousel-wrapper .card {
+            min-height: 180px; /* Unified min-height with latest articles cards */
+        }
+
+        .articles-carousel-wrapper .card .card-image {
+            padding-bottom: 55%; /* Consistent image aspect ratio */
+        }
+
+        .articles-carousel-wrapper .card .card-content h3 {
+            font-size: 0.9rem; /* Consistent font size on mobile */
+            line-height: 1.1em;
+            height: 3.3em;
+            -webkit-line-clamp: 3;
+        }
+
+        .articles-carousel-wrapper .card .card-content p.card-date {
+            font-size: 0.7rem;
+        }
+        
+        .carousel-control.prev-btn {
+            left: 0; /* Adjust button position on mobile */
+        }
+
+        .carousel-control.next-btn {
+            right: 0; /* Adjust button position on mobile */
+        }
+    }
+  </style>
 </head>
 
 <body>
@@ -30,10 +277,11 @@
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 
     <nav class="nav-links" id="navLinks">
-      <a href="index.html">Home</a>
-      
-      <a href="contact.html">Contact</a>
-      <a href="privacy.html">Privacy Policy</a>
+      <a href="index.html">ទំព័រដើម</a>
+      <a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a>
+      <a href="index.html?category=សង្គម">សង្គម</a>
+      <a href="index.html?category=កីឡា">កីឡា</a>
+      <a href="index.html?category=ពិភពលោក">ពិភពលោក</a>
     </nav>
   </header>
 
@@ -108,10 +356,11 @@
         <div class="footer-links">
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="groups.html">Groups</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
-            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="index.html">ទំព័រដើម</a></li>
+            <li><a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a></li>
+            <li><a href="index.html?category=សង្គម">សង្គម</a></li>
+            <li><a href="index.html?category=កីឡា">កីឡា</a></li>
+            <li><a href="index.html?category=ពិភពលោក">ពិភពលោក</a></li>
           </ul>
         </div>
         <div class="footer-social">
@@ -139,6 +388,7 @@
       const articleId = new URLSearchParams(window.location.search).get('id');
       const articleContainer = document.getElementById('articleContainer');
       const commentsList = document.getElementById('commentsList');
+      let currentArticleCategory = ''; // Variable to store the category of the current article
 
       // --- Function to fetch and display comments ---
       const fetchComments = async () => {
@@ -195,14 +445,16 @@
           })
           .then(article => {
             document.title = article.title; // Update page title
+            currentArticleCategory = article.category; // Store the category of the current article
+
             // Update Open Graph and Twitter meta tags dynamically
             document.querySelector('meta[property="og:title"]').setAttribute('content', article.title);
             document.querySelector('meta[property="og:description"]').setAttribute('content', article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...');
             document.querySelector('meta[property="og:image"]').setAttribute('content', article.image);
             document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
-            document.querySelector('meta[property="og:type"]').setAttribute('content', 'article'); // Ensure og:type is set
+            document.querySelector('meta[property="og:type"]').setAttribute('content', 'article'); 
             
-            document.querySelector('meta[name="twitter:card"]').setAttribute('content', 'summary_large_image'); // Ensure twitter:card is set
+            document.querySelector('meta[name="twitter:card"]').setAttribute('content', 'summary_large_image'); 
             document.querySelector('meta[name="twitter:title"]').setAttribute('content', article.title);
             document.querySelector('meta[name="twitter:description"]').setAttribute('content', article.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...');
             document.querySelector('meta[name="twitter:image"]').setAttribute('content', article.image);
@@ -214,7 +466,7 @@
             articleContainer.innerHTML = `
               <h1>${article.title}</h1>
               <p><em>Published: ${displayDate}</em></p>
-              <img src="${article.image}" style="width:100%; border-radius:8px; margin:1rem 0;" alt="${article.title}" />
+              <img src="${article.image}" style="width:100%; border-radius:8px; margin:1rem 0;" />
               <div style="line-height:1.6;">${article.content}</div>`;
 
             // --- Display initial like count ---
@@ -233,7 +485,7 @@
             }
             const twitterShare = document.getElementById('twitterShare');
             if (twitterShare) {
-                twitterShare.addEventListener('click', (e) => {
+                twitterShare.addEventListener('click', (e) => { 
                     e.preventDefault();
                     window.open(`https://twitter.com/intent/tweet/?url=${currentArticleUrl}&text=${articleTitleForShare}`, '_blank', 'width=600,height=400');
                 });
@@ -241,11 +493,14 @@
 
             // --- Fetch comments after article is loaded ---
             fetchComments();
+            // --- Call fetchAndDisplayMoreArticles with the current article's category ---
+            fetchAndDisplayMoreArticles(currentArticleCategory);
 
           })
           .catch(error => {
             console.error("Error fetching article:", error);
-            articleContainer.innerHTML = `<p style="color: red;">Failed to load article. ${error.message}</p>`;
+            // Display specific error for the article fetch
+            articleContainer.innerHTML = `<p style="color: red;">Failed to load article: ${error.message}</p>`;
             commentsList.innerHTML = '<p>Cannot load comments without article data.</p>';
           });
 
@@ -300,7 +555,7 @@
                 const authorInput = document.getElementById('commentAuthor');
                 const commentTextInput = document.getElementById('commentText');
                 const author = authorInput.value;
-                const text = commentTextInput.value; // Changed to 'text' to match server
+                const text = commentTextInput.value; 
 
                 if (text.trim() === '') {
                     alert('Comment cannot be empty.');
@@ -353,16 +608,16 @@
             const li = document.createElement('li');
             li.innerHTML = `
               <a href="article.html?id=${item._id}">
-                <img src="${item.image}" alt="${item.title}" loading="lazy"/>
+                <img src="${item.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image'}" alt="${item.title}" loading="lazy"/>
                 <span>${item.title}</span>
               </a>`;
-            trendingList.appendChild(li);
-          });
-        })
-        .catch(err => {
-          console.error("Failed to fetch trending articles:", err);
-          document.getElementById("trendingList").innerHTML = '<li style="color: red;">Failed to load trending articles.</li>';
+          trendingList.appendChild(li);
         });
+      })
+      .catch(err => {
+        console.error("Failed to fetch trending articles:", err);
+        document.getElementById("trendingList").innerHTML = '<li style="color: red;">Failed to load trending articles.</li>';
+      });
 
     // =========================================================
     // NEW JAVASCRIPT FOR MORE ARTICLES (CAROUSEL WITH CONTROLS)
@@ -377,11 +632,11 @@
 
     // Function to determine cards per page based on current screen width
     function getCardsPerPage() {
-  const width = window.innerWidth;
-  if (width <= 480) return 4; // 2x2 grid = 4 cards per page
-  if (width <= 992) return 4;
-  return 6;
-}
+      const width = window.innerWidth;
+      if (width <= 480) return 4; // 2x2 grid = 4 cards per page
+      if (width <= 992) return 4;
+      return 6;
+    }
 
 
     // Function to render the carousel pages based on articles and cardsPerPage
@@ -422,7 +677,7 @@
                 const articleDate = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                 card.innerHTML = `
                     <div class="card-image">
-                        <img src="${article.image}" alt="${article.title}" loading="lazy"/>
+                        <img src="${article.image || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}" alt="${article.title}" loading="lazy"/>
                     </div>
                     <div class="card-content">
                         <p class="card-date">${articleDate}</p>
@@ -479,12 +734,19 @@
     });
 
     // Fetch articles for the "More to Explore" section
-    async function fetchAndDisplayMoreArticles() {
+    // Modified to accept a category parameter
+    async function fetchAndDisplayMoreArticles(category = null) {
         if (!moreArticlesCarouselContent) return;
 
         moreArticlesCarouselContent.innerHTML = '<p style="text-align: center; width: 100%;">Loading more articles...</p>';
         try {
-            const response = await fetch(`/api/articles`); // Fetch all articles
+            let apiUrl = `/api/articles`;
+            // Add category filter if provided
+            if (category) {
+                apiUrl += `?category=${encodeURIComponent(category)}`;
+            }
+
+            const response = await fetch(apiUrl); // Fetch articles, possibly filtered by category
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -492,16 +754,21 @@
 
             // Filter out the current article (if on an article page)
             allMoreArticles = allFetchedArticles.filter(article => article._id !== articleId);
+            
+            // Only render if there are articles to show after filtering
+            if (allMoreArticles.length > 0) {
+                renderCarouselPages(); // Render the carousel with fetched articles
+            } else {
+                moreArticlesCarouselContent.innerHTML = '<p style="text-align: center; width: 100%;">No more articles in this category to display.</p>';
+                prevCarouselBtn.disabled = true;
+                nextCarouselBtn.disabled = true;
+            }
 
-            renderCarouselPages(); // Render the carousel with fetched articles
         } catch (error) {
             console.error("Error fetching more articles:", error);
             moreArticlesCarouselContent.innerHTML = '<p style="color: red; text-align: center; width: 100%;">Failed to load more articles.</p>';
         }
     }
-
-    // Call the function to load more articles when the page loads
-    fetchAndDisplayMoreArticles();
 
     // Optional: Re-render carousel pages on window resize to adjust cardsPerPage
     let resizeTimeout;
