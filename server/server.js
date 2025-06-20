@@ -4,7 +4,7 @@ const path = require("path");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const multer = require("multer");
-const fs = require('fs').promises;
+const fs = require('fs').promises; // Ensure fs.promises is available for readFile
 
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -92,6 +92,19 @@ async function startServer() {
         const newsCollection = db.collection(collectionName);
         const commentsCollection = db.collection(commentsCollectionName); // Get comments collection
 
+        // --- NEW: Explicit route for robots.txt to ensure it's always served 200 OK ---
+        app.get("/robots.txt", async (req, res) => {
+            try {
+                const robotsPath = path.join(__dirname, "../public", "robots.txt");
+                await fs.access(robotsPath); // Check if file exists
+                res.status(200).sendFile(robotsPath);
+            } catch (err) {
+                console.warn("robots.txt not found or accessible:", err.message);
+                res.status(404).send("robots.txt not found"); // Or send an empty file, depending on desired behavior
+            }
+        });
+
+
         // Route to serve your main HTML page
         app.get("/", (req, res) => {
             res.sendFile(path.join(__dirname, "../public", "index.html"));
@@ -166,10 +179,10 @@ async function startServer() {
         });
 
         // --- API Route to Get All Articles (Newest First) ---
-        // MODIFIED: Added search, category filtering
+        // MODIFIED: Added search, category, tag filtering
         app.get("/api/articles", async (req, res) => {
             try {
-                const { search, category } = req.query; // Removed tag
+                const { search, category, tag } = req.query;
                 const query = {};
 
                 if (search) {
@@ -181,7 +194,9 @@ async function startServer() {
                 if (category) {
                     query.category = category;
                 }
-                // Removed tag filtering
+                if (tag) {
+                    query.tags = tag; // Matches if the tag exists in the tags array
+                }
 
                 const articles = await newsCollection.find(query).sort({ createdAt: -1 }).toArray();
                 res.status(200).json(articles);
@@ -251,7 +266,7 @@ async function startServer() {
         });
 
         // --- API Route to Add New Article (Authentication Required) ---
-        // MODIFIED: Added category and views initialization
+        // MODIFIED: Added category, tags, and views initialization
         app.post("/api/news", isAuthenticated, (req, res, next) => { // Added multer error handling middleware
             uploadThumbnail(req, res, function (err) {
                 if (err instanceof multer.MulterError) {
@@ -263,7 +278,7 @@ async function startServer() {
             });
         }, async (req, res) => {
             try {
-                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Added category
+                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Ensure category is destructured
                 let imagePath = "/images/default_og_image.jpg"; // Default fallback if no file or external URL provided
 
                 if (req.file) {
@@ -286,7 +301,7 @@ async function startServer() {
                     trending: trending === 'true',
                     likes: 0, // Initialize likes
                     views: 0, // NEW: Initialize views
-                    category: category || 'កម្សាន្ត', // Default to 'កម្សាន្ត' if not provided
+                    category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
@@ -403,7 +418,7 @@ async function startServer() {
 
 
         // --- NEW: API Route to Update an Article (Authentication Required) ---
-        // MODIFIED: Added multer error handling middleware and category to update
+        // MODIFIED: Added multer error handling middleware and removed category/tags from update
         app.put("/api/articles/:id", isAuthenticated, (req, res, next) => {
             uploadThumbnail(req, res, function (err) {
                 if (err instanceof multer.MulterError) {
@@ -420,19 +435,13 @@ async function startServer() {
                     return res.status(400).json({ error: "Invalid article ID format." });
                 }
 
-                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Added category
-                
-                // Validate category
-                if (category && !CATEGORIES.includes(category)) {
-                    return res.status(400).json({ error: "Invalid category provided." });
-                }
-
+                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Ensure category is destructured
                 const updateDoc = {
                     title,
                     date,
                     content,
                     trending: trending === 'true',
-                    category: category || 'កម្សាន្ត', // Default to 'កម្សាន្ត' if not provided
+                    category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
                 };
 
                 // Handle image update: file upload takes precedence
