@@ -2,4 +2,4 @@ User-agent: facebookexternalhit
 Allow: /
 
 User-agent: *
-Disallow: /admin.html
+Disallow:

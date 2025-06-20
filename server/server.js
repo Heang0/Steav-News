@@ -164,7 +164,21 @@ async function startServer() {
 
         // --- Serve static files from the 'public' directory ---
         // This line MUST come AFTER any dynamic routes that might serve files from 'public'
-        app.use(express.static(path.join(__dirname, "../public")));
+       // Serve robots.txt for Facebook crawler
+app.get("/robots.txt", async (req, res) => {
+  try {
+    const robotsPath = path.join(__dirname, "../public", "robots.txt");
+    await fs.access(robotsPath); // ensure it exists
+    res.status(200).sendFile(robotsPath);
+  } catch (err) {
+    console.warn("robots.txt not found:", err.message);
+    res.status(404).send("robots.txt not found");
+  }
+});
+
+// Serve static files after dynamic routes
+app.use(express.static(path.join(__dirname, "../public")));
+
 
 
         // --- Authentication Endpoint ---
