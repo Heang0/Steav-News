@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>STEAV NEWS - Article</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
@@ -55,11 +55,7 @@
     }
 
     /* Styles for navbar font specific to article.html to match index.html */
-    .nav-links a {
-       font-size: 20px;
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
-        font-weight: bold; /* Ensure bold weight */
-    }
+   
     /* Increased width for trending section on desktop/laptop in article.html */
     @media (min-width: 993px) { /* Apply these styles for screens wider than 992px (laptops/desktops) */
         .article-page .trending {
@@ -71,154 +67,8 @@
         }
     }
 
-    /* Footer specific styles to match index.html for article.html */
-    .site-footer {
-        background-color: #333; /* Dark background */
-        color: #fff; /* White text */
-        padding: 40px 20px;
-        font-size: 0.9rem;
-        text-align: center;
-        margin-top: 50px; /* Space above the footer */
-        clear: both; /* Ensures it clears any floated content above it */
-        width: 100%; /* Ensures it takes full width */
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow at the top */
-        display: flex; /* Use flexbox for the footer */
-        flex-direction: column; /* Stack children vertically */
-        align-items: center; /* Center children horizontally */
-    }
-
-    .footer-content {
-        display: flex;
-        flex-direction: column; /* Stack logo, then sections wrapper */
-        align-items: center; /* Center items horizontally */
-        width: 100%;
-        max-width: 1200px; /* Limit content width */
-        margin: 0 auto 20px auto; /* Center the content container itself, add space below */
-    }
-
-    .footer-logo {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #e60000; /* K-Pop red for logo */
-        margin-bottom: 20px;
-        text-align: center;
-        width: 100%;
-    }
-
-    .footer-sections-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-        max-width: 800px;
-        gap: 30px;
-    }
-
-    .footer-links, .footer-social {
-        margin: 0 15px;
-        text-align: left;
-        flex-grow: 1;
-        min-width: 150px;
-    }
-
-    .footer-links h3, .footer-social h3 {
-        color: #e60000;
-        margin-bottom: 15px;
-        font-size: 1.2rem;
-    }
-
-    .footer-links ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .footer-links ul li {
-        margin-bottom: 8px;
-    }
-
-    .footer-links ul li a {
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
-        font-weight: bold;
-        font-size: 1.1rem;
-        color: #bbb;
-    }
-
-    .footer-social .social-icons {
-        display: flex;
-        justify-content: center; /* Ensures centering on mobile */
-        gap: 15px;
-    }
-
-    .social-icons a {
-        color: #bbb;
-        font-size: 24px;
-        transition: color 0.2s ease, transform 0.2s ease;
-    }
-
-    .social-icons a:hover {
-        color: #e60000;
-        transform: translateY(-3px);
-    }
-
-    .footer-bottom {
-        border-top: 1px solid #555;
-        padding-top: 20px;
-        margin-top: 20px;
-        width: 100%;
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
-        color: #aaa;
-    }
-
-    /* Media Queries for Responsiveness (footer specific) */
-    @media (max-width: 768px) {
-        .footer-sections-wrapper {
-            flex-direction: column;
-            align-items: center;
-            gap: 0;
-        }
-        .footer-links, .footer-social {
-            text-align: center;
-            margin: 10px 0;
-        }
-        .footer-links ul {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
-        .footer-links ul li {
-            margin-bottom: 0;
-        }
-    }
-
-    @media (min-width: 769px) {
-        .footer-sections-wrapper {
-            justify-content: space-around;
-            align-items: flex-start;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 20px;
-            flex-wrap: nowrap;
-        }
-        .footer-links, .footer-social {
-            flex-basis: auto;
-            min-width: unset;
-            flex-grow: 0;
-            text-align: left;
-        }
-        .social-icons {
-            justify-content: flex-start;
-        }
-        .footer-links ul {
-            display: block;
-        }
-        .footer-links ul li {
-            margin-bottom: 10px;
-        }
-    }
+    /* REMOVED: Footer specific styles that were causing conflicts.
+       article.html will now rely entirely on styles.css for footer styling. */
 
     /* Styles for 'More to Explore' section carousel cards to match 'Latest Articles' cards */
     .more-articles-section {
@@ -423,6 +273,21 @@
             <li><a href="index.html?category=សង្គម">សង្គម</a></li>
             <li><a href="index.html?category=កីឡា">កីឡា</a></li>
             <li><a href="index.html?category=ពិភពលោក">ពិភពលោក</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <ul>
+            <li><a href="contact-us.html">Contact Form</a></li>
+            <li>Email: info@steavnews.com</li>
+            <li>Phone: +855 96 392 5127</li>
+          </ul>
+        </div>
+        <div class="footer-policy">
+          <h3>Privacy Policy</h3>
+          <ul>
+            <li><a href="privacy-policy.html">Read Our Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
           </ul>
         </div>
         <div class="footer-social">
@@ -699,9 +564,9 @@
     // Function to determine cards per page based on current screen width
     function getCardsPerPage() {
       const width = window.innerWidth;
-      if (width <= 480) return 4; // 2x2 grid = 4 cards per page
-      if (width <= 992) return 4;
-      return 6;
+      if (width <= 480) return 4; // UPDATED: 2 columns x 2 rows = 4 cards for mobile
+      if (width <= 992) return 4; // 2x2 grid = 4 cards per page
+      return 6; // Desktop: 2x3 grid = 6 cards per page
     }
 
 

@@ -4,7 +4,7 @@ const path = require("path");
 const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const multer = require("multer");
-const fs = require('fs').promises; // Ensure fs.promises is available for readFile
+const fs = require('fs').promises;
 
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -31,8 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 const dbName = "kpop_news";
-const collectionName = "articles"; // This collection is used for both articles and trending
-const commentsCollectionName = "comments"; // New collection for comments
+const collectionName = "articles";
 
 // Define accepted categories
 const CATEGORIES = ["កម្សាន្ត", "សង្គម", "កីឡា", "ពិភពលោក"];
@@ -90,7 +89,6 @@ async function startServer() {
 
         const db = client.db(dbName);
         const newsCollection = db.collection(collectionName);
-        const commentsCollection = db.collection(commentsCollectionName); // Get comments collection
 
         // --- NEW: Explicit route for robots.txt to ensure it's always served 200 OK ---
         app.get("/robots.txt", async (req, res) => {
@@ -193,16 +191,19 @@ app.use(express.static(path.join(__dirname, "../public")));
         });
 
         // --- API Route to Get All Articles (Newest First) ---
-        // MODIFIED: Added search, category, tag filtering
+        // MODIFIED: Added search, category, tag filtering, limit, and offset for pagination
         app.get("/api/articles", async (req, res) => {
             try {
-                const { search, category, tag } = req.query;
+                const { search, category, tag, limit, offset } = req.query;
                 const query = {};
 
-                if (search) {
+                // Ensure search is a string before using it in regex
+                const processedSearch = typeof search === 'string' ? search.trim() : '';
+
+                if (processedSearch) {
                     query.$or = [
-                        { title: { $regex: search, $options: 'i' } },
-                        { content: { $regex: search, $options: 'i' } }
+                        { title: { $regex: processedSearch, $options: 'i' } },
+                        { content: { $regex: processedSearch, $options: 'i' } }
                     ];
                 }
                 if (category) {
@@ -212,11 +213,59 @@ app.use(express.static(path.join(__dirname, "../public")));
                     query.tags = tag; // Matches if the tag exists in the tags array
                 }
 
-                const articles = await newsCollection.find(query).sort({ createdAt: -1 }).toArray();
+                let articlesQuery = newsCollection.find(query).sort({ createdAt: -1 });
+
+                if (limit) {
+                    articlesQuery = articlesQuery.limit(parseInt(limit));
+                }
+                if (offset) {
+                    articlesQuery = articlesQuery.skip(parseInt(offset));
+                }
+
+                const articles = await articlesQuery.toArray();
                 res.status(200).json(articles);
             } catch (err) {
                 console.error("❌ Error fetching articles:", err);
                 res.status(500).json({ error: "Failed to fetch articles" });
+            }
+        });
+
+        // --- NEW API Route: Get Total Article Count (for pagination) ---
+        app.get("/api/articles/count", async (req, res) => {
+            try {
+                const { search, category, tag } = req.query;
+                const query = {};
+
+                // --- START DEBUGGING LOGS ---
+                console.log("DEBUG: Received query parameters for /api/articles/count:", req.query);
+                // --- END DEBUGGING LOGS ---
+
+                // Ensure search is a string before using it in regex
+                const processedSearch = typeof search === 'string' ? search.trim() : '';
+
+                if (processedSearch) {
+                    query.$or = [
+                        { title: { $regex: processedSearch, $options: 'i' } },
+                        { content: { $regex: processedSearch, $options: 'i' } }
+                    ];
+                }
+                if (category) {
+                    query.category = category;
+                }
+                // No change needed for tag as it's not directly used in regex
+                if (tag) {
+                    query.tags = tag;
+                }
+                
+                // --- START DEBUGGING LOGS ---
+                console.log("DEBUG: Constructed MongoDB query for count:", JSON.stringify(query));
+                // --- END DEBUGGING LOGS ---
+
+                const count = await newsCollection.countDocuments(query);
+                res.status(200).json({ count });
+            } catch (err) {
+                console.error("❌ Error fetching article count:", err);
+                res.status(500).json({ error: "Failed to fetch article count" });
             }
         });
 
@@ -249,7 +298,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                                                               .limit(5)
                                                               .toArray();
                 res.status(200).json(trendingArticles);
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error fetching trending articles:", err);
                 res.status(500).json({ error: "Failed to fetch trending articles" });
             }
@@ -273,7 +323,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                     return res.status(404).json({ error: "Article not found" });
                 }
                 res.status(200).json(article.value);
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error fetching single article:", err);
                 res.status(500).json({ error: "Failed to fetch article" });
             }
@@ -316,11 +367,13 @@ app.use(express.static(path.join(__dirname, "../public")));
                     likes: 0, // Initialize likes
                     views: 0, // NEW: Initialize views
                     category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
+                    comments: [] // Initialize comments array
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
                 res.status(201).json(result);
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error inserting article:", err);
                 res.status(500).json({ error: "Failed to create article" });
             }
@@ -344,7 +397,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                 }
                 const imageUrl = req.file.path;
                 res.status(200).json({ url: imageUrl, message: "Image uploaded successfully! This URL is permanent." });
-            } catch (error) {
+            }
+            catch (error) {
                 console.error("❌ Error processing inline image upload:", error);
                 res.status(500).json({ message: "Failed to upload image." });
             }
@@ -367,7 +421,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                 // Fetch the updated article to return the new like count
                 const updatedArticle = await newsCollection.findOne({ _id: new ObjectId(articleId) }, { projection: { likes: 1 } });
                 res.status(200).json({ message: "Article liked!", likes: updatedArticle.likes || 0 });
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error liking article:", err);
                 res.status(500).json({ error: "Failed to like article" });
             }
@@ -380,7 +435,7 @@ app.use(express.static(path.join(__dirname, "../public")));
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
-                // Changed to fetch comments from the article document directly, as per frontend JS
+                // Fetch comments directly from the article document
                 const article = await newsCollection.findOne({ _id: new ObjectId(articleId) }, { projection: { comments: 1 } });
                 if (!article) {
                     return res.status(404).json({ message: 'Article not found.' });
@@ -388,7 +443,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                 // Ensure comments array exists, sort by createdAt for consistent display (oldest first)
                 const comments = article.comments ? article.comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) : [];
                 res.status(200).json(comments);
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error fetching comments:", err);
                 res.status(500).json({ error: "Failed to fetch comments" });
             }
@@ -400,7 +456,7 @@ app.use(express.static(path.join(__dirname, "../public")));
                 if (!ObjectId.isValid(articleId)) {
                     return res.status(400).json({ error: "Invalid article ID format" });
                 }
-                const { author, text } = req.body; // Changed 'commentText' to 'text' to match frontend JS
+                const { author, text } = req.body; 
                 // Basic validation
                 if (!text || text.trim() === '') {
                     return res.status(400).json({ error: "Comment text cannot be empty." });
@@ -412,7 +468,7 @@ app.use(express.static(path.join(__dirname, "../public")));
                 const newComment = {
                     _id: new ObjectId(), // Unique ID for the comment
                     author: author && author.trim() !== '' ? author.trim() : "Anonymous", // Use Anonymous if author is empty
-                    text: text.trim(), // Changed 'commentText' to 'text'
+                    text: text.trim(), 
                     createdAt: new Date(),
                 };
                 const result = await newsCollection.updateOne( // Store comments directly in the article document
@@ -424,7 +480,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                     return res.status(404).json({ error: "Article not found." });
                 }
                 res.status(201).json(newComment); // Return the inserted comment structure
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error adding comment:", err);
                 res.status(500).json({ error: "Failed to add comment" });
             }
@@ -449,7 +506,7 @@ app.use(express.static(path.join(__dirname, "../public")));
                     return res.status(400).json({ error: "Invalid article ID format." });
                 }
 
-                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; // Ensure category is destructured
+                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; 
                 const updateDoc = {
                     title,
                     date,
@@ -474,7 +531,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                     return res.status(404).json({ error: "Article not found." });
                 }
                 res.status(200).json({ message: "Article updated successfully!" });
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error updating article:", err);
                 res.status(500).json({ error: "Failed to update article." });
             }
@@ -494,7 +552,8 @@ app.use(express.static(path.join(__dirname, "../public")));
                     return res.status(404).json({ error: "Article not found." });
                 }
                 res.status(200).json({ message: "Article deleted successfully!." });
-            } catch (err) {
+            }
+            catch (err) {
                 console.error("❌ Error deleting article:", err);
                 res.status(500).json({ error: "Failed to delete article." });
             }

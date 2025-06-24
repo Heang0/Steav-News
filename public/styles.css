@@ -53,6 +53,8 @@ a:hover {
   font-size: 1.5rem;
   line-height: 1.2;
   margin-left: 10px;
+  /* UPDATED: Ensure logo uses the specified font family */
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
 }
 
 .nav-links {
@@ -65,6 +67,10 @@ a:hover {
   font-weight: 500;
   padding: 0.5rem 0;
   position: relative; /* For underline animation */
+  /* This is the key styling for consistent navbar links: */
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif; /* Explicitly set font */
+  font-weight: bold; /* Explicitly set bold */
+  font-size: 20px; /* Explicitly set desired font size */
 }
 
 .nav-links a::after {
@@ -118,10 +124,11 @@ a:hover {
   }
 
   .nav-links a {
-    padding: 0.4rem 1rem; /* Reduced top/bottom padding to lessen menu height */
+    padding: 0.4rem 1rem;
     text-align: center;
     color: white;
     font-size: 1.1rem;
+    /* Font family and weight already handled by main .nav-links a rule */
   }
 
   .hamburger {
@@ -151,22 +158,22 @@ a:hover {
 }
 
 .carousel-slide {
-  position: absolute; /* Position slides over each other */
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.7s ease-in-out; /* Smooth fade effect */
-  display: flex; /* For centering content within slide */
+  opacity: 0;
+  transition: opacity 0.7s ease-in-out;
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1; /* Default stacking order */
+  z-index: 1;
 }
 
 .carousel-slide.active {
-  opacity: 1; /* Active slide is visible */
-  z-index: 2; /* Bring active slide to front */
+  opacity: 1;
+  z-index: 2;
 }
 
 .carousel-slide img {
@@ -177,9 +184,9 @@ a:hover {
 
 .banner-btn {
   position: absolute;
-  top: 50%; /* Vertically centered */
+  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* True horizontal and vertical centering */
+  transform: translate(-50%, -50%);
   padding: 10px 25px;
   background-color: #fff;
   color: #e60000;
@@ -189,7 +196,7 @@ a:hover {
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 3; /* Ensure button is above slide */
+  z-index: 3;
 }
 
 .carousel-nav {
@@ -199,19 +206,19 @@ a:hover {
   display: flex;
   justify-content: space-between;
   transform: translateY(-50%);
-  padding: 0 50px; /* Adjusted padding to bring buttons closer to edges but still visible */
-  z-index: 3; /* Ensure nav buttons are clickable */
+  padding: 0 50px;
+  z-index: 3;
 }
 
 .nav-button {
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
-  padding: 8px 15px; /* Reduced padding */
+  padding: 8px 15px;
   cursor: pointer;
   margin-top: 60px;
-  font-size: 1.2rem; /* Slightly smaller font size */
-  border-radius: 5px; /* Softer corners */
+  font-size: 1.2rem;
+  border-radius: 5px;
   transition: background-color 0.3s ease;
 }
 
@@ -224,29 +231,29 @@ a:hover {
   display: grid;
   /* Laptop layout: 3fr for news, 1fr for trending */
   grid-template-columns: 3fr 1fr;
-  grid-template-areas: "news trending"; /* Explicitly define areas for desktop */
-  gap: 30px; /* Space between news and trending sections */
-  max-width: 1300px; /* Increased width, matches carousel max-width */
-  margin: 40px auto; /* Centered with top/bottom margin */
-  padding: 0 20px; /* Horizontal padding */
+  grid-template-areas: "news trending";
+  gap: 30px;
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 0 20px;
 }
 
 /* Assign grid areas */
 .news-section {
   grid-area: news;
-  padding: 0; /* Already has padding from parent grid */
-  background-color: #fff; /* White background for the news section */
+  padding: 0;
+  background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 20px; /* Inner padding for the news section */
+  padding: 20px;
 }
 
 .trending {
   grid-area: trending;
-  background: #fff; /* White background for the trending section */
+  background: #fff;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Consistent shadow */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -257,12 +264,32 @@ h2 {
   font-weight: 700;
 }
 
+/* Updated news-cards (Latest Articles) for responsive 3-line text and transition */
 .news-cards {
   display: grid;
-  /* Laptop/Desktop: flexible columns, aiming for 3-4 */
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted minmax for more columns */
-  gap: 25px; /* Increased gap between cards */
+  /* Force 3 columns on desktop/laptop */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  position: relative;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
+
+.news-cards.leaving {
+    opacity: 0;
+    transform: translateX(30px);
+    pointer-events: none;
+}
+
+.news-cards.entering {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+.news-cards.entering.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
 
 .card {
     background: white;
@@ -274,22 +301,21 @@ h2 {
     flex-direction: column;
     text-decoration: none;
     color: inherit;
-    /* >>> IMPORTANT: ADD OR CONFIRM THIS LINE <<< */
-    min-height: 250px; /* This ensures the card has a minimum visible height for the image */
+    min-height: 250px;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); /* Lift effect on hover */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Image aspect ratio container */
 .card-image {
   position: relative;
   width: 100%;
-  padding-bottom: 60%; /* This creates a 16:9 aspect ratio (height is 60% of width) */
-  overflow: hidden; /* Hide anything outside this ratio */
-  border-bottom: 1px solid #eee; /* Separator for image */
+  padding-bottom: 60%;
+  overflow: hidden;
+  border-bottom: 1px solid #eee;
 }
 
 .card-image img {
@@ -298,47 +324,55 @@ h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the image covers the area without distortion */
+  object-fit: cover;
 }
 
 .card-content {
   padding: 15px;
-  flex-grow: 1; /* Allows content to expand */
+  flex-grow: 1;
 }
 
 .card-date {
   font-size: 0.85rem;
-  color: #888; /* Lighter color for date/category */
+  color: #888;
   margin-bottom: 5px;
 }
 
+/* Updated card h3 for 3 lines with ellipsis on all devices */
 .card h3 {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
+  margin-top: 0;
   margin-bottom: 10px;
-  line-height: 1.4;
+  line-height: 1.4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
 }
 
 /* ========================= Trending Section (in Index.html and Article.html) ========================= */
 .trending h2 {
   font-size: 1.6rem;
-  text-align: left; /* Align heading left */
+  text-align: left;
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
 /* ========================= Trending Now Images ========================= */
 .trending ul {
-    list-style: none; /* Remove default bullet points */
+    list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .trending li {
-    display: flex; /* Use flexbox for alignment of image and text */
-    align-items: center; /* Vertically align image and text */
-    margin-bottom: 15px; /* Space between trending items */
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
     background-color: #fff;
     padding: 10px;
     border-radius: 8px;
@@ -346,41 +380,145 @@ h2 {
 }
 
 .trending li a {
-    display: flex; /* Make the entire link a flex container */
+    display: flex;
     align-items: center;
-    width: 100%; /* Ensure link takes full width of li */
-    color: #333; /* Default link color */
+    width: 100%;
+    color: #333;
     text-decoration: none;
 }
 
 .trending li a:hover {
-    color: #e60000; /* Hover color */
+    color: #e60000;
 }
 
 .trending li img {
-    width: 60px;   /* Set a fixed width for the image */
-    height: 60px;  /* Set a fixed height for the image */
-    object-fit: cover; /* This is crucial: it crops the image to fit without distortion */
-    border-radius: 4px; /* Slightly rounded corners for the image */
-    margin-right: 15px; /* Space between image and text */
-    flex-shrink: 0; /* Prevent image from shrinking if text is long */
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 15px;
+    flex-shrink: 0;
 }
 
 .trending li span {
-    flex-grow: 1; /* Allow text to take remaining space */
+    flex-grow: 1;
     font-size: 0.95em;
     line-height: 1.3;
     font-weight: bold;
 }
 
 /* ========================= Footer ========================= */
-footer {
-  background: #333;
-  color: white;
-  text-align: center;
-  padding: 1.5rem 0;
-  margin-top: 40px;
-  font-size: 0.9rem;
+.site-footer {
+    background-color: #333;
+    color: #fff;
+    padding: 40px 20px;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 50px;
+    clear: both;
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    display: flex; /* Use flexbox for the footer */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column; /* Stack logo, then sections wrapper */
+    align-items: center; /* Center items horizontally */
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 20px auto; /* Center the content container itself, add space below */
+}
+
+.footer-logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e60000;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.footer-sections-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Ensure the wrapper itself centers the groups */
+    width: 100%;
+    max-width: 800px; /* Adjusted max-width for better centering on larger screens */
+    gap: 30px;
+}
+
+.footer-links, .footer-social, .footer-contact, .footer-policy { /* Added new classes here */
+    margin: 0 15px;
+    text-align: center; /* Set to center by default for both mobile and desktop */
+    flex-grow: 1;
+    min-width: 150px; /* Ensure a minimum width for columns */
+}
+
+.footer-links h3, .footer-social h3, .footer-contact h3, .footer-policy h3 { /* Added new classes here */
+    color: #e60000;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.footer-links ul, .footer-contact ul, .footer-policy ul { /* Added new classes here */
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links ul li, .footer-contact ul li, .footer-policy ul li { /* Added new classes here */
+    margin-bottom: 8px;
+}
+    .footer-links ul li a, .footer-contact ul li a, .footer-policy ul li a { /* Added new classes here */
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #bbb;
+    }
+.footer-links a, .footer-social a, .footer-contact a, .footer-policy a { /* Added new classes here */
+    color: #bbb;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover, .footer-social a:hover, .footer-contact a:hover, .footer-policy a:hover { /* Added new classes here */
+    color: #fff;
+}
+.footer-contact ul li {
+    font-size: 1.1rem; /* Adjust font size for contact text */
+    color: #bbb;
+    font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+}
+
+
+/* Font Awesome Icon Styling */
+.social-icons {
+    display: flex;
+    justify-content: center; /* Ensures centering on all screen sizes */
+    gap: 15px;
+}
+
+.social-icons a {
+    color: #bbb;
+    font-size: 28px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.social-icons a:hover {
+    color: #e60000;
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    border-top: 1px solid #555;
+    padding-top: 20px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+    color: #aaa;
 }
 
 /* ========================= Article Page (article.html) ========================= */
@@ -388,31 +526,30 @@ footer {
 
 .article-page {
   display: flex;
-  flex-direction: column; /* Default: stack all direct children vertically for mobile/smaller screens */
-  gap: 30px; /* Consistent spacing between main sections */
+  flex-direction: column;
+  gap: 30px;
   max-width: 1300px;
   margin: 20px auto;
   padding: 20px;
-  padding-top: 100px; /* Space from fixed navbar */
+  padding-top: 100px;
 }
 
 /* NEW WRAPPER FOR MAIN ARTICLE CONTENT, INTERACTION, AND COMMENTS */
 .article-main-content-wrapper {
   display: flex;
-  flex-direction: column; /* Stack its children (article-detail, interaction, comments) vertically */
-  gap: 30px; /* Gap between article-detail, interaction, and comments sections */
-  width: 100%; /* Takes full width on smaller screens */
-  box-sizing: border-box; /* Include padding/border in width */
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .article-detail {
-  width: 100%; /* Ensure article detail takes full width of its parent wrapper */
-  min-width: unset; /* Remove min-width constraint as it's now full width */
+  width: 100%;
+  min-width: unset;
   background: #fff;
   padding: 30px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  /* 'order' properties are removed from individual sections as they are now handled by parent flex containers */
 }
 
 /* Styling for the Article Title (h1 inside articleContainer) */
@@ -454,7 +591,7 @@ footer {
 
 /* ========================= Article Interaction Section ========================= */
 .article-interaction {
-    margin-top: 0; /* Gap handles spacing */
+    margin-top: 0;
     padding: 20px;
     background-color: #fff;
     border-radius: 8px;
@@ -491,7 +628,7 @@ footer {
 
 /* Like Button */
 .action-button {
-    background-color: #e60000; /* K-Pop Red */
+    background-color: #e60000;
     color: white;
 }
 
@@ -501,7 +638,7 @@ footer {
 }
 
 .action-button.liked {
-    background-color: #5cb85c; /* Green when liked */
+    background-color: #5cb85c;
     cursor: default;
     color: white;
 }
@@ -539,7 +676,7 @@ footer {
 
 /* ========================= Comments Section ========================= */
 .comments-section {
-    margin-top: 0; /* Gap handles spacing */
+    margin-top: 0;
     padding: 20px;
     background-color: #fff;
     border-radius: 8px;
@@ -557,9 +694,9 @@ footer {
 
 /* Adjustments for comments list height to reduce scrolling */
 #commentsList {
-    max-height: 400px; /* Set a maximum height for the comments display area */
-    overflow-y: auto; /* Add a scrollbar if comments exceed the max-height */
-    padding-right: 10px; /* Add some padding to avoid scrollbar touching content */
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 .comment-item {
@@ -626,7 +763,6 @@ footer {
 .form-group textarea {
     resize: vertical;
     min-height: 100px;
-    /* max-height: 200px; Uncomment and adjust if you want to limit how tall the input box can grow */
 }
 
 .form-group input[type="text"]:focus,
@@ -658,30 +794,30 @@ footer {
 
 /* Trending section specific to article page */
 .article-page .trending {
-  width: 100%; /* Default: takes full width when stacked on smaller screens */
-  flex-shrink: 0; /* Prevent it from shrinking unnecessarily */
+  width: 100%;
+  flex-shrink: 0;
   background: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-top: 0; /* Reset any specific margin-top, gap handles spacing */
+  margin-top: 0;
 }
 
 /* --- DESKTOP LAYOUT: Trending on Right Side --- */
-@media (min-width: 993px) { /* Apply these styles for screens wider than 992px (laptops/desktops) */
+@media (min-width: 993px) {
     .article-page {
-        flex-direction: row; /* Change main container to a row layout */
-        align-items: flex-start; /* Align items to the top */
+        flex-direction: row;
+        align-items: flex-start;
     }
 
     .article-main-content-wrapper {
-        flex: 1; /* Main content wrapper takes up available space */
-        min-width: 0; /* Allow it to shrink if necessary */
+        flex: 1;
+        min-width: 0;
     }
 
     .article-page .trending {
-        width: 280px; /* Fixed width for trending sidebar on desktop */
-        margin-left: 30px; /* Add margin to the left of trending sidebar */
+        width: 350px; /* Increased width for trending sidebar */
+        margin-left: 30px;
     }
 }
 
@@ -727,102 +863,94 @@ footer {
 }
 /* ========================= Responsive Adjustments ========================= */
 @media (min-width: 1200px) {
-  /* This media query ensures that carousel-container takes the set max-width. */
   .carousel {
-    height: 360px; /* Adjust banner height for larger screens */
+    height: 360px;
   }
 }
 
 @media (max-width: 992px) {
-  /* Tablet and Mobile layout: Stacking order for main content */
   .main-content-grid {
-    grid-template-columns: 1fr; /* Single column layout */
+    grid-template-columns: 1fr;
     grid-template-areas:
-      "trending" /* Trending appears first */
-      "news";     /* Then News */
-    padding: 0 15px; /* Adjust horizontal padding */
+      "trending"
+      "news";
+    padding: 0 15px;
   }
 
   .news-section,
   .trending {
-    margin-bottom: 30px; /* Add space between stacked sections */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ensure consistent shadow */
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
-  /* Carousel - Remove horizontal padding for full width on tablets */
   .carousel-container {
     padding-left: 0;
     padding-right: 0;
-    border-radius: 0; /* Remove border-radius for edge-to-edge look */
-    box-shadow: none; /* Remove shadow for edge-to-edge look */
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .carousel {
-    padding-bottom: 50%; /* Adjust aspect ratio for tablets/smaller desktops */
+    padding-bottom: 50%;
   }
 
   .card-image {
-    padding-bottom: 65%; /* Slightly taller aspect ratio for tablets */
+    padding-bottom: 65%;
   }
 
-  /* Adjust carousel navigation buttons for edge-to-edge */
   .carousel-nav {
-    padding: 0 5px; /* Reduced padding for tablets, slightly off the edge */
+    padding: 0 5px;
   }
 }
 
 @media (max-width: 768px) {
-  /* Mobile specific adjustments */
   .carousel-container {
-    padding-top: 60px; /* Unified padding-top for mobile to clear fixed navbar */
-    margin: 0 auto; /* Connect banner to navbar on mobile */
-    padding-left: 0; /* Ensure banner takes full width on mobile */
-    padding-right: 0; /* Ensure banner takes full width on mobile */
-    border-radius: 0; /* Remove border-radius for edge-to-edge look */
-    box-shadow: none; /* Remove shadow for edge-to-edge look */
+    padding-top: 60px;
+    margin: 0 auto;
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .carousel {
-    padding-bottom: 65%; /* Increased height for phone banner */
+    padding-bottom: 65%;
   }
 
   .news-section h2,
   .trending h2 {
-    font-size: 1.7rem; /* Smaller headings */
+    font-size: 1.7rem;
   }
 
   .main-content-grid {
-    padding: 0 10px; /* Slightly less padding for very small screens for main content */
+    padding: 0 10px;
   }
 
   .news-cards {
     /* Two cards per row on phones */
-    grid-template-columns: repeat(2, 1fr); /* Force two columns */
-    gap: 15px; /* Reduce gap for smaller screens */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
 
   .card h3 {
-    font-size: 0.9rem; /* Smaller card titles */
+    font-size: 0.9rem;
   }
 
   .card-image {
-    padding-bottom: 56.25%; /* Standard 16:9 aspect ratio for phone images */
+    padding-bottom: 56.25%;
   }
 
-  /* Article Page specific trending adjustments for mobile */
   .article-page .trending {
-    width: auto; /* Allow trending to take full width on mobile when stacked */
-    flex-shrink: 1; /* Allow it to shrink if needed */
+    width: auto;
+    flex-shrink: 1;
   }
 
-  /* Adjust carousel navigation buttons for edge-to-edge */
   .carousel-nav {
-    padding: 0 15px; /* Reduced padding for phones, slightly off the edge */
+    padding: 0 15px;
   }
 }
 
 @media (max-width: 480px) {
-  /* Very small mobile screens */
   .navbar {
     padding: 0.8rem 1rem;
   }
@@ -832,14 +960,14 @@ footer {
   }
 
   .carousel-container {
-    padding-left: 0; /* Ensure banner takes full width on very small screens */
-    padding-right: 0; /* Ensure banner takes full width on very small screens */
-    border-radius: 0; /* Remove border-radius for edge-to-edge look */
-    box-shadow: none; /* Remove shadow for edge-to-edge look */
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .carousel {
-    padding-bottom: 55%; /* Increased height for very small phones */
+    padding-bottom: 55%;
   }
 
   .banner-btn {
@@ -848,41 +976,43 @@ footer {
   }
 
   .nav-button {
-    padding: 6px 8px; /* Even smaller padding for very small screens */
-    font-size: 1rem; /* Smaller font size for very small screens */
+    padding: 6px 8px;
+    font-size: 1rem;
   }
 
   .main-content-grid {
-    padding: 0 5px; /* Even less padding for very small screens for main content */
+    padding: 0 5px;
   }
 
   .news-cards {
     /* Ensure two cards per row on very small phones */
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px; /* Adjust gap for very small screens */
+    gap: 10px;
   }
 
   .card-image {
-    padding-bottom: 56.25%; /* Maintain 16:9 aspect ratio */
+    padding-bottom: 56.25%;
   }
 
-  /* Adjust carousel navigation buttons for edge-to-edge */
   .carousel-nav {
-    padding: 0 20px; /* Minimal padding for very small phones */
+    padding: 0 20px;
   }
 }
 
 /* ========================= Footer Styles ========================= */
 .site-footer {
-    background-color: #333; /* Dark background */
-    color: #fff; /* White text */
+    background-color: #333;
+    color: #fff;
     padding: 40px 20px;
     font-size: 0.9rem;
     text-align: center;
-    margin-top: 50px; /* Space above the footer */
-    clear: both; /* Ensures it clears any floated content above it */
-    width: 100%; /* Ensures it takes full width */
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow at the top */
+    margin-top: 50px;
+    clear: both;
+    width: 100%;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    display: flex; /* Use flexbox for the footer */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
 }
 
 .footer-content {
@@ -890,75 +1020,88 @@ footer {
     flex-direction: column; /* Stack logo, then sections wrapper */
     align-items: center; /* Center items horizontally */
     width: 100%;
-    max-width: 1200px; /* Limit content width */
+    max-width: 1200px;
     margin: 0 auto 20px auto; /* Center the content container itself, add space below */
 }
 
 .footer-logo {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #e60000; /* K-Pop red for logo */
-    margin-bottom: 20px; /* Space below logo */
-    text-align: center; /* Ensure logo text is centered */
-    width: 100%; /* Allow logo to take full available width for centering */
-}
-
-.footer-sections-wrapper { /* Styles for the wrapper of links and social */
-    display: flex;
-    flex-wrap: wrap; /* Allow sections to wrap on smaller screens */
-    justify-content: center; /* Center the quick links and social sections */
+    color: #e60000;
+    margin-bottom: 20px;
+    text-align: center;
     width: 100%;
-    max-width: 600px; /* Limit their combined width to keep them grouped */
-    gap: 30px; /* Space between the 'links' and 'social' columns on larger screens */
 }
 
-.footer-links, .footer-social {
-    margin: 0 15px; /* Adjust margin for spacing within the wrapper */
-    text-align: left; /* Align text within these sections */
-    flex-grow: 1; /* Allow sections to grow */
-    min-width: 150px; /* Minimum width for each section */
+.footer-sections-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 800px;
+    gap: 30px;
 }
 
-.footer-links h3, .footer-social h3 {
-    color: #e60000; /* K-Pop red for headings */
+.footer-links, .footer-social, .footer-contact, .footer-policy {
+    margin: 0 15px;
+    text-align: center;
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.footer-links h3, .footer-social h3, .footer-contact h3, .footer-policy h3 {
+    color: #e60000;
     margin-bottom: 15px;
     font-size: 1.1rem;
 }
 
-.footer-links ul {
+.footer-links ul, .footer-contact ul, .footer-policy ul {
     list-style: none;
     padding: 0;
 }
 
-.footer-links ul li {
+.footer-links ul li, .footer-contact ul li, .footer-policy ul li {
     margin-bottom: 8px;
 }
-
-.footer-links a, .footer-social a {
-    color: #bbb; /* Lighter grey for links */
+    .footer-links ul li a, .footer-contact ul li a, .footer-policy ul li a {
+        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #bbb;
+    }
+.footer-links a, .footer-social a, .footer-contact a, .footer-policy a {
+    color: #bbb;
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
-.footer-links a:hover, .footer-social a:hover {
-    color: #fff; /* White on hover */
+.footer-links a:hover, .footer-social a:hover, .footer-contact a:hover, .footer-policy a:hover {
+    color: #fff;
 }
+/* Specific style for direct text in contact list items to match link style */
+.footer-contact ul li {
+    font-size: 1.1rem; /* Adjust font size for contact text */
+    color: #bbb;
+    font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+    font-weight: normal; /* Ensure it's not bold unless specifically an anchor */
+}
+
 
 /* Font Awesome Icon Styling */
 .social-icons {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 15px;
 }
 
 .social-icons a {
-    color: #bbb; /* Icon color (initially grey) */
-    font-size: 28px; /* Size of the icon */
+    color: #bbb;
+    font-size: 28px;
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .social-icons a:hover {
-    color: #e60000; /* K-Pop red on hover */
+    color: #e60000;
     transform: translateY(-3px);
 }
 
@@ -973,58 +1116,83 @@ footer {
 }
 
 /* Media Queries for Responsiveness */
-@media (max-width: 768px) {
+@media (min-width: 769px) {
     .footer-sections-wrapper {
-        flex-direction: column; /* Stack links and social vertically on small screens */
-        align-items: center; /* Center them */
-        gap: 0; /* Remove gap when stacked */
-    }
-    .footer-links, .footer-social {
-        text-align: center; /* Center text within these sections on small screens */
-        margin: 10px 0; /* Adjust margin */
-    }
-    .footer-links ul {
-        display: flex;
-        flex-wrap: wrap;
+        flex-direction: row;
         justify-content: center;
-        gap: 15px; /* Space between inline list items */
+        /* Increase gap slightly or adjust min-width if 4 columns are too tight */
+        gap: 30px; /* Adjust as needed for 4 columns */
     }
-    .footer-links ul li {
-        margin-bottom: 0; /* Remove extra margin for inline items */
+    .footer-links, .footer-social, .footer-contact, .footer-policy {
+        text-align: center;
+        min-width: 120px; /* May need to reduce min-width for 4 columns on some desktops */
+        flex-basis: 20%; /* Give each column roughly 20% of the wrapper width */
+        flex-grow: 1;
+    }
+    .footer-links ul, .footer-contact ul, .footer-policy ul {
+        display: block;
+    }
+    .footer-links ul li, .footer-contact ul li, .footer-policy ul li {
+        margin-bottom: 10px;
     }
     .social-icons {
-        justify-content: center; /* Center social icons on small screens */
+        justify-content: center;
     }
 }
 
-/* For larger screens (override small screen stacking) */
-@media (min-width: 769px) {
+/* For mobile footer to display Quick Links horizontally and others stacked */
+@media (max-width: 768px) {
     .footer-sections-wrapper {
-        flex-direction: row; /* Make links and social appear in a row */
-        justify-content: center; /* Center the whole section */
-        gap: 40px; /* Space between links and social */
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
     }
-    .footer-links, .footer-social {
-        text-align: left; /* Keep text aligned left within their columns */
-        min-width: unset; /* Allow natural width */
+    .footer-links, .footer-social, .footer-contact, .footer-policy {
+        text-align: center;
+        margin: 10px 0; /* Add vertical margin to separate stacked sections */
+        width: 100%; /* Take full width when stacked */
+        min-width: unset; /* Remove min-width when stacked */
+    }
+    .footer-links ul { /* Quick links remain horizontal for mobile */
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+    .footer-links ul li {
+        margin-bottom: 0;
+    }
+    .social-icons {
+        justify-content: center;
+    }
+    /* Contact and Policy sections (ul content) should stack vertically on mobile */
+    .footer-contact ul, .footer-policy ul {
+        display: block; /* Ensure vertical stacking for these on mobile */
+        padding: 0;
+        margin-top: 0;
+    }
+    .footer-contact ul li, .footer-policy ul li {
+        margin-bottom: 8px; /* Maintain normal spacing for stacked items */
     }
 }
 
 /* --- Privacy Content Area --- */
 .privacy-content {
-    padding: 40px 20px; /* Default padding for desktop */
-    max-width: 900px; /* Max width for content */
-    margin: 20px auto; /* Center content horizontally */
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: 20px auto;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    /* Added padding-top to clear fixed navbar, similar to article-page */
+    padding-top: 100px; /* Adjust based on navbar height */
 }
 
 .privacy-content h2 {
     color: #e60000;
     margin-bottom: 20px;
     font-size: 2em;
-    text-align: center; /* Center the main heading */
+    text-align: center;
 }
 
 .privacy-content h3 {
@@ -1044,7 +1212,7 @@ footer {
 .privacy-content p {
     margin-bottom: 15px;
     line-height: 1.7;
-    text-align: justify; /* Justify text for better readability */
+    text-align: justify;
 }
 
 .privacy-content ul {
@@ -1079,7 +1247,7 @@ footer {
     align-items: center;
     position: relative;
     justify-content: center;
-    overflow: visible; /* allow buttons to stick out */
+    overflow: visible;
 }
 
 .horizontal-carousel-content {
@@ -1090,7 +1258,7 @@ footer {
 
 .carousel-page {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Desktop default: 3 columns */
+    grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
     gap: 15px;
     padding: 5px;
@@ -1206,7 +1374,7 @@ footer {
 
 /* ======== RESPONSIVE BREAKPOINTS ======== */
 @media (max-width: 992px) {
-    .carousel-page {
+  .articles-carousel-wrapper .carousel-page {
         grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
@@ -1222,7 +1390,7 @@ footer {
 }
 
 @media (max-width: 480px) {
-    .carousel-page {
+    .articles-carousel-wrapper .carousel-page {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
@@ -1257,5 +1425,322 @@ footer {
 
     .carousel-control.next-btn {
         right: -10px;
+    }
+}
+
+/* Pagination styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 30px; /* Default margin */
+    margin-bottom: 30px; /* Default margin */
+    flex-wrap: wrap; /* Allow wrapping by default */
+}
+
+.pagination-button {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background-color: #e0e0e0;
+    color: #e60000;
+    border-color: #e60000;
+}
+
+.pagination-button.active {
+    background-color: #e60000;
+    color: white;
+    border-color: #e60000;
+    font-weight: bold;
+    cursor: default;
+}
+
+.pagination-button:disabled {
+    background-color: #cccccc;
+    color: #888;
+    cursor: not-allowed;
+    border-color: #ccc;
+}
+
+/* Responsive adjustments for pagination */
+@media (max-width: 767px) { /* Apply these styles for screens up to 767px wide (mobile) */
+    .pagination-container {
+        margin-top: 15px; /* Reduced top margin on mobile */
+        margin-bottom: 20px; /* Slightly reduced bottom margin on mobile */
+        gap: 8px; /* Slightly increase gap for better touch targets */
+        flex-wrap: nowrap; /* Prevent wrapping on mobile */
+        overflow-x: auto; /* Enable horizontal scrolling if content overflows */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        padding-bottom: 5px; /* Add some padding for scrollbar if present */
+    }
+    .pagination-button {
+        padding: 8px 12px; /* Slightly larger padding for better touch targets */
+        font-size: 0.95rem; /* Slightly larger font size */
+        min-width: 45px; /* Increased min-width for buttons */
+        flex-shrink: 0; /* Prevent buttons from shrinking */
+    }
+    /* Ensure ellipsis buttons are compact */
+    .pagination-button:not(.page-number) { /* Targeting non-page number buttons (ellipses) */
+        padding: 8px 5px; /* More compact padding for ellipsis */
+        min-width: 25px; /* Smaller min-width for ellipsis */
+        font-size: 1.1rem; /* Adjust font size if needed for ellipsis dots */
+    }
+}
+
+@media (max-width: 480px) {
+    .pagination-container {
+        gap: 5px; /* Further reduce gap for very small screens */
+    }
+    .pagination-button {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        min-width: 35px;
+    }
+    .pagination-button:not(.page-number) { /* Ellipsis on very small screens */
+        padding: 6px 3px;
+        min-width: 20px;
+    }
+}
+
+/* Search Bar Styles */
+.search-bar-container {
+    display: flex;
+    gap: 10px;
+    margin: 20px auto;
+    padding: 0 20px;
+    max-width: 1300px;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.search-bar-container input[type="text"] {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-bar-container input[type="text"]:focus {
+    border-color: #e60000;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(230, 0, 0, 0.2), inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search-bar-container button {
+    padding: 12px 20px;
+    background-color: #e60000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.search-bar-container button:hover {
+    background-color: #cc0000;
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments for search bar */
+@media (max-width: 768px) {
+    .search-bar-container {
+        flex-direction: column;
+        padding: 0 15px;
+        gap: 10px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    .search-bar-container input[type="text"],
+    .search-bar-container button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-bar-container {
+        padding: 0 10px;
+    }
+    .search-bar-container input[type="text"],
+    .search-bar-container button {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Category Spotlight Specific Styles - Forced 2 columns on all devices */
+.category-spotlight-section {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.category-spotlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.category-spotlight-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #f9f9f9;
+}
+
+.category-spotlight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.category-spotlight-card .card-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+}
+
+.category-spotlight-card .card-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.category-spotlight-card:hover .card-image img {
+    transform: scale(1.05);
+}
+
+.category-spotlight-card .card-content {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.category-spotlight-card .card-content .card-category {
+    font-size: 1rem;
+    color: #e60000;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+/* Highlights card h3 for 3 lines with ellipsis on all devices */
+.category-spotlight-card .card-content h3 {
+    font-size: 1.3rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    line-height: 1.2em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+}
+
+.category-spotlight-card .card-content .card-date {
+    font-size: 0.8rem;
+    color: #777;
+    text-align: right;
+    margin-top: auto;
+}
+
+
+/* --- Mobile-specific adjustments for .news-cards (Latest Articles) & Category Spotlight --- */
+@media (max-width: 767px) {
+    .news-section {
+        padding: 15px;
+        margin: 0;
+        width: 100%;
+    }
+    .news-section h2 {
+        padding-top: 0;
+        text-align: left;
+        font-size: 1.7rem;
+    }
+    .news-cards {
+        gap: 8px;
+    }
+    .news-cards .card {
+        min-height: 180px;
+    }
+    .news-cards .card-image {
+        padding-bottom: 55%;
+    }
+    .news-cards .card-content {
+        padding: 8px;
+    }
+    .news-cards .card-content h3 {
+        font-size: 0.9rem;
+        line-height: 1.1em;
+    }
+    .news-cards .card-content .card-category {
+        display: none;
+    }
+    .news-cards .card-content .card-date {
+        font-size: 0.7rem;
+    }
+
+    /* Category Spotlight Mobile Adjustments */
+    .category-spotlight-section {
+        padding: 15px;
+        margin: 0 0 20px 0;
+        width: 100%;
+        max-width: unset;
+    }
+    .category-spotlight-section h2 {
+        text-align: left;
+    }
+    .category-spotlight-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .category-spotlight-card .card-image {
+        height: auto;
+        padding-bottom: 55%;
+    }
+    .category-spotlight-card .card-content {
+        padding: 8px;
+    }
+    .category-spotlight-card .card-content h3 {
+        font-size: 0.9rem;
+        line-height: 1.1em;
+    }
+    .category-spotlight-card .card-content .card-date {
+        font-size: 0.7rem;
+    }
+
+    .main-content-grid {
+        padding: 0;
+        gap: 20px;
     }
 }

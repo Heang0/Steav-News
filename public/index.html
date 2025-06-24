@@ -19,354 +19,13 @@
 
   <title>STEAV NEWS</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
- <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> <!-- Favicon added -->
-<style>
-    /* Add new styles for category spotlight and overall layout */
-    .category-spotlight-section {
-        background-color: #fff; /* White background */
-        padding: 20px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    .category-spotlight-section h2 {
-        text-align: center;
-        color: #e60000;
-        margin-bottom: 25px;
-        font-size: 1.8rem;
-    }
-
-    .category-spotlight-grid {
-        display: grid;
-        /* Adjusted minmax to make cards larger or fit fewer per row */
-        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); /* Increased min-width */
-        gap: 20px;
-        justify-content: center;
-    }
-
-    .category-spotlight-card {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        overflow: hidden;
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background-color: #f9f9f9;
-    }
-
-    .category-spotlight-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .category-spotlight-card .card-image {
-        width: 100%;
-        height: 220px; /* Increased height for larger cards */
-        overflow: hidden;
-    }
-
-    .category-spotlight-card .card-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Ensures image covers the area without distortion */
-        transition: transform 0.3s ease;
-    }
-
-    .category-spotlight-card:hover .card-image img {
-        transform: scale(1.05);
-    }
-
-    .category-spotlight-card .card-content {
-        padding: 15px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .category-spotlight-card .card-content .card-category {
-        font-size: 1rem; /* Further increased font size for better visibility */
-        color: #e60000;
-        font-weight: bold;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-    }
-
-    .category-spotlight-card .card-content h3 {
-        font-size: 1.3rem; /* Further increased font size */
-        margin-top: 0;
-        margin-bottom: 10px;
-        color: #333;
-        line-height: 1.2em; /* Adjusted line height for 3-4 lines */
-        height: 3.6em; /* 1.2em * 3 lines (for max 3 lines) - adjusted */
-        overflow: hidden; /* Hide overflowing text */
-        text-overflow: ellipsis; /* Add ellipsis */
-        display: -webkit-box; /* For multi-line ellipsis */
-        -webkit-line-clamp: 3; /* Changed to 3 lines */
-        -webkit-box-orient: vertical; /* Required for -webkit-box-orient */
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif; /* Applied Khmer font */
-    }
-
-    .category-spotlight-card .card-content .card-date {
-        font-size: 0.8rem; /* Slightly increased font size */
-        color: #777;
-        text-align: right;
-        margin-top: auto; /* Push date to bottom */
-    }
-
-    /* Styles for category label on general news cards */
-    .news-cards .card-content .card-category { /* This will be removed from latest articles cards */
-        font-size: 1rem; /* Increased font size */
-        color: #e60000; /* K-Pop Red */
-        font-weight: bold;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-    }
-
-
-    /* Adjust main content grid for better spacing */
-    .main-content-grid {
-        display: grid;
-        grid-template-columns: 1fr; /* Default to single column for small screens */
-        gap: 30px;
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 0 20px; /* Default horizontal padding for desktop */
-    }
-
-    @media (min-width: 768px) {
-        .main-content-grid {
-            grid-template-columns: 2.5fr 1fr; /* Two columns for larger screens */
-        }
-        /* Make trending section sticky */
-        .main-content-grid aside.trending {
-            position: sticky;
-            top: 20px; /* Adjust as needed */
-            align-self: start; /* Prevents stretching */
-            height: fit-content; /* Prevents overflow */
-        }
-    }
-
-    /* Ensure other card styles from styles.css remain compatible */
-    .news-cards {
-        display: grid;
-        /* Changed to explicitly 2 columns for laptop/desktop size */
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px; /* Keep consistent gap for non-mobile */
-    }
-
-    /* Adjustments for .news-cards (Latest Articles) */
-    .news-cards .card {
-        min-height: 280px; /* Increased min-height */
-    }
-
-    .news-cards .card-image {
-        padding-bottom: 65%; /* Slightly increased aspect ratio for more vertical space */
-    }
-
-    .news-cards .card-content h3 {
-        font-size: 1.1rem; /* Increased font size */
-        line-height: 1.2em; /* Ensure sufficient line height for 3 lines */
-        height: 3.6em; /* 1.2 * 3 lines */
-        overflow: hidden; /* Hide overflowing text */
-        text-overflow: ellipsis; /* Add ellipsis */
-        display: -webkit-box; /* For multi-line ellipsis */
-        -webkit-line-clamp: 3; /* Changed to 3 lines */
-        -webkit-box-orient: vertical; /* Required for -webkit-box-orient */
-        /* Ensure that news cards titles also use Battambang font if they aren't inheriting it */
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
-    }
-    .news-cards .card-content .card-date {
-        font-size: 0.8rem; /* Slightly increased font size */
-    }
-
-    /* Navbar font update */
-    .nav-links a {
-      font-size: 20px;
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
-        font-weight: bold; /* Explicitly set to bold */
-    }
-
-    /* Specific adjustments for Category Spotlight grid on smaller screens */
-    @media (max-width: 767px) { /* Adjust breakpoint if needed */
-        .category-spotlight-grid {
-            grid-template-columns: repeat(2, 1fr); /* Force 2 columns on mobile/small tablets */
-            gap: 10px; /* Reduced gap for tighter fit in category spotlight */
-        }
-
-        .category-spotlight-card { /* Unified card height for mobile spotlights */
-            min-height: 180px; /* Matched to news cards min-height for consistency */
-        }
-
-        .category-spotlight-card .card-image {
-            height: auto; /* Allow auto height */
-            padding-bottom: 55%; /* Match news card image aspect ratio */
-        }
-
-        .category-spotlight-card .card-content {
-            padding: 8px; /* Reduced padding for category spotlight content */
-        }
-
-        .category-spotlight-card .card-content .card-category {
-            font-size: 1rem; /* Increased for mobile category spotlights */
-            margin-bottom: 3px;
-        }
-
-        .category-spotlight-card .card-content h3 {
-            font-size: 0.9rem; /* Reduced to match news card title size */
-            line-height: 1.1em; /* Even tighter line height */
-            height: 3.3em; /* 1.1 * 3 lines for 3-line title */
-            -webkit-line-clamp: 3; /* Changed to 3 lines */
-            margin-bottom: 5px;
-        }
-        .category-spotlight-card .card-content .card-date {
-            font-size: 0.7rem; /* Even smaller date font */
-        }
-
-
-        /* --- Mobile-specific adjustments for .news-cards (Latest Articles) --- */
-        .news-section {
-            background-color: #fff; /* White background for mobile */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Shadow for mobile */
-            border-radius: 8px; /* Rounded corners for mobile */
-            padding: 15px; /* Adjusted padding for the section itself */
-            margin: 0; /* Remove all margins to allow full width stretch */
-            width: 100%; /* Ensure full width */
-        }
-        .news-section h2 {
-            padding-top: 0; /* Remove top padding within the section */
-            text-align: left; /* Align heading left for mobile */
-            font-size: 1.7rem; /* Smaller headings */
-        }
-        .news-cards {
-            gap: 8px; /* Further reduced gap between cards on mobile for a very tight look */
-        }
-
-        .news-cards .card {
-            min-height: 180px; /* Reduced min-height for shorter cards (unified) */
-        }
-
-        .news-cards .card-image {
-            padding-bottom: 55%; /* Unified image aspect ratio for mobile */
-        }
-
-        .news-cards .card-content {
-            padding: 8px; /* Further reduced padding for more compact content */
-        }
-
-        .news-cards .card-content h3 {
-            font-size: 0.9rem; /* Further reduced font size for mobile article titles */
-            line-height: 1.1em; /* Even tighter line height */
-            height: 3.3em; /* 1.1 * 3 lines for 3-line title */
-            -webkit-line-clamp: 3; /* Changed to 3 lines for mobile */
-            margin-bottom: 5px;
-        }
-
-        .news-cards .card-content .card-category { /* This will be hidden below */
-            display: none; /* Hide category name on mobile cards */
-        }
-        .news-cards .card-content .card-date {
-            font-size: 0.7rem; /* Adjusted font size for date on mobile cards */
-            text-align: left; /* Align date left for consistency with new layout */
-        }
-
-        /* Adjust main-content-grid padding for mobile to allow sections to have their own padding/margin */
-        .main-content-grid {
-            padding: 0; /* Remove padding from main-content-grid on mobile */
-            gap: 20px; /* Adjust gap between main grid items */
-        }
-
-        /* Category Spotlight section on mobile */
-        .category-spotlight-section {
-            padding: 15px; /* Consistent padding */
-            margin: 0 0 20px 0; /* Removed horizontal margin, only bottom margin */
-            width: 100%; /* Full width */
-        }
-        .category-spotlight-section h2 {
-            text-align: left; /* Align heading left for mobile */
-        }
-    }
-
-    /* Default (desktop) styles for .news-section */
-    .news-section {
-        background-color: #fff; /* White background */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Shadow */
-        border-radius: 8px; /* Rounded corners */
-        padding: 20px; /* Default padding for desktop */
-        margin-bottom: 20px; /* Default margin for desktop */
-    }
-
-    /* Footer Quick Links Font Update */
-    .footer-links ul li a { /* Target specific links within footer list */
-        font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
-        font-weight: bold; /* Apply bold font weight */
-        font-size: 1.1rem; /* Slightly increased font size for better readability on desktop/laptop */
-        color: #bbb; /* Ensure color is consistent */
-    }
-    .footer-links h3 { /* Ensure heading font size is good */
-        font-size: 1.2rem;
-    }
-    .footer-social h3 { /* Ensure heading font size is good */
-        font-size: 1.2rem;
-    }
-    .social-icons a { /* Adjust social icons font size too if needed */
-        font-size: 24px;
-    }
-
-    @media (min-width: 769px) { /* Adjustments for larger screens (laptop/desktop) */
-        .footer-sections-wrapper {
-            justify-content: space-around; /* Distribute items with space around */
-            align-items: flex-start; /* Align sections to their start (top) */
-            max-width: 800px; /* Limit overall width for better grouping */
-            margin: 0 auto; /* Center the wrapper */
-            padding: 0 20px; /* Add some padding if the wrapper is too wide */
-            flex-wrap: nowrap; /* Prevent wrapping on large screens */
-        }
-        .footer-links, .footer-social {
-            flex-basis: auto; /* Allow natural width */
-            min-width: unset; /* Remove min-width constraint */
-            flex-grow: 0; /* Don't grow unnecessarily */
-            text-align: left; /* Keep text aligned left */
-        }
-        .social-icons {
-            justify-content: flex-start; /* Align social icons to the left */
-        }
-        /* Further adjust spacing and font for footer links on laptops */
-        .footer-links ul {
-            display: block; /* Stack list items vertically again for desktop */
-        }
-        .footer-links ul li {
-            margin-bottom: 10px; /* Space out vertical list items */
-        }
-    }
-
-    /* Footer specific adjustments for alignment of copyright and line */
-    .footer-bottom {
-        border-top: 1px solid #555;
-        padding-top: 20px;
-        margin-top: 20px;
-        width: 100%; /* Ensure it spans full width of its parent */
-        max-width: 1200px; /* Match main content max-width */
-        margin-left: auto; /* Center horizontally */
-        margin-right: auto; /* Center horizontally */
-        text-align: center; /* Center the text content */
-        color: #aaa;
-    }
-
-    .site-footer {
-        text-align: center; /* Ensure overall footer content is centered initially */
-    }
-</style>
-</head>
+ <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> </head>
 <body>
-  <header class="navbar">
+ <header class="navbar">
     <div class="logo">STEAV<br />NEWS</div>
 
     <button class="hamburger" onclick="toggleMenu()">☰</button>
@@ -398,6 +57,11 @@
     </div>
   </section>
 
+  <div class="search-bar-container">
+      <input type="text" id="searchInput" placeholder="Search articles by title or content...">
+      <button id="searchButton">Search</button>
+  </div>
+
   <main class="main-content-grid">
     <div class="left-column">
         <section class="category-spotlight-section" id="categorySpotlightSection">
@@ -411,6 +75,8 @@
             <h2 id="articlesSectionTitle">Latest Articles</h2>
             <div class="news-cards">
                 </div>
+            <div class="pagination-container" id="paginationContainer">
+                </div>
         </section>
     </div>
     <aside class="trending">
@@ -422,7 +88,7 @@
 
   <footer id="mainFooter" class="site-footer">
     <div class="footer-content">
-      <div class="footer-logo">STEAV<br />NEWS</div>
+      <div class="footer-logo">STEAV<br>NEWS</div>
       <div class="footer-sections-wrapper">
         <div class="footer-links">
           <h3>Quick Links</h3>
@@ -434,18 +100,36 @@
             <li><a href="index.html?category=ពិភពលោក">ពិភពលោក</a></li>
           </ul>
         </div>
-      <div class="footer-social">
-  <h3>Follow Us</h3>
-  <div class="social-icons">
-    <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-    <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-    <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-  </div>
-</div>
-      </div> </div> <div class="footer-bottom">
+        <div class="footer-contact">
+          <h3>Contact Us</h3>
+          <ul>
+            <li><a href="contact-us.html">Contact Form</a></li>
+            <li>Email: info@steavnews.com</li>
+            <li>Phone: +855 96 392 5127</li>
+          </ul>
+        </div>
+        <div class="footer-policy">
+          <h3>Privacy Policy</h3>
+          <ul>
+            <li><a href="privacy-policy.html">Read Our Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="footer-social">
+          <h3>Follow Us</h3>
+          <div class="social-icons">
+            <a href="https://www.facebook.com/steavnews" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
       &copy; 2025 STEAV NEWS. All rights reserved.
     </div>
   </footer>
+
 
   <script>
     // Navbar toggle for mobile
@@ -489,9 +173,10 @@
         const categorySpotlightGrid = document.getElementById("categorySpotlightGrid");
         const urlParams = new URLSearchParams(window.location.search);
         const categoryFilter = urlParams.get('category');
+        const searchTerm = urlParams.get('search'); // Check for search term too
 
-        // Hide the section if a category filter is active
-        if (categoryFilter) {
+        // Hide the section if a category filter or search term is active
+        if (categoryFilter || searchTerm) {
             categorySpotlightSection.style.display = 'none';
             return; // Exit function early
         } else {
@@ -539,24 +224,104 @@
         }
     }
 
-    // --- Fetch and display LATEST articles (or filtered by category) ---
+    // --- Pagination and Search Variables ---
+    let currentPage = 1; // Current page number (1-indexed)
+    let previousPage = 1; // Track previous page for slide direction
+    const articlesPerPage = 6; // Changed from 4 to 6 for 3 columns * 2 rows
+    let totalArticles = 0; // Will be fetched from backend
+    let totalPages = 0;
+
+    const newsCardsContainer = document.querySelector(".news-cards");
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const articlesSectionTitle = document.getElementById("articlesSectionTitle");
+    const paginationContainer = document.getElementById('paginationContainer');
+    const newsSectionElement = document.querySelector('.news-section'); // Get the news section element for scrolling
+
+    // Function to update URL parameters and trigger article fetch
+    function updateUrlAndFetchArticles() {
+        const url = new URL(window.location.href);
+        const categoryFilter = url.searchParams.get('category');
+        const searchTerm = searchInput.value.trim();
+
+        // Store current page before updating for the next fetch
+        previousPage = currentPage;
+
+        // Clear existing params that might conflict
+        url.searchParams.delete('category');
+        url.searchParams.delete('search');
+        url.searchParams.delete('page');
+
+        if (categoryFilter) {
+            url.searchParams.set('category', categoryFilter);
+        }
+        if (searchTerm) {
+            url.searchParams.set('search', searchTerm);
+        }
+        url.searchParams.set('page', currentPage);
+
+        window.history.pushState({ page: currentPage, category: categoryFilter, search: searchTerm }, '', url);
+        fetchArticles();
+        fetchCategorySpotlights(); // Re-evaluate spotlight visibility based on new URL
+    }
+
+    // --- Fetch and display LATEST articles (or filtered by category/search) ---
     async function fetchArticles() {
-        const articlesSectionTitle = document.getElementById("articlesSectionTitle");
-        const newsCardsContainer = document.querySelector(".news-cards");
+        // Determine slide direction for animation
+        let initialTransform = 'translateX(0)';
+        if (currentPage > previousPage) {
+            initialTransform = 'translateX(30px)'; // For incoming content, appears from right
+        } else if (currentPage < previousPage) {
+            initialTransform = 'translateX(-30px)'; // For incoming content, appears from left
+        } else if (previousPage === 1) { // First load or refresh without page change
+            initialTransform = 'translateX(0)'; // No initial slide for first load
+        }
+        
+        // Step 1: Animate out current content
+        newsCardsContainer.classList.add('leaving'); // Add leaving class for fade-out/slide-out
+        newsCardsContainer.classList.remove('entering', 'active'); // Clean up previous entering state
+
+        // Wait for the 'leaving' animation to complete
+        await new Promise(resolve => setTimeout(resolve, 300)); // Match CSS transition duration
+
+        // Step 2: Show loading message and prepare for new content
+        newsCardsContainer.innerHTML = '<p style="text-align: center; width: 100%;">Loading articles...</p>';
+        newsCardsContainer.classList.remove('leaving'); // Remove leaving class
+        newsCardsContainer.style.opacity = '1'; // Ensure loading text is visible
+        newsCardsContainer.style.transform = 'translateX(0)'; // Reset transform for loading message
+
+        paginationContainer.innerHTML = ''; // Clear pagination while loading
+
         const urlParams = new URLSearchParams(window.location.search);
         const categoryFilter = urlParams.get('category');
+        const searchTerm = urlParams.get('search');
+        const pageFromUrl = parseInt(urlParams.get('page')) || 1;
+        currentPage = pageFromUrl; // Ensure currentPage is in sync with URL
 
-        let apiUrl = '/api/articles';
+        let apiUrl = `/api/articles?limit=${articlesPerPage}&offset=${(currentPage - 1) * articlesPerPage}`;
+        let countApiUrl = `/api/articles/count?`;
+
         if (categoryFilter) {
-            apiUrl += `?category=${encodeURIComponent(categoryFilter)}`;
-            articlesSectionTitle.textContent = `${categoryFilter}`; /* Removed " Articles" */
+            apiUrl += `&category=${encodeURIComponent(categoryFilter)}`;
+            countApiUrl += `category=${encodeURIComponent(categoryFilter)}`;
+            articlesSectionTitle.textContent = `${categoryFilter}`;
+        } else if (searchTerm) {
+            apiUrl += `&search=${encodeURIComponent(searchTerm)}`;
+            countApiUrl += `search=${encodeURIComponent(searchTerm)}`;
+            articlesSectionTitle.textContent = `Search Results for "${searchTerm}"`;
         } else {
             articlesSectionTitle.textContent = 'Latest Articles';
         }
 
-        newsCardsContainer.innerHTML = '<p style="text-align: center; width: 100%;">Loading articles...</p>';
-
         try {
+            // First, fetch the total count
+            const countRes = await fetch(countApiUrl);
+            if (!countRes.ok) throw new Error(`HTTP error! status: ${countRes.status} (Count API)`);
+            const countData = await countRes.json();
+            totalArticles = countData.count;
+            totalPages = Math.ceil(totalArticles / articlesPerPage);
+
+            // Then, fetch the articles for the current page
             const res = await fetch(apiUrl);
             if (!res.ok) {
                 const errorText = await res.text();
@@ -564,10 +329,10 @@
             }
             const articles = await res.json();
 
-            newsCardsContainer.innerHTML = "";
+            newsCardsContainer.innerHTML = ""; // Clear loading message
 
             if (articles.length === 0) {
-                newsCardsContainer.innerHTML = `<p style="text-align: center; width: 100%; color: #888;">No articles found ${categoryFilter ? `in the '${categoryFilter}' category` : ''}.</p>`;
+                newsCardsContainer.innerHTML = `<p style="text-align: center; width: 100%; color: #888;">No articles found ${categoryFilter ? `in the '${categoryFilter}' category` : ''}${searchTerm ? ` for "${searchTerm}"` : ''}.</p>`;
             } else {
                 articles.forEach(article => {
                     const card = document.createElement("a");
@@ -582,19 +347,157 @@
                             <img src="${article.image || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}" alt="${article.title}" loading="lazy"/>
                         </div>
                         <div class="card-content">
-                            <!-- Removed category name from Latest Articles cards -->
                             <p class="card-date">${articleDate}</p>
                             <h3>${article.title}</h3>
                         </div>`;
                     newsCardsContainer.appendChild(card);
                 });
             }
+            
+            // Step 3: Animate in new content
+            newsCardsContainer.classList.add('entering'); // Prepare for entering transition
+            newsCardsContainer.style.opacity = '0'; // Ensure it starts invisible for re-entry
+            newsCardsContainer.style.transform = initialTransform; // Apply initial slide position
+
+            // Force reflow to ensure the initial state is applied before the transition starts
+            void newsCardsContainer.offsetWidth; 
+
+            newsCardsContainer.classList.add('active'); // Trigger the transition to final state (opacity 1, transform 0)
+
+            // Clear transition classes after animation completes to avoid interference with other DOM changes
+            setTimeout(() => {
+                newsCardsContainer.classList.remove('leaving', 'entering', 'active');
+                newsCardsContainer.style.opacity = ''; // Remove inline styles
+                newsCardsContainer.style.transform = '';
+            }, 300); // Should match CSS transition duration
+
+            renderPagination(); // Render pagination controls after articles are loaded
+
+            // Scroll to the top of the news section after loading new articles
+            if (newsSectionElement) {
+                newsSectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
         } catch (err) {
-            console.error("Failed to fetch articles:", err);
+            console.error("Failed to fetch articles or total count:", err);
             newsCardsContainer.innerHTML = `<p style="color: red; text-align: center; width: 100%;">Failed to load articles: ${err.message}.</p>`;
+            newsCardsContainer.classList.remove('leaving', 'entering', 'active'); // Clear classes on error
+            newsCardsContainer.style.opacity = '';
+            newsCardsContainer.style.transform = '';
+            paginationContainer.innerHTML = ''; // Hide pagination on error
         }
     }
 
+    // --- Helper function to create pagination buttons or ellipses ---
+    const appendPaginationItem = (container, text, page, isActive = false, isDisabled = false) => {
+        const button = document.createElement('button');
+        button.classList.add('pagination-button');
+        button.textContent = text;
+        if (isActive) button.classList.add('active');
+        if (isDisabled) button.disabled = true;
+        if (page !== null) { // It's a page number
+            button.classList.add('page-number');
+            button.addEventListener('click', () => {
+                if (currentPage !== page) { // Only update if not already active page
+                    currentPage = page;
+                    updateUrlAndFetchArticles();
+                }
+            });
+        } else { // It's an ellipsis
+             button.style.background = 'none';
+             button.style.border = 'none';
+             button.style.cursor = 'default';
+             button.style.minWidth = 'unset'; // Allows ellipsis to be compact
+        }
+        container.appendChild(button);
+    };
+
+    // --- Render Smart Pagination Controls ---
+    function renderPagination() {
+        paginationContainer.innerHTML = ''; // Clear existing pagination buttons
+        
+        if (totalPages <= 1) { // No pagination needed for 1 or fewer pages
+            return;
+        }
+
+        // Check if it's a mobile viewport (assuming 767px is your mobile breakpoint)
+        const isMobileView = window.innerWidth <= 767; 
+
+        // Previous button
+        appendPaginationItem(paginationContainer, 'Previous', currentPage - 1, false, currentPage === 1);
+
+        if (isMobileView) {
+            // --- Ultra-Condensed Mobile Logic: 1, 2, ..., Current, ..., Last ---
+            let mobilePages = new Set();
+            
+            mobilePages.add(1); // Always show page 1
+            if (totalPages >= 2) mobilePages.add(2); // Always show page 2
+
+            mobilePages.add(currentPage); // Always show current page
+
+            if (totalPages > 2) { // Only add totalPages if more than 2 pages
+                mobilePages.add(totalPages);
+            }
+
+            let sortedMobilePages = Array.from(mobilePages)
+                                        .filter(p => p >= 1 && p <= totalPages) // Filter invalid pages
+                                        .sort((a, b) => a - b);
+
+            let lastPrintedPage = 0;
+            for (const page of sortedMobilePages) {
+                if (page > lastPrintedPage + 1) { // Check for a gap
+                    appendPaginationItem(paginationContainer, '...', null); // Add ellipsis
+                }
+                appendPaginationItem(paginationContainer, String(page), page, page === currentPage);
+                lastPrintedPage = page;
+            }
+
+        } else {
+            // --- Desktop/Laptop Robust Smart Pagination Logic (more numbers) ---
+            let pagesToDisplay = new Set();
+            
+            pagesToDisplay.add(1);
+            if (totalPages >= 2) pagesToDisplay.add(2);
+
+            // Add current page and up to 2 pages on each side for a small "window"
+            for (let i = currentPage - 2; i <= currentPage + 2; i++) { 
+                if (i > 0 && i <= totalPages) { // Ensure page is valid
+                    pagesToDisplay.add(i);
+                }
+            }
+            
+            if (totalPages > 0) pagesToDisplay.add(totalPages);
+
+            let sortedUniquePages = Array.from(pagesToDisplay)
+                                        .filter(page => page >= 1 && page <= totalPages)
+                                        .sort((a, b) => a - b);
+
+            let lastPrintedPage = 0;
+            for (const page of sortedUniquePages) {
+                if (page > lastPrintedPage + 1) {
+                    appendPaginationItem(paginationContainer, '...', null);
+                }
+                appendPaginationItem(paginationContainer, String(page), page, page === currentPage);
+                lastPrintedPage = page;
+            }
+        }
+
+        // Next button
+        appendPaginationItem(paginationContainer, 'Next', currentPage + 1, false, currentPage === totalPages);
+    }
+
+    // --- Event Listeners for Search ---
+    searchButton.addEventListener('click', () => {
+        previousPage = 1; // Reset previous page for search (no slide direction based on previous pagination state)
+        currentPage = 1; // Reset to page 1 on new search
+        updateUrlAndFetchArticles();
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchButton.click(); // Trigger search on Enter key
+        }
+    });
 
     // Fetch and display trending articles for the "Trending Now" section
     fetch('/api/trending')
@@ -620,16 +523,27 @@
 
     // Call initial fetch functions on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
+        // Initialize current page from URL or default to 1
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPage = parseInt(urlParams.get('page')) || 1;
+        previousPage = currentPage; // Set previousPage to currentPage on initial load
+        searchInput.value = urlParams.get('search') || '';
+
         fetchCategorySpotlights(); // Fetches the distinct category previews (now conditional)
         fetchArticles(); // Fetches the main list of articles (filtered or all)
     });
 
     // Listen for changes in the URL (e.g., when a category link is clicked, or browser back/forward)
     window.addEventListener('popstate', () => {
+        // On popstate, re-read URL params and re-fetch everything
+        const urlParams = new URLSearchParams(window.location.search);
+        const newPage = parseInt(urlParams.get('page')) || 1;
+        previousPage = currentPage; // Set previousPage before updating currentPage from URL
+        currentPage = newPage;
+        searchInput.value = urlParams.get('search') || '';
         fetchCategorySpotlights(); // Re-evaluate visibility of spotlights
-        fetchArticles(); // Re-fetch articles based on new URL (category filter)
+        fetchArticles(); // Re-fetch articles based on new URL (category filter or search term)
     });
-    // This script should be placed at the end of <body>.
   </script>
 </body>
 </html>

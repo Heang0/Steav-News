@@ -5,16 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact Us - STEAV NEWS</title>
     <link rel="stylesheet" href="styles.css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" href="/uploads/images/favicon.jpg" type="image/jpeg"> </head>
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Specific styles for the Contact page */
+        /* Page-specific styling for the Contact page */
+        /* Adjusted margin-top for main content to clear fixed navbar */
+        main {
+            padding-top: 100px; /* Space to clear the fixed navbar */
+            padding-bottom: 50px; /* Space before the footer */
+        }
+
         .contact-container {
             max-width: 800px;
-            margin: 4rem auto; /* Centered with vertical margin */
+            margin: 0 auto; /* Centered horizontally */
             padding: 2rem;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box; /* Include padding in width */
         }
 
         .contact-container h2 {
@@ -121,7 +132,7 @@
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .contact-container {
-                margin: 2rem auto;
+                margin: 0 auto; /* Remove auto margin from the rule itself, let main padding handle it */
                 padding: 1.5rem;
             }
             .contact-info div {
@@ -131,7 +142,7 @@
 
         @media (max-width: 480px) {
             .contact-container {
-                margin: 1rem auto;
+                margin: 0 auto; /* Remove auto margin */
                 padding: 1rem;
             }
             .contact-info {
@@ -156,10 +167,11 @@
         <button class="hamburger" onclick="toggleMenu()">☰</button>
 
         <nav class="nav-links" id="navLinks">
-            <a href="index.html">Home</a>
-            <!-- <a href="groups.html">Groups</a> -->
-            <a href="contact.html">Contact</a> 
-             <a href="privacy.html">Privacy Policy</a>
+            <a href="index.html">ទំព័រដើម</a>
+            <a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a>
+            <a href="index.html?category=សង្គម">សង្គម</a>
+            <a href="index.html?category=កីឡា">កីឡា</a>
+            <a href="index.html?category=ពិភពលោក">ពិភពលោក</a>
         </nav>
     </header>
 
@@ -203,6 +215,53 @@
             </form>
         </section>
     </main>
+
+    <!-- Consistent Footer from index.html -->
+    <footer id="mainFooter" class="site-footer">
+        <div class="footer-content">
+          <div class="footer-logo">STEAV<br>NEWS</div>
+          <div class="footer-sections-wrapper">
+            <div class="footer-links">
+              <h3>Quick Links</h3>
+              <ul>
+                <li><a href="index.html">ទំព័រដើម</a></li>
+                <li><a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a></li>
+                <li><a href="index.html?category=សង្គម">សង្គម</a></li>
+                <li><a href="index.html?category=កីឡា">កីឡា</a></li>
+                <li><a href="index.html?category=ពិភពលោក">ពិភពលោក</a></li>
+              </ul>
+            </div>
+            <!-- Contact Us Section (self-referencing or pointing to specific details) -->
+            <div class="footer-contact">
+              <h3>Contact Us</h3>
+              <ul>
+                <li><a href="contact-us.html">Contact Form</a></li>
+                <li>Email: info@steavnews.com</li>
+                <li>Phone: +855 96 392 5127</li>
+              </ul>
+            </div>
+            <!-- Privacy Policy Section -->
+            <div class="footer-policy">
+              <h3>Privacy Policy</h3>
+              <ul>
+                <li><a href="privacy-policy.html">Read Our Policy</a></li>
+                <li><a href="terms-of-service.html">Terms of Service</a></li> <!-- Link to Terms of Service -->
+              </ul>
+            </div>
+            <div class="footer-social">
+              <h3>Follow Us</h3>
+              <div class="social-icons">
+                <a href="https://www.facebook.com/steavnews" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          &copy; 2025 STEAV NEWS. All rights reserved.
+        </div>
+      </footer>
 
     <script>
         // Function to toggle the mobile navigation menu (reused from other pages)
