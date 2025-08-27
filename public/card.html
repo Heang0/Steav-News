@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STEAV NEWS - បង្កើត/មើលកាត</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html2canvas (download as image) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- QRCode -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+
+  <!-- Google Fonts (Khmer friendly) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand:#E60000;
+      --card-w: clamp(260px, 86vw, 380px);
+      --ratio: calc(550 / 350);
+    }
+    body{font-family:'Battambang','Noto Sans Khmer',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .card-shell{
+      width: var(--card-w);
+      aspect-ratio: 350/550;
+      perspective: 1200px;
+      position: relative;
+    }
+    .card-3d{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform .7s cubic-bezier(.2,.8,.2,1);
+      border-radius: 1rem;
+    }
+    .card-3d.flipped{ transform: rotateY(180deg); }
+    .card-face{
+      position: absolute;
+      inset: 0;
+      border-radius: 1rem;
+      overflow: hidden;
+      backface-visibility: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,.20);
+      display: flex;
+      flex-direction: column;
+    }
+    .card-front{
+      color: white;
+      background: radial-gradient(1150px 420px at -20% -10%, #ff6a6a 0%, transparent 60%) ,
+                  linear-gradient(160deg, var(--brand) 0%, #7a0000 100%);
+    }
+    .card-back{
+      transform: rotateY(180deg);
+      color: white;
+      background: radial-gradient(1150px 420px at 120% 110%, #ff6a6a 0%, transparent 60%) ,
+                  linear-gradient(200deg, #111 0%, #2a2a2a 100%);
+    }
+    .avatar{
+      width: clamp(96px, 22vw, 128px);
+      height: clamp(96px, 22vw, 128px);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 9999px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    }
+    .badge{
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.45);
+      backdrop-filter: blur(8px);
+    }
+    .qr-box{
+      width: clamp(120px, 34vw, 160px);
+      height: clamp(120px, 34vw, 160px);
+      background: white;
+      border-radius: .75rem;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    }
+    .hint{
+      font-size: .82rem;
+      opacity: .75;
+    }
+    .btn{
+      @apply px-4 py-2 md:px-5 md:py-2.5 rounded-xl font-semibold shadow-md transition active:scale-[.98];
+    }
+    .btn-primary{ @apply bg-blue-600 text-white hover:bg-blue-700; }
+    .btn-gray{ @apply bg-gray-600 text-white hover:bg-gray-700; }
+    .btn-red{ @apply bg-red-600 text-white hover:bg-red-700; }
+    .grid-form{
+      display:grid;
+      gap: .9rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 768px){
+      .grid-form{ grid-template-columns: 1fr 1fr; }
+    }
+    /* Utility when capturing: temporarily remove 3D to snapshot a face */
+    .no-3d{ transform: none !important; }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .info-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .info-label {
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+    .info-value {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <header class="w-full sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-[var(--brand)]"></div>
+        <h1 class="text-xl md:text-2xl font-extrabold tracking-wide text-[var(--brand)]">STEAV NEWS</h1>
+      </div>
+      <div class="text-xs md:text-sm text-gray-500">បង្កើតកាត • Preview • Download • Share</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 md:py-10">
+    <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+      <!-- Left: Form -->
+      <section id="formWrap" class="flex-1 bg-white rounded-2xl p-4 md:p-6 shadow">
+        <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-4">បំពេញព័ត៌មាន</h2>
+        <div class="grid-form">
+          <div class="flex flex-col gap-2">
+            <label for="nameInput" class="font-semibold text-gray-700">ឈ្មោះ</label>
+            <input id="nameInput" type="text" placeholder="បញ្ចូលឈ្មោះ"
+                   class="border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <label for="positionInput" class="font-semibold text-gray-700">មុខតំណែង</label>
+            <input id="positionInput" type="text" placeholder="បញ្ចូលមុខតំណែង"
+                   class="border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+          </div>
+          <div class="md:col-span-2 flex flex-col gap-2">
+            <label for="organizationInput" class="font-semibold text-gray-700">អង្គភាព</label>
+            <input id="organizationInput" type="text" placeholder="ឧ. STEAV NEWS - ផ្នែកព័ត៌មាន"
+                   class="border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+          </div>
+          <div class="md:col-span-2 flex flex-col gap-2">
+            <label for="imageUpload" class="font-semibold text-gray-700">រូបភាព (បុគ្គល)</label>
+            <input id="imageUpload" type="file" accept="image/*"
+                   class="border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)]" />
+            <div class="hint">ជ្រើសរើសរូបមុខ (square) ឬទំហំក្បាលច្បាស់ៗ ដើម្បីបង្ហាញលើកាត</div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button id="saveShareBtn" class="btn btn-red">
+            <span id="saveBtnText">រក្សាទុកទិន្នន័យ</span>
+            <span id="saveBtnSpinner" class="loading-spinner hidden"></span>
+          </button>
+          <button id="resetBtn" class="btn btn-gray">សម្អាតទម្រង់</button>
+        </div>
+        <p id="shareNote" class="mt-2 text-sm text-gray-600"></p>
+      </section>
+
+      <!-- Right: Card + Actions -->
+      <section class="flex-1 flex flex-col items-center">
+        <div class="card-shell">
+          <div id="card3d" class="card-3d">
+            <!-- FRONT -->
+            <article id="cardFront" class="card-face card-front">
+              <div class="flex items-center justify-between px-5 pt-4">
+                <div class="uppercase tracking-widest font-extrabold">STEAV NEWS</div>
+                <div class="badge text-xs px-3 py-1 rounded-full">PRESS</div>
+              </div>
+              <div class="flex-1 flex flex-col items-center justify-center gap-3 px-5 pb-5 text-center">
+                <div class="avatar">
+                  <img id="profileImage" src="https://placehold.co/256x256/png" alt="profile" class="w-full h-full object-cover"/>
+                </div>
+                
+                <div class="info-line">
+                  <span class="info-label">ឈ្មោះ</span>
+                  <span id="cardName" class="info-value">ឈ្មោះ</span>
+                </div>
+                
+                <div class="info-line">
+                  <span class="info-label">មុខតំណែង</span>
+                  <span id="cardPosition" class="info-value">មុខតំណែង</span>
+                </div>
+                
+                <div class="info-line">
+                  <span class="info-label">អង្គភាព</span>
+                  <span id="cardOrganization" class="info-value">អង្គភាព</span>
+                </div>
+                
+                <p id="cardId" class="text-xs badge px-3 py-1 rounded-full mt-3">ID: -----</p>
+              </div>
+            </article>
+
+            <!-- BACK -->
+            <article id="cardBack" class="card-face card-back">
+              <div class="flex items-center justify-between px-5 pt-4">
+                <div class="uppercase tracking-widest font-extrabold">INFO</div>
+                <div class="badge text-xs px-3 py-1 rounded-full">SCAN</div>
+              </div>
+              <div class="flex-1 flex flex-col items-center justify-center gap-3 px-5 pb-5 text-center">
+                <div class="qr-box"><div id="qrcode"></div></div>
+                <div class="info-line">
+                  <span class="info-label">ឈ្មោះ</span>
+                  <span id="backName" class="info-value"></span>
+                </div>
+                <div class="info-line">
+                  <span class="info-label">មុខតំណែង</span>
+                  <span id="backPosition" class="info-value"></span>
+                </div>
+                <div class="info-line">
+                  <span class="info-label">អង្គភាព</span>
+                  <span id="backOrg" class="info-value"></span>
+                </div>
+                <p id="backDate" class="text-xs md:text-sm opacity-75 mt-2"></p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <button id="flipBtn" class="btn btn-gray">ត្រឡប់កាត</button>
+          <button id="dlCurrentBtn" class="btn btn-primary">ទាញយក (ជ្រុងកំពុងបង្ហាញ)</button>
+          <button id="dlBothBtn" class="btn btn-primary">ទាញយក (មុខ & ក្រោយ)</button>
+        </div>
+        <p class="hint mt-2 text-center px-3">បើកកាមេរ៉ាថត QR ដើម្បីបើក Link ដែលផ្ទុកទិន្នន័យកាត</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 bg-black text-white text-sm px-4 py-2 rounded-lg shadow hidden"></div>
+
+<script>
+// =============== Helpers ===============
+const $ = (sel)=>document.querySelector(sel);
+const showToast = (msg)=>{
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.remove("hidden");
+  setTimeout(()=> t.classList.add("hidden"), 2200);
+};
+
+// =============== Elements ===============
+const nameInput = $("#nameInput");
+const positionInput = $("#positionInput");
+const organizationInput = $("#organizationInput");
+const imageUpload = $("#imageUpload");
+
+const card3d = $("#card3d");
+const profileImage = $("#profileImage");
+const cardName = $("#cardName");
+const cardPosition = $("#cardPosition");
+const cardOrganization = $("#cardOrganization");
+const cardId = $("#cardId");
+
+const backName = $("#backName");
+const backPosition = $("#backPosition");
+const backOrg = $("#backOrg");
+const backDate = $("#backDate");
+const qrcodeEl = $("#qrcode");
+
+const flipBtn = $("#flipBtn");
+const dlCurrentBtn = $("#dlCurrentBtn");
+const dlBothBtn = $("#dlBothBtn");
+const saveShareBtn = $("#saveShareBtn");
+const saveBtnText = $("#saveBtnText");
+const saveBtnSpinner = $("#saveBtnSpinner");
+const resetBtn = $("#resetBtn");
+const shareNote = $("#shareNote");
+const formWrap = $("#formWrap");
+
+let currentId = null;
+let createdAt = new Date();
+let cardDataId = null; // MongoDB document ID
+let cardCounter = 1; // Counter for ID generation
+
+// =============== Live Preview Bindings ===============
+function updatePreview(){
+  const name = nameInput.value?.trim() || "ឈ្មោះ";
+  const pos  = positionInput.value?.trim() || "មុខតំណែង";
+  const org  = organizationInput.value?.trim() || "អង្គភាព";
+
+  cardName.textContent = name;
+  cardPosition.textContent = pos;
+  cardOrganization.textContent = org;
+  cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
+
+  backName.textContent = nameInput.value?.trim() || "";
+  backPosition.textContent = positionInput.value?.trim() || "";
+  backOrg.textContent = organizationInput.value?.trim() || "";
+  backDate.textContent = "កាលបរិច្ឆេទបង្កើត: " + formatDateTime(createdAt);
+
+  makeQR();
+}
+[nameInput, positionInput, organizationInput].forEach(el => el.addEventListener('input', updatePreview));
+
+// Image upload preview
+imageUpload.addEventListener('change', (e)=>{
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (x)=>{
+    profileImage.src = x.target.result;
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+});
+
+// =============== Save to Database ===============
+async function saveCardData() {
+  // Validate required fields
+  if(!nameInput.value || !positionInput.value || !organizationInput.value){
+    showToast("សូមបំពេញព័ត៌មានទាំងអស់");
+    return null;
+  }
+  if(profileImage.src.includes("placehold.co")){
+    showToast("សូមបញ្ចូលរូបមុខជាមុន");
+    return null;
+  }
+
+  // Show loading state
+  saveBtnText.textContent = "កំពុងរក្សាទុក...";
+  saveBtnSpinner.classList.remove("hidden");
+  
+  try {
+    const formData = new FormData();
+    formData.append('name', nameInput.value);
+    formData.append('position', positionInput.value);
+    formData.append('organization', organizationInput.value);
+    
+    // Add image file if selected
+    if (imageUpload.files[0]) {
+      formData.append('image', imageUpload.files[0]);
+    } else if (!profileImage.src.includes("placehold.co")) {
+      // If image is already uploaded (from URL), send the URL
+      formData.append('imageUrl', profileImage.src);
+    }
+    
+    // Add ID if updating existing card
+    if (cardDataId) {
+      formData.append('id', cardDataId);
+    }
+
+    const response = await fetch('/api/cards', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Server returned ${response.status}`);
+    }
+
+    const result = await response.json();
+    cardDataId = result.id;
+    currentId = cardCounter++;
+    
+    showToast("បានរក្សាទុកទិន្នន័យកាតដោយជោគជ័យ");
+    updateShareUrl();
+    
+    return result;
+  } catch (error) {
+    console.error("Error saving card:", error);
+    showToast(`កំហុសក្នុងការរក្សាទុក: ${error.message}`);
+    return null;
+  } finally {
+    saveBtnText.textContent = "រក្សាទុកទិន្នន័យ";
+    saveBtnSpinner.classList.add("hidden");
+  }
+}
+
+// =============== QR Code Generation ===============
+function makeQR(){
+  if (!cardDataId) return;
+  
+  qrcodeEl.innerHTML = "";
+  const url = `${window.location.origin}/card.html?id=${cardDataId}`;
+  new QRCode(qrcodeEl, { 
+    text: url, 
+    width: 148, 
+    height: 148, 
+    colorDark:"#000", 
+    colorLight:"#fff", 
+    correctLevel: QRCode.CorrectLevel.H 
+  });
+}
+
+function updateShareUrl() {
+  if (!cardDataId) {
+    shareNote.innerHTML = "";
+    return;
+  }
+  
+  const url = `${window.location.origin}/card.html?id=${cardDataId}`;
+  shareNote.innerHTML = `Link របស់អ្នក៖ <a class="text-blue-600 underline break-all" href="${url}" target="_blank">${url}</a>`;
+}
+
+// =============== Flip ===============
+flipBtn.addEventListener('click', ()=>{
+  card3d.classList.toggle('flipped');
+});
+
+// =============== Download (current side / both) ===============
+async function captureElementToPng(el){
+  // Temporarily disable 3D to snapshot the face cleanly
+  const hadFlipped = card3d.classList.contains('flipped');
+  card3d.classList.add('no-3d');
+  const dataUrl = await html2canvas(el, { scale: 2, useCORS: true }).then(c=>c.toDataURL('image/png'));
+  card3d.classList.remove('no-3d');
+  return dataUrl;
+}
+
+function triggerDownload(dataUrl, filename){
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+dlCurrentBtn.addEventListener('click', async ()=>{
+  const side = card3d.classList.contains('flipped') ? document.getElementById('cardBack') : document.getElementById('cardFront');
+  const png = await captureElementToPng(side);
+  triggerDownload(png, `steav-card-${card3d.classList.contains('flipped')?'back':'front'}-${Date.now()}.png`);
+  showToast("បានទាញយករួចរាល់");
+});
+
+dlBothBtn.addEventListener('click', async ()=>{
+  const front = await captureElementToPng(document.getElementById('cardFront'));
+  triggerDownload(front, `steav-card-front-${Date.now()}.png`);
+  const back = await captureElementToPng(document.getElementById('cardBack'));
+  triggerDownload(back, `steav-card-back-${Date.now()}.png`);
+  showToast("បានទាញយកមុខ & ក្រោយ");
+});
+
+// =============== Save/Share (URL) ===============
+saveShareBtn.addEventListener('click', async ()=>{
+  const result = await saveCardData();
+  if (result) {
+    makeQR(); // refresh QR code with new URL
+  }
+});
+
+// =============== Reset form ===============
+resetBtn.addEventListener('click', ()=>{
+  nameInput.value = "";
+  positionInput.value = "";
+  organizationInput.value = "";
+  imageUpload.value = "";
+  profileImage.src = "https://placehold.co/256x256/png";
+  currentId = null;
+  cardDataId = null;
+  createdAt = new Date();
+  updatePreview();
+  shareNote.textContent = "";
+  history.replaceState(null, "", location.pathname);
+  showToast("បានសម្អាតទម្រង់");
+});
+
+// =============== Load Card Data from URL Parameter ===============
+async function loadCardData(id) {
+  try {
+    const response = await fetch(`/api/cards/${id}`);
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+    
+    const cardData = await response.json();
+    
+    // Populate form fields
+    nameInput.value = cardData.name || "";
+    positionInput.value = cardData.position || "";
+    organizationInput.value = cardData.organization || "";
+    
+    if (cardData.image) {
+      profileImage.src = cardData.image;
+    }
+    
+    cardDataId = cardData._id;
+    currentId = cardData.shortId;
+    createdAt = new Date(cardData.createdAt);
+    
+    updatePreview();
+    updateShareUrl();
+    makeQR();
+    
+    // View mode: make form slightly transparent
+    formWrap.classList.add("opacity-90");
+    shareNote.innerHTML = `<span class="text-gray-700">កំពុងមើលកាតពី Link</span>`;
+    
+  } catch (error) {
+    console.error("Error loading card:", error);
+    showToast("មិនអាចផ្ទុកទិន្នន័យកាតបាន");
+  }
+}
+
+// =============== Utility Functions ===============
+function formatDateTime(d){
+  try{
+    return new Intl.DateTimeFormat('km-KH', { dateStyle:'long', timeStyle:'short' }).format(d);
+  }catch(e){ return d.toLocaleString(); }
+}
+
+// =============== Initialize Page ===============
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if we have an ID parameter to load existing card
+  const urlParams = new URLSearchParams(window.location.search);
+  const cardId = urlParams.get('id');
+  
+  if (cardId) {
+    loadCardData(cardId);
+  } else {
+    updatePreview();
+  }
+});
+</script>
+</body>
+</html>
