@@ -19,6 +19,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
 
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
     :root{
       --brand:#E60000;
@@ -265,6 +268,81 @@
         display: block;
       }
     }
+
+    /* ==================== NEW BUTTON STYLES ==================== */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+      margin: 20px 0;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      min-width: 140px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-red {
+      background: #e53e3e;
+      color: white;
+    }
+
+    .btn-red:hover {
+      background: #c53030;
+    }
+
+    .btn-gray {
+      background: #718096;
+      color: white;
+    }
+
+    .btn-gray:hover {
+      background: #4a5568;
+    }
+
+    .btn-primary {
+      background: #3182ce;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2b6cb0;
+    }
+
+    @media (max-width: 640px) {
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -309,16 +387,25 @@
             <input id="imageUpload" type="file" accept="image/*"
                    class="border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand)]" />
             <div class="hint">ជ្រើសរើសរូបមុខ (square) ឬទំហំក្បាលច្បាស់ៗ ដើម្បីបង្ហាញលើកាត</div>
+            <div class="hint">សូមចុចប៊ូតុងរក្សាទុកទិន្នន័យ ដើម្បីបង្កើតកាត</div>
+
           </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-3">
+        <!-- Form Buttons -->
+        <div class="button-group">
           <button id="saveShareBtn" class="btn btn-red">
+            <i class="fas fa-save"></i>
             <span id="saveBtnText">រក្សាទុកទិន្នន័យ</span>
             <span id="saveBtnSpinner" class="loading-spinner hidden"></span>
+
           </button>
-          <button id="resetBtn" class="btn btn-gray">សម្អាតទម្រង់</button>
+          <button id="resetBtn" class="btn btn-gray">
+            <i class="fas fa-broom"></i>
+            សម្អាតទម្រង់
+          </button>
         </div>
+        
         <p id="shareNote" class="mt-2 text-sm text-gray-600"></p>
       </section>
 
@@ -382,11 +469,22 @@
           </div>
         </div>
 
-        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
-          <button id="flipBtn" class="btn btn-gray">ត្រឡប់កាត</button>
-          <button id="dlCurrentBtn" class="btn btn-primary">ទាញយក (ជ្រុងកំពុងបង្ហាញ)</button>
-          <button id="dlBothBtn" class="btn btn-primary">ទាញយក (មុខ & ក្រោយ)</button>
+        <!-- Card Action Buttons -->
+        <div class="button-group">
+          <button id="flipBtn" class="btn btn-gray">
+            <i class="fas fa-sync-alt"></i>
+            ត្រឡប់កាត
+          </button>
+          <button id="dlCurrentBtn" class="btn btn-primary">
+            <i class="fas fa-download"></i>
+            ទាញយក (ជ្រុងកំពុងបង្ហាញ)
+          </button>
+          <button id="dlBothBtn" class="btn btn-primary">
+            <i class="fas fa-file-download"></i>
+            ទាញយក (មុខ & ក្រោយ)
+          </button>
         </div>
+        
         <p class="hint mt-2 text-center px-3">បើកកាមេរ៉ាថត QR ដើម្បីបើក Link ដែលផ្ទុកទិន្នន័យកាត</p>
       </section>
     </div>
@@ -540,6 +638,11 @@ async function saveCardData() {
     
     return result;
   } catch (error) {
+    console.error("Error saving card:", error);
+    showToast("មិនអាចរក្សាទុកទិន្នន័យបាន");
+    return null; // Return null on error
+  } finally {
+    // This block will always run, whether there's an error or not.
     saveBtnText.textContent = "រក្សាទុកទិន្នន័យ";
     saveBtnSpinner.classList.add("hidden");
   }
@@ -746,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const overlay = document.getElementById("loadingOverlay");
       setTimeout(() => {
         overlay.style.display = "none";
-      }, 2000); // 2 seconds
+      }, 2500); // 2 seconds
     });
   </script>
 

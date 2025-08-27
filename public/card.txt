@@ -450,9 +450,20 @@ function updatePreview(){
   cardName.textContent = name;
   cardPosition.textContent = pos;
   cardOrganization.textContent = org;
-  cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
+  
+  // Generate a temporary ID if none exists
+  if (!currentId) {
+    // Create a simple hash based on name and timestamp for a temporary ID
+    const tempId = Math.abs(name.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0)).toString().substring(0, 4).padStart(4, '0');
+    cardId.textContent = "ID: " + tempId;
+  } else {
+    cardId.textContent = "ID: " + currentId.toString().padStart(4, '0');
+  }
 
-  // Update back side - THIS IS WHAT WAS MISSING
+  // Update back side
   backName.textContent = name;
   backPosition.textContent = pos;
   backOrg.textContent = org;
@@ -509,7 +520,7 @@ async function saveCardData() {
       formData.append('id', cardDataId);
     }
 
-    const response = await fetch('/api/cards', {
+   const response = await fetch('/api/cards', {
       method: 'POST',
       body: formData
     });
@@ -521,17 +532,14 @@ async function saveCardData() {
 
     const result = await response.json();
     cardDataId = result.id;
-    currentId = cardCounter++;
+    currentId = result.shortId; // Use the shortId from server response
     
     showToast("បានរក្សាទុកទិន្នន័យកាតដោយជោគជ័យ");
+    updatePreview(); // Refresh the preview with the new ID
     updateShareUrl();
     
     return result;
   } catch (error) {
-    console.error("Error saving card:", error);
-    showToast(`កំហុសក្នុងការរក្សាទុក: ${error.message}`);
-    return null;
-  } finally {
     saveBtnText.textContent = "រក្សាទុកទិន្នន័យ";
     saveBtnSpinner.classList.add("hidden");
   }
@@ -676,7 +684,7 @@ async function loadCardData(id) {
     }
     
     cardDataId = cardData._id;
-    currentId = cardData.shortId;
+    currentId = cardData.shortId; // Make sure this is set correctly
     createdAt = new Date(cardData.createdAt);
     
     updatePreview();
@@ -729,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="text-center">
       <h1 class="text-3xl font-extrabold mb-6 tracking-widest">STEAV NEWS</h1>
       <div class="loading-spinner mx-auto mb-4" style="width:40px;height:40px;border-width:4px;border-top-color:white"></div>
-      <p class="text-xl font-bold">សូមរង់ចាំបន្តិច ប្រូសុីស!</p>
+      <p class="text-xl font-bold">សូមរង់ចាំបន្តិច ប្រូស៊ីស!</p>
     </div>
   </div>
 
