@@ -180,7 +180,8 @@ async function startServer() {
             const { username, password } = req.body;
             if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
                 const sessionId = process.env.ADMIN_SESSION_ID;
-                res.status(200).json({ message: 'Login successful', sessionId: sessionId });
+                res.status(200).json({
+                    _id: id || result.insertedId, message: 'Login successful', sessionId: sessionId });
             } else {
                 res.status(401).json({ message: 'Invalid credentials' });
             }
@@ -258,7 +259,8 @@ async function startServer() {
                 // --- END DEBUGGING LOGS ---
 
                 const count = await newsCollection.countDocuments(query);
-                res.status(200).json({ count });
+                res.status(200).json({
+                    _id: id || result.insertedId, count });
             } catch (err) {
                 console.error("❌ Error fetching article count:", err);
                 res.status(500).json({ error: "Failed to fetch article count" });
@@ -391,7 +393,8 @@ async function startServer() {
                     return res.status(400).json({ message: "No image file provided." });
                 }
                 const imageUrl = req.file.path;
-                res.status(200).json({ url: imageUrl, message: "Image uploaded successfully! This URL is permanent." });
+                res.status(200).json({
+                    _id: id || result.insertedId, url: imageUrl, message: "Image uploaded successfully! This URL is permanent." });
             }
             catch (error) {
                 console.error("❌ Error processing inline image upload:", error);
@@ -415,7 +418,8 @@ async function startServer() {
                 }
                 // Fetch the updated article to return the new like count
                 const updatedArticle = await newsCollection.findOne({ _id: new ObjectId(articleId) }, { projection: { likes: 1 } });
-                res.status(200).json({ message: "Article liked!", likes: updatedArticle.likes || 0 });
+                res.status(200).json({
+                    _id: id || result.insertedId, message: "Article liked!", likes: updatedArticle.likes || 0 });
             }
             catch (err) {
                 console.error("❌ Error liking article:", err);
@@ -524,7 +528,8 @@ async function startServer() {
                 if (result.matchedCount === 0) {
                     return res.status(404).json({ error: "Article not found." });
                 }
-                res.status(200).json({ message: "Article updated successfully!" });
+                res.status(200).json({
+                    _id: id || result.insertedId, message: "Article updated successfully!" });
             }
             catch (err) {
                 console.error("❌ Error updating article:", err);
@@ -545,7 +550,8 @@ async function startServer() {
                 if (result.deletedCount === 0) {
                     return res.status(404).json({ error: "Article not found." });
                 }
-                res.status(200).json({ message: "Article deleted successfully!." });
+                res.status(200).json({
+                    _id: id || result.insertedId, message: "Article deleted successfully!." });
             }
             catch (err) {
                 console.error("❌ Error deleting article:", err);
@@ -630,7 +636,8 @@ async function startServer() {
                     result = await cardsCollection.insertOne(newCard);
                 }
                 
-                res.status(200).json({ 
+                res.status(200).json({
+                    _id: id || result.insertedId, 
                     message: "Card saved successfully!", 
                     id: id || result.insertedId,
                     shortId
