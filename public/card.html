@@ -446,14 +446,16 @@ function updatePreview(){
   const pos  = positionInput.value?.trim() || "";
   const org  = organizationInput.value?.trim() || "";
 
+  // Update front side
   cardName.textContent = name;
   cardPosition.textContent = pos;
   cardOrganization.textContent = org;
   cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
 
-  backName.textContent = "";
-  backPosition.textContent = "";
-  backOrg.textContent = "";
+  // Update back side - THIS IS WHAT WAS MISSING
+  backName.textContent = name;
+  backPosition.textContent = pos;
+  backOrg.textContent = org;
   backDate.textContent = "កាលបរិច្ឆេទបង្កើត: " + formatDateTime(createdAt);
 
   makeQR();
