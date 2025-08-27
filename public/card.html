@@ -26,6 +26,16 @@
       --ratio: calc(550 / 350);
     }
     body{font-family:'Battambang','Noto Sans Khmer',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+
+    /* Add this to your existing CSS */
+    .justify-center {
+      justify-content: center !important;
+    }
+
+    main > .flex {
+      transition: all 0.3s ease;
+    }
+
     .card-shell{
       width: var(--card-w);
       aspect-ratio: 350/550;
@@ -63,18 +73,18 @@
                   linear-gradient(200deg, #111 0%, #2a2a2a 100%);
     }
     .avatar{
-      width: clamp(96px, 22vw, 128px);
-      height: clamp(96px, 22vw, 128px);
+      width: clamp(120px, 28vw, 160px); /* Increased size */
+      height: clamp(120px, 28vw, 160px); /* Increased size */
       border: 4px solid rgba(255,255,255,.85);
       border-radius: 9999px;
       overflow: hidden;
       box-shadow: 0 6px 20px rgba(0,0,0,.35);
     }
-    .badge{
+    /* .badge{
       background: rgba(255,255,255,.18);
       border: 1px solid rgba(255,255,255,.45);
       backdrop-filter: blur(8px);
-    }
+    } */
     .qr-box{
       width: clamp(120px, 34vw, 160px);
       height: clamp(120px, 34vw, 160px);
@@ -118,35 +128,162 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    /* Updated info line styles for centered single row format */
     .info-line {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: center; /* Center horizontally */
       align-items: center;
       text-align: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+      width: 100%;
+      padding: 0 1rem;
     }
     .info-label {
       font-weight: bold;
-      font-size: 0.9rem;
-      margin-bottom: 0.2rem;
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+      min-width: auto; /* Allow width to adjust to content */
     }
     .info-value {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
+      flex: 0 1 auto; /* Don't grow, but can shrink if needed */
+    }
+    /* Card header with larger text */
+    .card-header {
+      font-size: 1.4rem; /* Increased header text size */
+    }
+    /* Card ID with larger text */
+    .card-id {
+      font-size: 1rem; /* Increased ID text size */
+      text-align: center;
+      width: 100%;
+    }
+    /* Center the date text on back */
+    #backDate {
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ========================= Navbar Styles ========================= */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #e60000; /* K-Pop red */
+      color: white;
+      padding: 1rem 2rem;
+      position: fixed; /* Make it fixed to the viewport */
+      top: 0; /* Stick it to the top */
+      left: 0; /* Extend to the left edge */
+      right: 0; /* Extend to the right edge */
+      z-index: 1000; /* Ensure it stays on top of other content */
+      box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-weight: 700; /* Bolder font */
+      font-size: 1.5rem;
+      line-height: 1.2;
+      margin-left: 10px;
+      font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem; /* Increased space between nav items */
+    }
+
+    .nav-links a {
+      color: white; /* Nav links remain white */
+      font-weight: 500;
+      padding: 0.5rem 0;
+      position: relative; /* For underline animation */
+      font-family: 'Battambang', 'Khmer OS Siemreap', 'Noto Sans Khmer', Arial, sans-serif; /* Explicitly set font */
+      font-weight: bold; /* Explicitly set bold */
+      font-size: 20px; /* Explicitly set desired font size */
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      background: white;
+      left: 0;
+      bottom: 0;
+      transition: width 0.3s ease-in-out;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%; /* White underline on hover */
+    }
+
+    .hamburger {
+      display: none; /* Hidden by default on larger screens */
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    /* Mobile Navbar */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none; /* Hide by default on small screens */
+        flex-direction: column;
+        position: absolute;
+        top: 60px; /* Below navbar */
+        left: 0;
+        width: 100%;
+        background: #e60000;
+        padding: 1rem 2rem;
+        box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.1);
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      }
+
+      .nav-links.open {
+        display: flex; /* Show when open */
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .nav-links a {
+        padding: 0.4rem 1rem;
+        text-align: center;
+        color: white;
+        font-size: 1.1rem;
+      }
+
+      .hamburger {
+        display: block;
+      }
     }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
-  <header class="w-full sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-[var(--brand)]"></div>
-        <h1 class="text-xl md:text-2xl font-extrabold tracking-wide text-[var(--brand)]">STEAV NEWS</h1>
-      </div>
-      <div class="text-xs md:text-sm text-gray-500">បង្កើតកាត • Preview • Download • Share</div>
-    </div>
+  <!-- Updated Navbar -->
+  <header class="navbar">
+    <div class="logo">STEAV<br />NEWS</div>
+
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">ទំព័រដើម</a>
+      <a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a>
+      <a href="index.html?category=សង្គម">សង្គម</a>
+      <a href="index.html?category=កីឡា">កីឡា</a>
+      <a href="index.html?category=ពិភពលោក">ពិភពលោក</a>
+    </nav>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-6 md:py-10">
+  <main class="max-w-6xl mx-auto px-4 py-6 md:py-10" style="margin-top: 80px;">
     <div class="flex flex-col md:flex-row gap-6 md:gap-8">
       <!-- Left: Form -->
       <section id="formWrap" class="flex-1 bg-white rounded-2xl p-4 md:p-6 shadow">
@@ -192,54 +329,54 @@
             <!-- FRONT -->
             <article id="cardFront" class="card-face card-front">
               <div class="flex items-center justify-between px-5 pt-4">
-                <div class="uppercase tracking-widest font-extrabold">STEAV NEWS</div>
+                <div class="card-header uppercase tracking-widest font-extrabold">STEAV NEWS</div>
                 <div class="badge text-xs px-3 py-1 rounded-full">PRESS</div>
               </div>
-              <div class="flex-1 flex flex-col items-center justify-center gap-3 px-5 pb-5 text-center">
+              <div class="flex-1 flex flex-col items-center justify-center gap-4 px-5 pb-5 text-center">
                 <div class="avatar">
                   <img id="profileImage" src="https://placehold.co/256x256/png" alt="profile" class="w-full h-full object-cover"/>
                 </div>
                 
                 <div class="info-line">
-                  <span class="info-label">ឈ្មោះ</span>
-                  <span id="cardName" class="info-value">ឈ្មោះ</span>
+                  <span class="info-label">ឈ្មោះ :</span>
+                  <span id="cardName" class="info-value"></span>
                 </div>
                 
                 <div class="info-line">
-                  <span class="info-label">មុខតំណែង</span>
-                  <span id="cardPosition" class="info-value">មុខតំណែង</span>
+                  <span class="info-label">មុខតំណែង :</span>
+                  <span id="cardPosition" class="info-value"></span>
                 </div>
                 
                 <div class="info-line">
-                  <span class="info-label">អង្គភាព</span>
-                  <span id="cardOrganization" class="info-value">អង្គភាព</span>
+                  <span class="info-label">អង្គភាព :</span>
+                  <span id="cardOrganization" class="info-value"></span>
                 </div>
                 
-                <p id="cardId" class="text-xs badge px-3 py-1 rounded-full mt-3">ID: -----</p>
+                <p id="cardId" class="card-id text-lg font-bold">ID: -----</p>
               </div>
             </article>
 
             <!-- BACK -->
             <article id="cardBack" class="card-face card-back">
               <div class="flex items-center justify-between px-5 pt-4">
-                <div class="uppercase tracking-widest font-extrabold">INFO</div>
+                <div class="card-header uppercase tracking-widest font-extrabold">INFO</div>
                 <div class="badge text-xs px-3 py-1 rounded-full">SCAN</div>
               </div>
-              <div class="flex-1 flex flex-col items-center justify-center gap-3 px-5 pb-5 text-center">
+              <div class="flex-1 flex flex-col items-center justify-center gap-4 px-5 pb-5 text-center">
                 <div class="qr-box"><div id="qrcode"></div></div>
                 <div class="info-line">
-                  <span class="info-label">ឈ្មោះ</span>
+                  <span class="info-label">ឈ្មោះ :</span>
                   <span id="backName" class="info-value"></span>
                 </div>
                 <div class="info-line">
-                  <span class="info-label">មុខតំណែង</span>
+                  <span class="info-label">មុខតំណែង :</span>
                   <span id="backPosition" class="info-value"></span>
                 </div>
                 <div class="info-line">
-                  <span class="info-label">អង្គភាព</span>
+                  <span class="info-label">អង្គភាព :</span>
                   <span id="backOrg" class="info-value"></span>
                 </div>
-                <p id="backDate" class="text-xs md:text-sm opacity-75 mt-2"></p>
+                <p id="backDate" class="text-sm md:text-base opacity-75 mt-2"></p>
               </div>
             </article>
           </div>
@@ -301,21 +438,22 @@ let currentId = null;
 let createdAt = new Date();
 let cardDataId = null; // MongoDB document ID
 let cardCounter = 1; // Counter for ID generation
+let isViewMode = false; // Track if we're in view-only mode
 
 // =============== Live Preview Bindings ===============
 function updatePreview(){
-  const name = nameInput.value?.trim() || "ឈ្មោះ";
-  const pos  = positionInput.value?.trim() || "មុខតំណែង";
-  const org  = organizationInput.value?.trim() || "អង្គភាព";
+  const name = nameInput.value?.trim() || "";
+  const pos  = positionInput.value?.trim() || "";
+  const org  = organizationInput.value?.trim() || "";
 
   cardName.textContent = name;
   cardPosition.textContent = pos;
   cardOrganization.textContent = org;
   cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
 
-  backName.textContent = nameInput.value?.trim() || "";
-  backPosition.textContent = positionInput.value?.trim() || "";
-  backOrg.textContent = organizationInput.value?.trim() || "";
+  backName.textContent = "";
+  backPosition.textContent = "";
+  backOrg.textContent = "";
   backDate.textContent = "កាលបរិច្ឆេទបង្កើត: " + formatDateTime(createdAt);
 
   makeQR();
@@ -433,7 +571,23 @@ async function captureElementToPng(el){
   // Temporarily disable 3D to snapshot the face cleanly
   const hadFlipped = card3d.classList.contains('flipped');
   card3d.classList.add('no-3d');
-  const dataUrl = await html2canvas(el, { scale: 2, useCORS: true }).then(c=>c.toDataURL('image/png'));
+  
+  // Fix for orientation issues - ensure proper rendering before capture
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  const dataUrl = await html2canvas(el, { 
+    scale: 2, 
+    useCORS: true,
+    logging: false,
+    onclone: function(clonedDoc) {
+      // Ensure the cloned element has the correct styles
+      const clonedEl = clonedDoc.getElementById(el.id);
+      if (clonedEl) {
+        clonedEl.style.transform = 'none';
+      }
+    }
+  }).then(c=>c.toDataURL('image/png'));
+  
   card3d.classList.remove('no-3d');
   return dataUrl;
 }
@@ -486,6 +640,20 @@ resetBtn.addEventListener('click', ()=>{
   showToast("បានសម្អាតទម្រង់");
 });
 
+// =============== Toggle View Mode ===============
+function toggleViewMode(isView) {
+  isViewMode = isView;
+  if (isView) {
+    formWrap.style.display = "none";
+    document.querySelector("main").classList.add("justify-center");
+    document.querySelector("header .text-xs").textContent = "មើលកាត • Download • Share";
+  } else {
+    formWrap.style.display = "block";
+    document.querySelector("main").classList.remove("justify-center");
+    document.querySelector("header .text-xs").textContent = "បង្កើតកាត • Preview • Download • Share";
+  }
+}
+
 // =============== Load Card Data from URL Parameter ===============
 async function loadCardData(id) {
   try {
@@ -513,8 +681,9 @@ async function loadCardData(id) {
     updateShareUrl();
     makeQR();
     
-    // View mode: make form slightly transparent
-    formWrap.classList.add("opacity-90");
+    // Enable view mode - hide the form
+    toggleViewMode(true);
+    
     shareNote.innerHTML = `<span class="text-gray-700">កំពុងមើលកាតពី Link</span>`;
     
   } catch (error) {
@@ -530,6 +699,12 @@ function formatDateTime(d){
   }catch(e){ return d.toLocaleString(); }
 }
 
+// =============== Navbar Toggle Function ===============
+function toggleMenu() {
+  const nav = document.getElementById("navLinks");
+  nav.classList.toggle("open");
+}
+
 // =============== Initialize Page ===============
 document.addEventListener('DOMContentLoaded', () => {
   // Check if we have an ID parameter to load existing card
@@ -543,5 +718,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+  
+  <!-- Loading Screen -->
+  <div id="loadingOverlay" class="fixed inset-0 flex flex-col items-center justify-center z-[2000]"
+       style="background: radial-gradient(1150px 420px at -20% -10%, #ff6a6a 0%, transparent 60%) , 
+              linear-gradient(160deg, #E60000 0%, #7a0000 100%); color:white;">
+    <div class="text-center">
+      <h1 class="text-3xl font-extrabold mb-6 tracking-widest">STEAV NEWS</h1>
+      <div class="loading-spinner mx-auto mb-4" style="width:40px;height:40px;border-width:4px;border-top-color:white"></div>
+      <p class="text-xl font-bold">សូមរង់ចាំបន្តិច ប្រូសុីស!</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("loadingOverlay");
+      setTimeout(() => {
+        overlay.style.display = "none";
+      }, 2000); // 2 seconds
+    });
+  </script>
+
+
 </body>
 </html>

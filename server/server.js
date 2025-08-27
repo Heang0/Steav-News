@@ -28,15 +28,15 @@ app.use(express.urlencoded({ extended: true }));
 // MongoDB connection details
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
-const dbName = "kpop_news";
+const dbName = process.env.DB_NAME || "kpop_news";
 const collectionName = "articles";
 
 // Define accepted categories
 const CATEGORIES = ["កម្សាន្ត", "សង្គម", "កីឡា", "ពិភពលោក"];
 
 // --- Authentication Middleware ---
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin6232';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 const isAuthenticated = (req, res, next) => {
     const sessionId = req.headers['x-session-id'];
@@ -179,7 +179,7 @@ async function startServer() {
         app.post('/api/login', (req, res) => {
             const { username, password } = req.body;
             if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-                const sessionId = process.env.ADMIN_SESSION_ID || 'static-admin-session-id';
+                const sessionId = process.env.ADMIN_SESSION_ID;
                 res.status(200).json({ message: 'Login successful', sessionId: sessionId });
             } else {
                 res.status(401).json({ message: 'Invalid credentials' });
