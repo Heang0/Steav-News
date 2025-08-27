@@ -630,11 +630,12 @@ async function startServer() {
                     result = await cardsCollection.insertOne(newCard);
                 }
                 
-                res.status(200).json({ 
+                                // In the POST /api/cards route
+                    res.status(200).json({ 
                     message: "Card saved successfully!", 
                     id: id || result.insertedId,
-                    shortId
-                });
+                    shortId: shortId // Make sure this is included
+                    });
             } catch (err) {
                 console.error("❌ Error saving card:", err);
                 res.status(500).json({ error: "Failed to save card" });

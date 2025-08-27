@@ -450,9 +450,11 @@ function updatePreview(){
   cardName.textContent = name;
   cardPosition.textContent = pos;
   cardOrganization.textContent = org;
+  
+  // Always show ID if it exists, otherwise show placeholder
   cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
 
-  // Update back side - THIS IS WHAT WAS MISSING
+  // Update back side
   backName.textContent = name;
   backPosition.textContent = pos;
   backOrg.textContent = org;
@@ -676,7 +678,7 @@ async function loadCardData(id) {
     }
     
     cardDataId = cardData._id;
-    currentId = cardData.shortId;
+    currentId = cardData.shortId; // Make sure this is set correctly
     createdAt = new Date(cardData.createdAt);
     
     updatePreview();
