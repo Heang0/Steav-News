@@ -451,8 +451,17 @@ function updatePreview(){
   cardPosition.textContent = pos;
   cardOrganization.textContent = org;
   
-  // Always show ID if it exists, otherwise show placeholder
-  cardId.textContent = "ID: " + (currentId ? currentId.toString().padStart(4, '0') : "-----");
+  // Generate a temporary ID if none exists
+  if (!currentId) {
+    // Create a simple hash based on name and timestamp for a temporary ID
+    const tempId = Math.abs(name.split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0)).toString().substring(0, 4).padStart(4, '0');
+    cardId.textContent = "ID: " + tempId;
+  } else {
+    cardId.textContent = "ID: " + currentId.toString().padStart(4, '0');
+  }
 
   // Update back side
   backName.textContent = name;
@@ -511,7 +520,7 @@ async function saveCardData() {
       formData.append('id', cardDataId);
     }
 
-    const response = await fetch('/api/cards', {
+   const response = await fetch('/api/cards', {
       method: 'POST',
       body: formData
     });
@@ -523,17 +532,14 @@ async function saveCardData() {
 
     const result = await response.json();
     cardDataId = result.id;
-    currentId = cardCounter++;
+    currentId = result.shortId; // Use the shortId from server response
     
     showToast("បានរក្សាទុកទិន្នន័យកាតដោយជោគជ័យ");
+    updatePreview(); // Refresh the preview with the new ID
     updateShareUrl();
     
     return result;
   } catch (error) {
-    console.error("Error saving card:", error);
-    showToast(`កំហុសក្នុងការរក្សាទុក: ${error.message}`);
-    return null;
-  } finally {
     saveBtnText.textContent = "រក្សាទុកទិន្នន័យ";
     saveBtnSpinner.classList.add("hidden");
   }
