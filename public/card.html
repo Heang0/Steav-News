@@ -6,7 +6,17 @@
   <title>STEAV NEWS - បង្កើត/មើលកាត</title>
 
   <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+
+// Helper to build short, clean article links
+function buildArticleLink(article) {
+  if (article && article.shortId) return `/a/${article.shortId}`;
+  if (article && article._id) return `/article/${article._id}`;
+  return '#';
+}
+
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
 
   <!-- html2canvas (download as image) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -353,11 +363,11 @@
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 
     <nav class="nav-links" id="navLinks">
-      <a href="index.html">ទំព័រដើម</a>
-      <a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a>
-      <a href="index.html?category=សង្គម">សង្គម</a>
-      <a href="index.html?category=កីឡា">កីឡា</a>
-      <a href="index.html?category=ពិភពលោក">ពិភពលោក</a>
+      <a href="/index">ទំព័រដើម</a>
+      <a href="/index?category=កម្សាន្ត">កម្សាន្ត</a>
+      <a href="/index?category=សង្គម">សង្គម</a>
+      <a href="/index?category=កីឡា">កីឡា</a>
+      <a href="/index?category=ពិភពលោក">ពិភពលោក</a>
     </nav>
   </header>
 

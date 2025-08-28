@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6134759270953813"
+  <script>
+
+// Helper to build short, clean article links
+function buildArticleLink(article) {
+  if (article && article.shortId) return `/a/${article.shortId}`;
+  if (article && article._id) return `/article/${article._id}`;
+  return '#';
+}
+
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6134759270953813"
      crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,11 +41,11 @@
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 
     <nav class="nav-links" id="navLinks">
-      <a href="index.html">ទំព័រដើម</a>
-      <a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a>
-      <a href="index.html?category=សង្គម">សង្គម</a>
-      <a href="index.html?category=កីឡា">កីឡា</a>
-      <a href="index.html?category=ពិភពលោក">ពិភពលោក</a>
+      <a href="/index">ទំព័រដើម</a>
+      <a href="/index?category=កម្សាន្ត">កម្សាន្ត</a>
+      <a href="/index?category=សង្គម">សង្គម</a>
+      <a href="/index?category=កីឡា">កីឡា</a>
+      <a href="/index?category=ពិភពលោក">ពិភពលោក</a>
     </nav>
   </header>
 
@@ -93,17 +103,17 @@
         <div class="footer-links">
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="index.html">ទំព័រដើម</a></li>
-            <li><a href="index.html?category=កម្សាន្ត">កម្សាន្ត</a></li>
-            <li><a href="index.html?category=សង្គម">សង្គម</a></li>
-            <li><a href="index.html?category=កីឡា">កីឡា</a></li>
-            <li><a href="index.html?category=ពិភពលោក">ពិភពលោក</a></li>
+            <li><a href="/index">ទំព័រដើម</a></li>
+            <li><a href="/index?category=កម្សាន្ត">កម្សាន្ត</a></li>
+            <li><a href="/index?category=សង្គម">សង្គម</a></li>
+            <li><a href="/index?category=កីឡា">កីឡា</a></li>
+            <li><a href="/index?category=ពិភពលោក">ពិភពលោក</a></li>
           </ul>
         </div>
         <div class="footer-contact">
           <h3>Contact Us</h3>
           <ul>
-            <li><a href="contact-us.html">Contact Form</a></li>
+            <li><a href="/contact-us">Contact Form</a></li>
             <li>Email: info@steavnews.com</li>
             <li>Phone: +855 96 392 5127</li>
           </ul>
@@ -111,7 +121,7 @@
         <div class="footer-policy">
           <h3>Privacy Policy</h3>
           <ul>
-            <li><a href="privacy-policy.html">Read Our Policy</a></li>
+            <li><a href="/privacy-policy">Read Our Policy</a></li>
             <li><a href="#">Terms of Service</a></li>
           </ul>
         </div>
@@ -512,7 +522,7 @@
         trendingArticles.forEach(item => {
           const li = document.createElement('li');
           li.innerHTML = `
-            <a href="article.html?id=${item._id}">
+            <a href="/article?id=${item._id}">
               <img src="${item.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image'}" alt="${item.title}" loading="lazy"/>
               <span>${item.title}</span>
             </a>`;

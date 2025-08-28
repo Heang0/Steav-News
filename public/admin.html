@@ -338,6 +338,16 @@
   </div>
 
   <script>
+
+// Helper to build short, clean article links
+function buildArticleLink(article) {
+  if (article && article.shortId) return `/a/${article.shortId}`;
+  if (article && article._id) return `/article/${article._id}`;
+  return '#';
+}
+
+</script>
+<script>
     // Rich Text Editor functions
     function formatDoc(command, value = null) {
       document.execCommand(command, false, value);

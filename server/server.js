@@ -10,6 +10,23 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
+
+// ✅ Set permissive CSP header to allow inline scripts and assets
+app.use((req, res, next) => {
+  res.removeHeader("Content-Security-Policy");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;"
+  );
+  next();
+});
+
+
+// Remove CSP header globally
+app.use((req, res, next) => {
+  res.removeHeader("Content-Security-Policy");
+  next();
+});
 const port = process.env.PORT || 5000;
 
 // --- CONFIGURE CLOUDINARY ---
@@ -120,6 +137,8 @@ async function startServer() {
         });
 
         // --- IMPORTANT: Dynamic Route for Article Detail Pages (for Open Graph Meta Tags) ---
+// === URL Rewrite Rules ===
+
         // This route MUST be placed BEFORE `app.use(express.static(...))` for '/article.html'
         app.get("/article.html", async (req, res) => {
             try {
@@ -171,7 +190,27 @@ async function startServer() {
             }
         });
 
-        // --- Serve static files from the 'public' directory ---
+        
+        // Redirect legacy .html links to clean short URLs
+        app.get("/article.html", async (req, res) => {
+            try {
+                const articleId = req.query.id;
+                if (!articleId) return res.redirect("/");
+
+                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
+                if (!article) return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+
+                if (article.shortId) {
+                    return res.redirect(301, `/a/${article.shortId}`);
+                }
+                return res.redirect(301, `/article/${article._id}`);
+            } catch (err) {
+                console.error("Redirect error:", err);
+                res.redirect("/");
+            }
+        });
+
+// --- Serve static files from the 'public' directory ---
         // This line MUST come AFTER any dynamic routes that might serve files from 'public'
         app.use(express.static(path.join(__dirname, "../public")));
 
@@ -352,6 +391,10 @@ async function startServer() {
                     return res.status(400).json({ error: "Invalid category provided." });
                 }
 
+                // Generate sequential shortId for pretty URLs
+                const articleCount = await newsCollection.countDocuments();
+                const shortId = (articleCount + 1).toString().padStart(4, '0');
+
                 const newArticle = {
                     title,
                     image: imagePath, // This will now store the Cloudinary URL
@@ -362,7 +405,8 @@ async function startServer() {
                     likes: 0, // Initialize likes
                     views: 0, // NEW: Initialize views
                     category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
-                    comments: [] // Initialize comments array
+                    comments: [], // Initialize comments array
+                    shortId
                 };
 
                 const result = await newsCollection.insertOne(newArticle);
@@ -683,7 +727,104 @@ async function startServer() {
         });
 
         // Start the Express server
-        app.listen(port, () => {
+        
+// --- CLEAN URL HANDLERS (no .html in URLs) ---
+// Root stays index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
+
+// Article route supports both /article and /article.html so OG meta works
+app.get(["/article", "/article.html"], async (req, res, next) => {
+  try {
+    const articleId = req.query.id;
+    if (!articleId) return res.status(400).send("Article ID is required.");
+    if (!ObjectId.isValid(articleId)) return res.status(400).send("Invalid Article ID format.");
+
+    const db = client.db(process.env.DB_NAME || "kpop_news");
+    const newsCollection = db.collection("articles");
+
+    const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
+    if (!article) return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+
+    let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8');
+
+    const protocol = req.protocol || 'http';
+    const host = req.headers.host;
+    const absoluteImageUrl = article.image ? article.image : `${protocol}://${host}/images/default_og_image.jpg`;
+    const absoluteArticleUrl = `${protocol}://${host}/article?id=${article._id}`;
+    const plainTextContent = article.content ? article.content.replace(/<[^>]*>/g, '').substring(0, 150) + "..." : "Read the latest K-POP news here.";
+
+    htmlContent = htmlContent.replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${article.title || "K-POP News Article"}">`);
+    htmlContent = htmlContent.replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${plainTextContent}">`);
+    htmlContent = htmlContent.replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${absoluteImageUrl}">`);
+    htmlContent = htmlContent.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${absoluteArticleUrl}">`);
+
+    htmlContent = htmlContent.replace(/<meta name="twitter:card" content="[^"]*">/, `<meta name="twitter:card" content="summary_large_image">`);
+    htmlContent = htmlContent.replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`);
+    htmlContent = htmlContent.replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${plainTextContent}">`);
+    htmlContent = htmlContent.replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${absoluteImageUrl}">`);
+
+    return res.status(200).send(htmlContent);
+  } catch (err) {
+    console.error("❌ Error serving dynamic article page (clean URL):", err);
+    return res.status(500).send("Failed to load article page.");
+  }
+});
+
+// Serve /:page -> /public/:page.html only if that file exists, and avoid intercepting APIs or assets
+app.get("/:page", async (req, res, next) => {
+  try {
+    const page = req.params.page;
+
+    // Skip API and other special prefixes
+    const skipPrefixes = ["api", "uploads"];
+    if (skipPrefixes.some(p => req.path.startsWith("/" + p))) return next();
+
+    // If contains a dot, it's an asset: skip
+    if (page.includes(".")) return next();
+
+    const candidate = path.join(__dirname, "../public", `${page}.html`);
+    try {
+      await fs.access(candidate);
+      return res.sendFile(candidate);
+    } catch {
+      return next();
+    }
+  } catch (e) {
+    return next();
+  }
+});
+
+// Optional: fallback 404 to your custom page if exists
+app.use((req, res) => {
+  const notFound = path.join(__dirname, "../public", "404.html");
+  res.status(404).sendFile(notFound);
+});
+
+
+
+// ✅ CLEAN URL HANDLERS (serve .html without showing extension)
+
+// Root -> index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
+
+// Clean URLs like /about -> about.html, /contact-us -> contact-us.html
+app.get("/:page", (req, res, next) => {
+  // Skip API routes and assets
+  if (req.params.page.startsWith("api")) return next();
+  if (req.params.page.includes(".")) return next();
+
+  const filePath = path.join(__dirname, "../public", req.params.page + ".html");
+  res.sendFile(filePath, (err) => {
+    if (err) next();
+  });
+});
+
+
+app.listen(port, () => {
             console.log(`🚀 Server is running on http://localhost:${port}`);
         });
     } catch (err) {
@@ -693,3 +834,129 @@ async function startServer() {
 
 // Call the function to start the server
 startServer();
+
+
+// ✅ Clean article URL without .html (e.g. /article/123456)
+app.get("/article/:id", async (req, res) => {
+    try {
+        const articleId = req.params.id;
+        if (!ObjectId.isValid(articleId)) {
+            return res.status(400).send("Invalid Article ID format.");
+        }
+
+        const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
+        if (!article) {
+            return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+        }
+
+        let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), "utf8");
+
+        const protocol = req.protocol || "http";
+        const host = req.headers.host;
+        const absoluteImageUrl = article.image
+            ? article.image
+            : `${protocol}://${host}/images/default_og_image.jpg`;
+        const absoluteArticleUrl = `${protocol}://${host}/article/${article._id}`;
+
+        const plainTextContent = article.content
+            ? article.content.replace(/<[^>]*>/g, "").substring(0, 150) + "..."
+            : "Read the latest K-POP news here.";
+
+        // Replace Open Graph meta tags
+        htmlContent = htmlContent.replace(
+            /<meta property="og:title" content="[^"]*">/,
+            `<meta property="og:title" content="${article.title || "K-POP News Article"}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:description" content="[^"]*">/,
+            `<meta property="og:description" content="${plainTextContent}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:image" content="[^"]*">/,
+            `<meta property="og:image" content="${absoluteImageUrl}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:url" content="[^"]*">/,
+            `<meta property="og:url" content="${absoluteArticleUrl}">`
+        );
+
+        // Twitter meta tags
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:title" content="[^"]*">/,
+            `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:description" content="[^"]*">/,
+            `<meta name="twitter:description" content="${plainTextContent}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:image" content="[^"]*">/,
+            `<meta name="twitter:image" content="${absoluteImageUrl}">`
+        );
+
+        res.status(200).send(htmlContent);
+    } catch (err) {
+        console.error("❌ Error serving clean article page:", err);
+        res.status(500).send("Failed to load article page.");
+    }
+});
+
+
+
+// ✅ Super short article URL: /a/:shortId  (e.g., /a/0001)
+app.get("/a/:shortId", async (req, res) => {
+    try {
+        const article = await newsCollection.findOne({ shortId: req.params.shortId });
+        if (!article) {
+            return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+        }
+
+        let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), "utf8");
+
+        const protocol = req.protocol || "http";
+        const host = req.headers.host;
+        const absoluteImageUrl = article.image
+            ? article.image
+            : `${protocol}://${host}/images/default_og_image.jpg`;
+        const absoluteArticleUrl = `${protocol}://${host}/a/${article.shortId}`;
+
+        const plainTextContent = article.content
+            ? article.content.replace(/<[^>]*>/g, "").substring(0, 150) + "..."
+            : "Read the latest K-POP news here.";
+
+        htmlContent = htmlContent.replace(
+            /<meta property="og:title" content="[^"]*">/,
+            `<meta property="og:title" content="${article.title || "K-POP News Article"}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:description" content="[^"]*">/,
+            `<meta property="og:description" content="${plainTextContent}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:image" content="[^"]*">/,
+            `<meta property="og:image" content="${absoluteImageUrl}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta property="og:url" content="[^"]*">/,
+            `<meta property="og:url" content="${absoluteArticleUrl}">`
+        );
+
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:title" content="[^"]*">/,
+            `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:description" content="[^"]*">/,
+            `<meta name="twitter:description" content="${plainTextContent}">`
+        );
+        htmlContent = htmlContent.replace(
+            /<meta name="twitter:image" content="[^"]*">/,
+            `<meta name="twitter:image" content="${absoluteImageUrl}">`
+        );
+
+        res.status(200).send(htmlContent);
+    } catch (err) {
+        console.error("❌ Error serving shortId article page:", err);
+        res.status(500).send("Failed to load article page.");
+    }
+});
