@@ -11,14 +11,18 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
 
-// ✅ Set permissive CSP header to allow inline scripts and assets
+// ✅ ALLOW FACEBOOK CRAWLER MIDDLEWARE
 app.use((req, res, next) => {
-  res.removeHeader("Content-Security-Policy");
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;"
-  );
-  next();
+  const userAgent = req.headers['user-agent'] || '';
+  
+  // Check if it's Facebook's crawler
+  if (userAgent.includes('facebookexternalhit') || userAgent.includes('Facebot')) {
+    console.log('✅ Facebook crawler detected, allowing access:', req.url);
+    // Ensure crawler can access all routes
+    next();
+  } else {
+    next();
+  }
 });
 
 
@@ -119,7 +123,7 @@ async function startServer() {
         const newsCollection = db.collection(collectionName);
         const cardsCollection = db.collection(cardsCollectionName);
 
-        // --- NEW: Explicit route for robots.txt to ensure it's always served 200 OK ---
+    // --- NEW: Explicit route for robots.txt to ensure it's always served 200 OK ---
         app.get("/robots.txt", async (req, res) => {
             try {
                 const robotsPath = path.join(__dirname, "../public", "robots.txt");
@@ -127,10 +131,10 @@ async function startServer() {
                 res.status(200).sendFile(robotsPath);
             } catch (err) {
                 console.warn("robots.txt not found or accessible:", err.message);
-                res.status(404).send("robots.txt not found"); // Or send an empty file, depending on desired behavior
+                // Send a basic robots.txt that allows all (including Facebook)
+                res.type('text/plain').send("User-agent: *\nAllow: /");
             }
         });
-
         // Route to serve your main HTML page
         app.get("/", (req, res) => {
             res.sendFile(path.join(__dirname, "../public", "index.html"));
@@ -187,26 +191,6 @@ async function startServer() {
             } catch (err) {
                 console.error("❌ Error serving dynamic article page:", err);
                 res.status(500).send("Failed to load article page.");
-            }
-        });
-
-        
-        // Redirect legacy .html links to clean short URLs
-        app.get("/article.html", async (req, res) => {
-            try {
-                const articleId = req.query.id;
-                if (!articleId) return res.redirect("/");
-
-                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
-                if (!article) return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
-
-                if (article.shortId) {
-                    return res.redirect(301, `/a/${article.shortId}`);
-                }
-                return res.redirect(301, `/article/${article._id}`);
-            } catch (err) {
-                console.error("Redirect error:", err);
-                res.redirect("/");
             }
         });
 

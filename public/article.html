@@ -199,13 +199,13 @@ function buildArticleLink(article) {
 
     <button class="hamburger" onclick="toggleMenu()">☰</button>
 
-    <nav class="nav-links" id="navLinks">
-      <a href="/index">ទំព័រដើម</a>
-      <a href="/index?category=កម្សាន្ត">កម្សាន្ត</a>
-      <a href="/index?category=សង្គម">សង្គម</a>
-      <a href="/index?category=កីឡា">កីឡា</a>
-      <a href="/index?category=ពិភពលោក">ពិភពលោក</a>
-    </nav>
+            <nav class="nav-links" id="navLinks">
+  <a href="/">ទំព័រដើម</a>
+  <a href="/?category=កម្សាន្ត">កម្សាន្ត</a>
+  <a href="/?category=សង្គម">សង្គម</a>
+  <a href="/?category=កីឡា">កីឡា</a>
+  <a href="/?category=ពិភពលោក">ពិភពលោក</a>
+</nav>
   </header>
 
 <main class="article-page">
@@ -276,15 +276,15 @@ function buildArticleLink(article) {
       <div class="footer-logo">STEAV<br>NEWS</div>
       <div class="footer-sections-wrapper">
         <div class="footer-links">
-          <h3>Quick Links</h3>
-          <ul>
-            <li><a href="/index">ទំព័រដើម</a></li>
-            <li><a href="/index?category=កម្សាន្ត">កម្សាន្ត</a></li>
-            <li><a href="/index?category=សង្គម">សង្គម</a></li>
-            <li><a href="/index?category=កីឡា">កីឡា</a></li>
-            <li><a href="/index?category=ពិភពលោក">ពិភពលោក</a></li>
-          </ul>
-        </div>
+  <h3>Quick Links</h3>
+  <ul>
+    <li><a href="/">ទំព័រដើម</a></li>
+    <li><a href="/?category=កម្សាន្ត">កម្សាន្ត</a></li>
+    <li><a href="/?category=សង្គម">សង្គម</a></li>
+    <li><a href="/?category=កីឡា">កីឡា</a></li>
+    <li><a href="/?category=ពិភពលោក">ពិភពលោក</a></li>
+  </ul>
+</div>
         <div class="footer-contact">
           <h3>Contact Us</h3>
           <ul>
@@ -316,6 +316,41 @@ function buildArticleLink(article) {
   </footer>
 
   <script>
+// URL Rewriting - Remove .html from article URLs
+document.addEventListener('DOMContentLoaded', function() {
+    // Rewrite all article links on page load
+    const rewriteArticleLinks = function() {
+        const articleLinks = document.querySelectorAll('a[href*="article.html"]');
+        articleLinks.forEach(link => {
+            link.href = link.href.replace('article.html', 'article');
+        });
+    };
+    
+    // Initial rewrite
+    rewriteArticleLinks();
+    
+    // Also handle dynamically created links (for "More to Explore" section)
+    const observer = new MutationObserver(function(mutations) {
+        let shouldRewrite = false;
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1) {
+                    if (node.querySelector && node.querySelector('a[href*="article.html"]')) {
+                        shouldRewrite = true;
+                    }
+                }
+            });
+        });
+        if (shouldRewrite) {
+            rewriteArticleLinks();
+        }
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+});
     function toggleMenu() {
       const nav = document.getElementById("navLinks");
       nav.classList.toggle("open");
@@ -613,7 +648,7 @@ function buildArticleLink(article) {
 
             articlesForPage.forEach(article => {
                 const card = document.createElement("a");
-                card.href = `article.html?id=${article._id}`;
+                card.href = `/article?id=${article._id}`;
                 card.classList.add("card"); // Reuse existing card styles
                 const articleDate = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                 card.innerHTML = `
