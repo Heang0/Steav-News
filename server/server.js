@@ -11,14 +11,13 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
 
-// ✅ ALLOW FACEBOOK CRAWLER MIDDLEWARE
+// ✅ EMERGENCY FIX - FORCE ALLOW FACEBOOK
 app.use((req, res, next) => {
   const userAgent = req.headers['user-agent'] || '';
-  
-  // Check if it's Facebook's crawler
   if (userAgent.includes('facebookexternalhit') || userAgent.includes('Facebot')) {
-    console.log('✅ Facebook crawler detected, allowing access:', req.url);
-    // Ensure crawler can access all routes
+    console.log('🚨 EMERGENCY: Facebook detected, forcing access to:', req.url);
+    // Remove any potential blocks
+    res.setHeader('X-Robots-Tag', 'all');
     next();
   } else {
     next();
@@ -143,18 +142,13 @@ async function startServer() {
         const newsCollection = db.collection(collectionName);
         const cardsCollection = db.collection(cardsCollectionName);
 
-    // --- NEW: Explicit route for robots.txt to ensure it's always served 200 OK ---
-        app.get("/robots.txt", async (req, res) => {
-            try {
-                const robotsPath = path.join(__dirname, "../public", "robots.txt");
-                await fs.access(robotsPath); // Check if file exists
-                res.status(200).sendFile(robotsPath);
-            } catch (err) {
-                console.warn("robots.txt not found or accessible:", err.message);
-                // Send a basic robots.txt that allows all (including Facebook)
-                res.type('text/plain').send("User-agent: *\nAllow: /");
-            }
-        });
+            app.get("/robots.txt", (req, res) => {
+            console.log('🚨 ROBOTS.TXT ACCESSED - Returning allow all');
+            // Force return the correct robots.txt content
+            const robotsContent = "User-agent: *\nAllow: /";
+            res.type('text/plain').send(robotsContent);
+            });
+
         // Route to serve your main HTML page
         app.get("/", (req, res) => {
             res.sendFile(path.join(__dirname, "../public", "index.html"));
