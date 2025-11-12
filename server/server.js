@@ -25,6 +25,26 @@ app.use((req, res, next) => {
   }
 });
 
+// ✅ COMPREHENSIVE DEBUG MIDDLEWARE - ADD THIS RIGHT HERE
+app.use((req, res, next) => {
+  const userAgent = req.headers['user-agent'] || '';
+  const isFacebookBot = userAgent.includes('facebookexternalhit') || userAgent.includes('Facebot');
+  
+  console.log('=== REQUEST DEBUG ===');
+  console.log('Time:', new Date().toISOString());
+  console.log('URL:', req.url);
+  console.log('Path:', req.path);
+  console.log('Method:', req.method);
+  console.log('User-Agent:', userAgent.substring(0, 100)); // First 100 chars
+  console.log('Is Facebook Bot:', isFacebookBot);
+  console.log('=====================');
+  
+  if (isFacebookBot) {
+    console.log('🎯 FACEBOOK BOT DETECTED - Allowing access to:', req.url);
+  }
+  
+  next();
+});
 
 // Remove CSP header globally
 app.use((req, res, next) => {
