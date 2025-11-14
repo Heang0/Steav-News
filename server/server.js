@@ -88,12 +88,13 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // --- MULTER CONFIGURATION FOR THUMBNAIL WITH CLOUDINARY STORAGE ---
+// --- MULTER CONFIGURATION FOR THUMBNAIL WITH CLOUDINARY STORAGE ---
 const thumbnailStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "kpop_news_thumbnails",
-        format: async (req, file) => 'jpg',
-        public_id: (req, file) => `thumbnail-${Date.now()}-${file.originalname.split('.')[0]}`
+        folder: "steav_news",
+        upload_preset: "ml_default", // TEMPORARILY use the working signed preset
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
     },
 });
 // Multer instance for thumbnail with file size limit and error handling
@@ -106,11 +107,12 @@ const uploadThumbnail = multer({
 const inlineImageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "kpop_news_inline_images",
-        format: async (req, file) => 'jpg',
-        public_id: (req, file) => `inline-${Date.now()}-${file.originalname.split('.')[0]}`
+        folder: "steav_news", // Using your new folder
+        upload_preset: "steav_news", // Your new preset name
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
     },
 });
+
 // Multer instance for inline image with file size limit and error handling
 const uploadInlineImage = multer({
     storage: inlineImageStorage,
@@ -121,9 +123,9 @@ const uploadInlineImage = multer({
 const cardImageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "kpop_news_card_images",
-        format: async (req, file) => 'jpg',
-        public_id: (req, file) => `card-${Date.now()}-${file.originalname.split('.')[0]}`
+        folder: "steav_news", // Use the same folder
+        upload_preset: "steav_news", // ADD THIS LINE - same as others
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
     },
 });
 // Multer instance for card image with file size limit and error handling
@@ -573,56 +575,64 @@ app.get("/article", async (req, res) => {
             }
         });
 
-        // --- NEW: API Route to Update an Article (Authentication Required) ---
-        // MODIFIED: Added multer error handling middleware and removed category/tags from update
-        app.put("/api/articles/:id", isAuthenticated, (req, res, next) => {
-            uploadThumbnail(req, res, function (err) {
-                if (err instanceof multer.MulterError) {
-                    return res.status(500).json({ error: `File upload error: ${err.message}` });
-                } else if (err) {
-                    return res.status(500).json({ error: `An unknown error occurred during upload: ${err.message}` });
-                }
-                next(); // Proceed to actual route handler
-            });
-        }, async (req, res) => {
-            try {
-                const articleId = req.params.id;
-                if (!ObjectId.isValid(articleId)) {
-                    return res.status(400).json({ error: "Invalid article ID format." });
-                }
+// --- NEW: API Route to Update an Article (Authentication Required) ---
+// DEBUG: Add this before your PUT route to see Cloudinary upload details
+app.put("/api/articles/:id", isAuthenticated, (req, res, next) => {
+    console.log('=== UPLOAD DEBUG START ===');
+    console.log('Upload preset being used:', 'steav_news');
+    console.log('Has file:', !!req.file);
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('=== UPLOAD DEBUG END ===');
+    
+    uploadThumbnail(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            console.log('❌ Multer Error:', err.message);
+            return res.status(500).json({ error: `File upload error: ${err.message}` });
+        } else if (err) {
+            console.log('❌ Unknown Upload Error:', err.message);
+            return res.status(500).json({ error: `An unknown error occurred during upload: ${err.message}` });
+        }
+        console.log('✅ Upload middleware passed successfully');
+        next(); // Proceed to actual route handler
+    });
+}, async (req, res) => {
+    try {
+        const articleId = req.params.id;
+        if (!ObjectId.isValid(articleId)) {
+            return res.status(400).json({ error: "Invalid article ID format." });
+        }
 
-                const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; 
-                const updateDoc = {
-                    title,
-                    date,
-                    content,
-                    trending: trending === 'true',
-                    category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
-                };
+        const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body; 
+        const updateDoc = {
+            title,
+            date,
+            content,
+            trending: trending === 'true',
+            category: category || 'កម្សាន្ត', // Use category from form, default to 'កម្សាន្ត'
+        };
 
-                // Handle image update: file upload takes precedence
-                if (req.file) {
-                    updateDoc.image = req.file.path; // Cloudinary URL
-                } else if (bodyImageUrl) {
-                    updateDoc.image = bodyImageUrl;
-                }
+        // Handle image update: file upload takes precedence
+        if (req.file) {
+            updateDoc.image = req.file.path; // Cloudinary URL
+        } else if (bodyImageUrl) {
+            updateDoc.image = bodyImageUrl;
+        }
 
-                const result = await newsCollection.updateOne(
-                    { _id: new ObjectId(articleId) },
-                    { $set: updateDoc }
-                );
+        const result = await newsCollection.updateOne(
+            { _id: new ObjectId(articleId) },
+            { $set: updateDoc }
+        );
 
-                if (result.matchedCount === 0) {
-                    return res.status(404).json({ error: "Article not found." });
-                }
-                res.status(200).json({ message: "Article updated successfully!" });
-            }
-            catch (err) {
-                console.error("❌ Error updating article:", err);
-                res.status(500).json({ error: "Failed to update article." });
-            }
-        });
-
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: "Article not found." });
+        }
+        res.status(200).json({ message: "Article updated successfully!" });
+    }
+    catch (err) {
+        console.error("❌ Error updating article:", err);
+        res.status(500).json({ error: "Failed to update article." });
+    }
+});
         // --- NEW: API Route to Delete an Article (Authentication Required) ---
         app.delete("/api/articles/:id", isAuthenticated, async (req, res) => {
             try {
@@ -643,6 +653,73 @@ app.get("/article", async (req, res) => {
                 res.status(500).json({ error: "Failed to delete article." });
             }
         });
+        app.post("/api/news", isAuthenticated, async (req, res) => {
+    try {
+        console.log('=== CREATE DEBUG ===');
+        console.log('Content-Type:', req.headers['content-type']);
+        
+        // If there's a file upload, handle it with Multer
+        if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+            console.log('Processing file upload for new article...');
+            
+            await new Promise((resolve, reject) => {
+                uploadThumbnail(req, res, function (err) {
+                    if (err) {
+                        console.log('❌ Upload Error:', err.message);
+                        reject(err);
+                    } else {
+                        console.log('✅ Upload processed successfully');
+                        resolve();
+                    }
+                });
+            });
+        }
+
+        const { title, date, content, trending, imageUrl: bodyImageUrl, category } = req.body;
+        let imagePath = "/images/default_og_image.jpg";
+
+        if (req.file) {
+            imagePath = req.file.path;
+            console.log('Using uploaded file:', imagePath);
+        } else if (bodyImageUrl) {
+            imagePath = bodyImageUrl;
+            console.log('Using image URL:', imagePath);
+        }
+
+        // Validate category
+        if (category && !CATEGORIES.includes(category)) {
+            return res.status(400).json({ error: "Invalid category provided." });
+        }
+
+        // Generate sequential shortId for pretty URLs
+        const articleCount = await newsCollection.countDocuments();
+        const shortId = (articleCount + 1).toString().padStart(4, '0');
+
+        const newArticle = {
+            title,
+            image: imagePath,
+            date,
+            content,
+            createdAt: new Date(),
+            trending: trending === 'true',
+            likes: 0,
+            views: 0,
+            category: category || 'កម្សាន្ត',
+            comments: [],
+            shortId
+        };
+
+        const result = await newsCollection.insertOne(newArticle);
+        res.status(201).json(result);
+    }
+    catch (err) {
+        console.error("❌ Error inserting article:", err);
+        if (err.message.includes('uploading is disabled')) {
+            return res.status(500).json({ error: "File upload failed. Please try using an image URL instead." });
+        }
+        res.status(500).json({ error: "Failed to create article" });
+    }
+});
 
         // --- API Route to Create/Update Staff Card ---
         app.post("/api/cards", (req, res, next) => {
@@ -800,6 +877,11 @@ app.listen(port, () => {
         console.error("❌ MongoDB connection error:", err);
     }
 }
+
+// Test Cloudinary connection
+cloudinary.api.ping()
+  .then(result => console.log('✅ Cloudinary connection successful:', result))
+  .catch(err => console.error('❌ Cloudinary connection failed:', err));
 
 // Call the function to start the server
 startServer();
