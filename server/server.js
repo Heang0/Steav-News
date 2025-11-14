@@ -93,7 +93,7 @@ const thumbnailStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: "steav_news",
-        upload_preset: "ml_default", // TEMPORARILY use the working signed preset
+        upload_preset: "steav_news", // Use the same preset everywhere
         allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
     },
 });
@@ -161,59 +161,68 @@ async function startServer() {
             res.sendFile(path.join(__dirname, "../public", "index.html"));
         });
 
-        // --- IMPORTANT: Dynamic Route for Article Detail Pages (for Open Graph Meta Tags) ---
-// === URL Rewrite Rules ===
+app.get("/article.html", async (req, res) => {
+    try {
+        const articleId = req.query.id;
+        if (!articleId) {
+            return res.status(400).send("Article ID is required.");
+        }
+        if (!ObjectId.isValid(articleId)) {
+            return res.status(400).send("Invalid Article ID format.");
+        }
 
-        // This route MUST be placed BEFORE `app.use(express.static(...))` for '/article.html'
-        app.get("/article.html", async (req, res) => {
-            try {
-                const articleId = req.query.id;
-                if (!articleId) {
-                    return res.status(400).send("Article ID is required.");
-                }
-                if (!ObjectId.isValid(articleId)) {
-                    return res.status(400).send("Invalid Article ID format.");
-                }
+        const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
 
-                const article = await newsCollection.findOne({ _id: new ObjectId(articleId) });
+        if (!article) {
+            return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
+        }
 
-                if (!article) {
-                    // Serve a generic 404 HTML page if the article is not found
-                    return res.status(404).sendFile(path.join(__dirname, "../public", "404.html"));
-                }
+        let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8');
 
-                // Read the article.html template
-                let htmlContent = await fs.readFile(path.join(__dirname, "../public", "article.html"), 'utf8');
+        const protocol = req.protocol || 'http';
+        const host = req.headers.host;
 
-                // Construct full absolute URL for Open Graph image and URL
-                const protocol = req.protocol || 'http';
-                const host = req.headers.host;
-
-                const absoluteImageUrl = article.image ? article.image : `${protocol}://${host}/images/default_og_image.jpg`;
-                const absoluteArticleUrl = `${protocol}://${host}/article.html?id=${article._id}`;
-
-                const plainTextContent = article.content ? article.content.replace(/<[^>]*>/g, '').substring(0, 150) + "..." : "Read the latest K-POP news here.";
-
-                // Replace placeholders with actual article data
-                htmlContent = htmlContent.replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${article.title || "K-POP News Article"}">`);
-                htmlContent = htmlContent.replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${plainTextContent}">`);
-                htmlContent = htmlContent.replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${absoluteImageUrl}">`);
-                htmlContent = htmlContent.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${absoluteArticleUrl}">`);
-
-                // Also update Twitter card meta tags
-                htmlContent = htmlContent.replace(/<meta name="twitter:card" content="[^"]*">/, `<meta name="twitter:card" content="summary_large_image">`);
-                htmlContent = htmlContent.replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${article.title || "K-POP News Article"}">`);
-                htmlContent = htmlContent.replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${plainTextContent}">`);
-                htmlContent = htmlContent.replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${absoluteImageUrl}">`);
-
-                // Send the modified HTML
-                res.status(200).send(htmlContent);
-
-            } catch (err) {
-                console.error("❌ Error serving dynamic article page:", err);
-                res.status(500).send("Failed to load article page.");
+        // OPTIMIZED: Add cache-buster and optimize for Facebook
+        let absoluteImageUrl;
+        if (article.image) {
+            // Add cache-buster to force Facebook to re-fetch
+            const cacheBuster = Date.now();
+            if (article.image.includes('cloudinary.com')) {
+                // Optimize image dimensions for Facebook (1200x630 is ideal)
+                absoluteImageUrl = article.image.replace('/upload/', '/upload/w_1200,h_630,c_fill/') + `?v=${cacheBuster}`;
+            } else {
+                absoluteImageUrl = article.image + `?v=${cacheBuster}`;
             }
-        });
+        } else {
+            absoluteImageUrl = `${protocol}://${host}/images/default_og_image.jpg`;
+        }
+
+        const absoluteArticleUrl = `${protocol}://${host}/article.html?id=${article._id}`;
+        const plainTextContent = article.content ? article.content.replace(/<[^>]*>/g, '').substring(0, 150) + "..." : "Read the latest STEAV NEWS here.";
+
+        // Enhanced Open Graph tags
+        htmlContent = htmlContent.replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${article.title || "STEAV NEWS"}">`);
+        htmlContent = htmlContent.replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${plainTextContent}">`);
+        htmlContent = htmlContent.replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${absoluteImageUrl}">`);
+        htmlContent = htmlContent.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${absoluteArticleUrl}">`);
+        
+        // Add missing OG tags for better Facebook display
+        htmlContent = htmlContent.replace(/<meta property="og:type" content="[^"]*">/, `<meta property="og:type" content="article">`);
+        htmlContent = htmlContent.replace(/<meta property="og:site_name" content="[^"]*">/, `<meta property="og:site_name" content="STEAV NEWS">`);
+        
+        // Twitter Card meta tags
+        htmlContent = htmlContent.replace(/<meta name="twitter:card" content="[^"]*">/, `<meta name="twitter:card" content="summary_large_image">`);
+        htmlContent = htmlContent.replace(/<meta name="twitter:title" content="[^"]*">/, `<meta name="twitter:title" content="${article.title || "STEAV NEWS"}">`);
+        htmlContent = htmlContent.replace(/<meta name="twitter:description" content="[^"]*">/, `<meta name="twitter:description" content="${plainTextContent}">`);
+        htmlContent = htmlContent.replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${absoluteImageUrl}">`);
+
+        res.status(200).send(htmlContent);
+
+    } catch (err) {
+        console.error("❌ Error serving dynamic article page:", err);
+        res.status(500).send("Failed to load article page.");
+    }
+});
         // --- ADD THIS ROUTE FOR CLEAN URLs WITHOUT .html ---
 app.get("/article", async (req, res) => {
     try {
