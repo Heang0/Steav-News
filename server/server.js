@@ -144,13 +144,18 @@ async function startServer() {
         const newsCollection = db.collection(collectionName);
         const cardsCollection = db.collection(cardsCollectionName);
 
-            app.get("/robots.txt", (req, res) => {
-            console.log('🚨 ROBOTS.TXT ACCESSED - Returning allow all');
-            // Force return the correct robots.txt content
-            const robotsContent = "User-agent: *\nAllow: /";
-            res.type('text/plain').send(robotsContent);
-            });
+                        app.get("/robots.txt", (req, res) => {
+                console.log('✅ ROBOTS.TXT - Allowing Facebook crawlers');
+                const robotsContent = `User-agent: *
+            Allow: /
 
+            User-agent: facebookexternalhit
+            Allow: /
+
+            User-agent: Facebot
+            Allow: /`;
+                res.type('text/plain').send(robotsContent);
+            });
         // Route to serve your main HTML page
         app.get("/", (req, res) => {
             res.sendFile(path.join(__dirname, "../public", "index.html"));
