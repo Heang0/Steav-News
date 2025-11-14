@@ -11,6 +11,26 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const app = express();
 
+// ✅ ULTRA AGGRESSIVE FACEBOOK ALLOW - PUT THIS FIRST
+app.use((req, res, next) => {
+    const userAgent = req.headers['user-agent'] || '';
+    const isFacebookBot = userAgent.includes('facebookexternalhit') || userAgent.includes('Facebot');
+    
+    if (isFacebookBot) {
+        console.log('🎯 FACEBOOK CRAWLER DETECTED - FORCING ACCESS TO:', req.url);
+        // Remove ALL potential blocking headers
+        res.removeHeader("Content-Security-Policy");
+        res.removeHeader("X-Frame-Options");
+        res.removeHeader("X-Robots-Tag");
+        res.removeHeader("Permissions-Policy");
+        
+        // Explicitly allow in headers
+        res.setHeader('X-Robots-Tag', 'all');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    next();
+});
+
 // ✅ EMERGENCY FIX - FORCE ALLOW FACEBOOK
 app.use((req, res, next) => {
   const userAgent = req.headers['user-agent'] || '';
@@ -144,16 +164,24 @@ async function startServer() {
         const newsCollection = db.collection(collectionName);
         const cardsCollection = db.collection(cardsCollectionName);
 
-                        app.get("/robots.txt", (req, res) => {
-                console.log('✅ ROBOTS.TXT - Allowing Facebook crawlers');
-                const robotsContent = `User-agent: *
+            app.get("/robots.txt", (req, res) => {
+             console.log('✅ ROBOTS.TXT - ULTRA PERMISSIVE FOR FACEBOOK');
+                const robotsContent = `# ULTRA PERMISSIVE FOR FACEBOOK
+            User-agent: *
             Allow: /
 
             User-agent: facebookexternalhit
             Allow: /
+            Crawl-delay: 1
 
             User-agent: Facebot
-            Allow: /`;
+            Allow: /
+            Crawl-delay: 1
+
+            User-agent: Twitterbot
+            Allow: /
+
+            Sitemap: https://steav-news.onrender.com/sitemap.xml`;
                 res.type('text/plain').send(robotsContent);
             });
         // Route to serve your main HTML page
