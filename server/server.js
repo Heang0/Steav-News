@@ -107,14 +107,16 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-// --- MULTER CONFIGURATION FOR THUMBNAIL WITH CLOUDINARY STORAGE ---
-// --- MULTER CONFIGURATION FOR THUMBNAIL WITH CLOUDINARY STORAGE ---
+// --- OPTIMIZED MULTER CONFIGURATION FOR THUMBNAIL ---
 const thumbnailStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: "steav_news",
-        upload_preset: "steav_news", // Use the same preset everywhere
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        upload_preset: "steav_news",
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        // 🔥 ADD JUST THESE 2 LINES:
+        quality: "auto:good",        // Reduces size by 60-80%
+        fetch_format: "auto"         // Auto WebP for modern browsers
     },
 });
 // Multer instance for thumbnail with file size limit and error handling
@@ -123,13 +125,16 @@ const uploadThumbnail = multer({
     limits: { fileSize: 1024 * 1024 * 5 } // 5 MB file size limit
 }).single('thumbnail');
 
-// --- MULTER CONFIGURATION FOR INLINE IMAGE UPLOADS WITH CLOUDINARY STORAGE ---
+// --- OPTIMIZED MULTER CONFIGURATION FOR INLINE IMAGES ---
 const inlineImageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "steav_news", // Using your new folder
-        upload_preset: "steav_news", // Your new preset name
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        folder: "steav_news",
+        upload_preset: "steav_news",
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        // 🔥 ADD JUST THESE 2 LINES:
+        quality: "auto:good",
+        fetch_format: "auto"
     },
 });
 
@@ -139,13 +144,16 @@ const uploadInlineImage = multer({
     limits: { fileSize: 1024 * 1024 * 5 } // 5 MB file size limit
 }).single('inlineImage');
 
-// --- MULTER CONFIGURATION FOR CARD IMAGE UPLOADS WITH CLOUDINARY STORAGE ---
+// --- OPTIMIZED MULTER CONFIGURATION FOR CARD IMAGES ---
 const cardImageStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "steav_news", // Use the same folder
-        upload_preset: "steav_news", // ADD THIS LINE - same as others
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp']
+        folder: "steav_news",
+        upload_preset: "steav_news",
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        // 🔥 ADD JUST THESE 2 LINES:
+        quality: "auto:good",
+        fetch_format: "auto"
     },
 });
 // Multer instance for card image with file size limit and error handling
