@@ -21,7 +21,7 @@ export const fetchCache = 'force-no-store';
 // Convert MongoDB object to plain object for serialization
 function serializeArticle(article: any): Article {
   return {
-    _id: article._id.toString(),
+    _id: article._id ? article._id.toString() : '',
     shortId: article.shortId || '',
     title: article.title || '',
     image: article.image || '',
@@ -114,21 +114,38 @@ export default async function ArticlePage({ params }: PageProps) {
     const db = await getDb();
     const newsCollection = db.collection('articles');
 
-    let article = null;
+    let article: any = null;
 
-    // Try to find by shortId first
-    article = await newsCollection.findOne({ shortId: id });
+    // Try to find by shortId first and increment views
+    let result = await newsCollection.findOneAndUpdate(
+      { shortId: id },
+      { $inc: { views: 1 } },
+      { returnDocument: 'after' }
+    );
+    
+    // In newer MongoDB Node drivers, findOneAndUpdate returns the document directly
+    // In older versions, it returns { lastErrorObject, value, ok }
+    article = result?.value !== undefined ? result.value : result;
 
-    if (article) {
-      console.log('✅ Found by shortId:', id, '->', article.title.substring(0, 50));
+    if (article && article._id) {
+      console.log('✅ Found by shortId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
     } else {
       console.log('❌ Not found by shortId, trying ObjectId...');
       // If not found, try ObjectId
       if (ObjectId.isValid(id)) {
-        article = await newsCollection.findOne({ _id: new ObjectId(id) });
-        if (article) {
-          console.log('✅ Found by ObjectId:', id, '->', article.title.substring(0, 50));
+        result = await newsCollection.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $inc: { views: 1 } },
+          { returnDocument: 'after' }
+        );
+        article = result?.value !== undefined ? result.value : result;
+        if (article && article._id) {
+          console.log('✅ Found by ObjectId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
+        } else {
+          article = null;
         }
+      } else {
+        article = null;
       }
     }
 

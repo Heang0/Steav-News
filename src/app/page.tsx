@@ -46,8 +46,8 @@ export default async function Home({ searchParams }: HomeProps) {
 
         <SearchBar />
 
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-8 max-w-[1300px]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
             {/* Main Content - Left Column */}
             <div className="lg:col-span-2 min-w-0">
               {/* Category Spotlights */}

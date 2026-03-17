@@ -19,7 +19,7 @@ export const revalidate = 0;
 // Convert MongoDB object to plain object for serialization
 function serializeArticle(article: any): Article {
   return {
-    _id: article._id.toString(),
+    _id: article._id ? article._id.toString() : '',
     shortId: article.shortId || '',
     title: article.title || '',
     image: article.image || '',
@@ -143,13 +143,28 @@ export default async function ArticlePage({ searchParams }: PageProps) {
     const db = await getDb();
     const newsCollection = db.collection('articles');
 
-    let article;
-    // Try to find by shortId first
-    article = await newsCollection.findOne({ shortId: id });
+    let article: any = null;
+    
+    // Try to find by shortId first and increment views
+    let result = await newsCollection.findOneAndUpdate(
+      { shortId: id },
+      { $inc: { views: 1 } },
+      { returnDocument: 'after' }
+    );
+    article = result?.value !== undefined ? result.value : result;
 
     // If not found, try ObjectId
-    if (!article && ObjectId.isValid(id)) {
-      article = await newsCollection.findOne({ _id: new ObjectId(id) });
+    if ((!article || !article._id) && ObjectId.isValid(id)) {
+      result = await newsCollection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $inc: { views: 1 } },
+        { returnDocument: 'after' }
+      );
+      article = result?.value !== undefined ? result.value : result;
+    }
+
+    if (!article || !article._id) {
+      article = null;
     }
 
     if (!article) {
@@ -175,8 +190,8 @@ export default async function ArticlePage({ searchParams }: PageProps) {
       <div className="min-h-screen flex flex-col">
         <Header />
 
-        <main className="flex-grow pt-[60px] sm:pt-[65px] md:pt-[70px]">
-          <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
+        <main className="flex-grow pt-[56px] sm:pt-[64px]">
+          <div className="article-page container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               {/* Main Article Content */}
               <div className="article-main-content-wrapper flex-1 min-w-0">

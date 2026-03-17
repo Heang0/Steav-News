@@ -19,9 +19,9 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       return (
         <span
           key={`ellipsis-${text}`}
-          className="pagination-button px-3 py-2 text-gray-500"
+          className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 text-gray-400 text-sm"
         >
-          {text}
+          …
         </span>
       );
     }
@@ -29,10 +29,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     return (
       <button
         key={`page-${page}`}
-        className={`pagination-button px-3 sm:px-4 py-2 rounded text-sm sm:text-base font-semibold transition-colors min-w-[40px] sm:min-w-[48px]
-          ${isActive 
-            ? 'bg-primary text-white' 
-            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sm font-bold transition-all duration-200
+          ${isActive
+            ? 'bg-primary text-white shadow-md shadow-red-200'
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:-translate-y-0.5 hover:shadow-sm'
           }`}
         onClick={() => onPageChange(page)}
         disabled={isDisabled}
@@ -97,23 +97,35 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     return items;
   };
 
+  const arrowBtn = (page: number, direction: 'prev' | 'next', disabled: boolean) => (
+    <button
+      key={direction}
+      onClick={() => !disabled && onPageChange(page)}
+      disabled={disabled}
+      aria-label={direction === 'prev' ? 'Previous page' : 'Next page'}
+      className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm transition-all duration-200
+        ${disabled
+          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+          : 'bg-gray-100 hover:bg-primary hover:text-white text-gray-600 hover:shadow-md hover:-translate-y-0.5'
+        }`}
+    >
+      {direction === 'prev' ? (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      )}
+    </button>
+  );
+
   return (
-    <div className="pagination-container flex justify-center items-center gap-1.5 sm:gap-2 mt-6 sm:mt-8 flex-wrap">
-      {appendPaginationItem(
-        currentPage - 1,
-        'Previous',
-        false,
-        currentPage === 1
-      )}
-
+    <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-6 sm:mt-8 flex-wrap">
+      {arrowBtn(currentPage - 1, 'prev', currentPage === 1)}
       {renderPaginationItems()}
-
-      {appendPaginationItem(
-        currentPage + 1,
-        'Next',
-        false,
-        currentPage === totalPages
-      )}
+      {arrowBtn(currentPage + 1, 'next', currentPage === totalPages)}
     </div>
   );
 }
