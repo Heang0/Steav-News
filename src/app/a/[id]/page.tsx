@@ -1,11 +1,13 @@
 import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { escapeHtml, stripHtml, getFacebookOptimizedImageUrl } from '@/lib/utils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrendingArticles from '@/components/TrendingArticles';
 import ArticleContent from '@/components/ArticleContent';
 import { Article } from '@/types';
+import type { Metadata } from 'next';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -39,6 +41,70 @@ function serializeArticle(article: any): Article {
   };
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const db = await getDb();
+    const newsCollection = db.collection('articles');
+
+    let article;
+    article = await newsCollection.findOne({ shortId: id });
+
+    if (!article && ObjectId.isValid(id)) {
+      article = await newsCollection.findOne({ _id: new ObjectId(id) });
+    }
+
+    if (!article) {
+      return {
+        title: 'Article Not Found - STEAV NEWS',
+        description: 'The requested article could not be found.',
+      };
+    }
+
+    const title = escapeHtml(article.title || 'STEAV NEWS');
+    const description = escapeHtml(
+      stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
+    );
+    const imageUrl = getFacebookOptimizedImageUrl(article.image);
+    const articleUrl = article.shortId
+      ? `https://steav-news.onrender.com/a/${article.shortId}`
+      : `https://steav-news.onrender.com/a/${article._id}`;
+
+    return {
+      title: `${title} - STEAV NEWS`,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        siteName: 'STEAV NEWS',
+        images: [
+          {
+            url: imageUrl,
+            width: 1200,
+            height: 630,
+            alt: title,
+          },
+        ],
+        url: articleUrl,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: [imageUrl],
+      },
+    };
+  } catch (error) {
+    console.error('Error generating metadata:', error);
+    return {
+      title: 'STEAV NEWS',
+      description: 'Read the latest news from STEAV NEWS',
+    };
+  }
+}
+
 export default async function ArticlePage({ params }: PageProps) {
   const { id } = await params;
 
@@ -49,10 +115,10 @@ export default async function ArticlePage({ params }: PageProps) {
     const newsCollection = db.collection('articles');
 
     let article = null;
-    
+
     // Try to find by shortId first
     article = await newsCollection.findOne({ shortId: id });
-    
+
     if (article) {
       console.log('✅ Found by shortId:', id, '->', article.title.substring(0, 50));
     } else {
