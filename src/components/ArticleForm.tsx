@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { CATEGORIES } from '@/lib/utils';
 
 interface ArticleFormProps {
@@ -25,9 +25,10 @@ interface Article {
 }
 
 export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [content, setContent] = useState(article?.content || '');
   const [title, setTitle] = useState(article?.title || '');
   const [date, setDate] = useState(article?.date || new Date().toISOString().split('T')[0]);
-  const [content, setContent] = useState(article?.content || '');
   const [category, setCategory] = useState(article?.category || CATEGORIES[0]);
   const [trending, setTrending] = useState(article?.trending || false);
   const [imageUrl, setImageUrl] = useState(article?.image || '');
@@ -114,6 +115,24 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const insertHtml = (before: string, after: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end) || 'text';
+    
+    const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
+    setContent(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
+    }, 0);
   };
 
   return (
@@ -230,16 +249,35 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         <label htmlFor="content" className="block text-sm font-semibold text-gray-700 mb-2">
           Content <span className="text-red-500">*</span>
         </label>
+        
+        {/* Formatting Toolbar */}
+        <div className="flex flex-wrap gap-1 mb-2 p-2 bg-gray-100 rounded-t-lg border border-b-0 border-gray-300">
+          <button type="button" onClick={() => insertHtml('<b>', '</b>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Bold"><b>B</b></button>
+          <button type="button" onClick={() => insertHtml('<i>', '</i>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Italic"><i>I</i></button>
+          <button type="button" onClick={() => insertHtml('<u>', '</u>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Underline"><u>U</u></button>
+          <button type="button" onClick={() => insertHtml('<s>', '</s>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Strikethrough"><s>S</s></button>
+          <div className="w-px h-6 bg-gray-300 mx-1"></div>
+          <button type="button" onClick={() => insertHtml('<h2>', '</h2>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Heading 2">H2</button>
+          <button type="button" onClick={() => insertHtml('<h3>', '</h3>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Heading 3">H3</button>
+          <div className="w-px h-6 bg-gray-300 mx-1"></div>
+          <button type="button" onClick={() => insertHtml('<ul>\n  <li>', '</li>\n</ul>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Bullet List">• List</button>
+          <button type="button" onClick={() => insertHtml('<ol>\n  <li>', '</li>\n</ol>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Numbered List">1. List</button>
+          <div className="w-px h-6 bg-gray-300 mx-1"></div>
+          <button type="button" onClick={() => insertHtml('<p align="center">', '</p>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Center Align">⫸ Center</button>
+          <button type="button" onClick={() => insertHtml('<blockquote>', '</blockquote>')} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200" title="Quote">❝ Quote</button>
+        </div>
+        
         <textarea
+          ref={textareaRef}
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="input-field min-h-[300px] resize-vertical font-mono text-sm"
-          placeholder="Write your article content here..."
+          className="input-field min-h-[400px] resize-vertical font-mono text-sm border-t-0 rounded-t-none"
+          placeholder="Write your article content here... Select text and click a formatting button above, or type HTML tags directly."
           required
         />
         <p className="text-xs text-gray-500 mt-1">
-          Tip: You can use HTML tags like &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;h2&gt;headings&lt;/h2&gt;, &lt;ul&gt;&lt;li&gt;lists&lt;/li&gt;&lt;/ul&gt;, etc.
+          💡 Select text and click a button above to format it. You can also type HTML tags directly.
         </p>
       </div>
 

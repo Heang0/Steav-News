@@ -50,6 +50,47 @@
   }
 }
 
+/* Tiptap Editor Styles */
+.ProseMirror {
+  min-height: 300px;
+  padding: 1rem;
+  font-family: 'Battambang', 'Noto Sans Khmer', Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p {
+  margin-bottom: 1em;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-weight: bold;
+  margin: 1em 0 0.5em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  margin: 1em 0;
+}
+
+.ProseMirror a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
