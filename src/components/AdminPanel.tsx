@@ -81,9 +81,7 @@ export default function AdminPanel() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-100">
-        <Header />
-        
+      <div className="min-h-screen bg-gray-100">
         <main className="flex-grow flex items-center justify-center px-4">
           <div className="admin-container max-w-md w-full bg-white p-8 rounded-xl shadow-lg mt-20">
             <h2 className="text-3xl font-bold text-primary text-center mb-6">

@@ -124,6 +124,7 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                       alt={article.title}
                       fill
                       className="object-cover"
+                      sizes="96px"
                     />
                   </div>
                 </td>

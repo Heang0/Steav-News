@@ -1,13 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { Article } from '@/types';
 import { CATEGORIES } from '@/lib/utils';
 
 interface ArticleFormProps {
   article?: Article | null;
   onSuccess?: () => void;
   onCancel?: () => void;
+}
+
+interface Article {
+  _id: string;
+  shortId: string;
+  title: string;
+  image: string;
+  date: string;
+  content: string;
+  createdAt: string;
+  trending: boolean;
+  likes: number;
+  views: number;
+  category: string;
+  comments: any[];
 }
 
 export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {
@@ -57,7 +71,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       }
 
       const url = isEditing
-        ? `/api/admin/articles/${article._id}`
+        ? `/api/admin/articles/${article?._id}`
         : '/api/admin/articles';
       
       const method = isEditing ? 'PUT' : 'POST';
@@ -86,7 +100,6 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       if (onSuccess) {
         setTimeout(onSuccess, 1500);
       } else {
-        // Reset form
         setTitle('');
         setDate(new Date().toISOString().split('T')[0]);
         setContent('');
@@ -221,10 +234,13 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="input-field min-h-[300px] resize-vertical font-mono"
+          className="input-field min-h-[300px] resize-vertical font-mono text-sm"
           placeholder="Write your article content here..."
           required
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Tip: You can use HTML tags like &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;h2&gt;headings&lt;/h2&gt;, &lt;ul&gt;&lt;li&gt;lists&lt;/li&gt;&lt;/ul&gt;, etc.
+        </p>
       </div>
 
       <div className="form-group">
