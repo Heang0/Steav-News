@@ -12,12 +12,39 @@ type PageProps = {
   searchParams: Promise<{ id?: string }>;
 };
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Convert MongoDB object to plain object for serialization
+function serializeArticle(article: any): Article {
+  return {
+    _id: article._id.toString(),
+    shortId: article.shortId || '',
+    title: article.title || '',
+    image: article.image || '',
+    date: article.date || '',
+    content: article.content || '',
+    createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
+    trending: article.trending || false,
+    likes: article.likes || 0,
+    views: article.views || 0,
+    category: article.category || '',
+    comments: (article.comments || []).map((c: any) => ({
+      _id: c._id?.toString() || '',
+      author: c.author || '',
+      text: c.text || '',
+      createdAt: c.createdAt instanceof Date ? c.createdAt.toISOString() : c.createdAt,
+    })),
+  };
+}
+
 export async function generateMetadata(
   { searchParams }: PageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { id } = await searchParams;
-  
+
   if (!id) {
     return {
       title: 'Article Not Found - STEAV NEWS',
@@ -28,15 +55,14 @@ export async function generateMetadata(
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-    
-    // Try to find by ObjectId first, then by shortId
+
     let article;
-    if (ObjectId.isValid(id)) {
+    // Try to find by shortId first
+    article = await newsCollection.findOne({ shortId: id });
+
+    // If not found, try ObjectId
+    if (!article && ObjectId.isValid(id)) {
       article = await newsCollection.findOne({ _id: new ObjectId(id) });
-    }
-    
-    if (!article) {
-      article = await newsCollection.findOne({ shortId: id });
     }
 
     if (!article) {
@@ -51,7 +77,10 @@ export async function generateMetadata(
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
     const imageUrl = getFacebookOptimizedImageUrl(article.image);
-    const articleUrl = `https://steav-news.onrender.com/a/${article.shortId}`;
+    // Always use clean URL for sharing
+    const articleUrl = article.shortId
+      ? `https://steav-news.onrender.com/a/${article.shortId}`
+      : `https://steav-news.onrender.com/a/${article._id}`;
 
     return {
       title: `${title} - STEAV NEWS`,
@@ -113,15 +142,14 @@ export default async function ArticlePage({ searchParams }: PageProps) {
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-    
-    // Try to find by ObjectId first, then by shortId
+
     let article;
-    if (ObjectId.isValid(id)) {
+    // Try to find by shortId first
+    article = await newsCollection.findOne({ shortId: id });
+
+    // If not found, try ObjectId
+    if (!article && ObjectId.isValid(id)) {
       article = await newsCollection.findOne({ _id: new ObjectId(id) });
-    }
-    
-    if (!article) {
-      article = await newsCollection.findOne({ shortId: id });
     }
 
     if (!article) {
@@ -140,6 +168,9 @@ export default async function ArticlePage({ searchParams }: PageProps) {
       );
     }
 
+    // Serialize the article to plain object
+    const serializedArticle = serializeArticle(article);
+
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -149,7 +180,7 @@ export default async function ArticlePage({ searchParams }: PageProps) {
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               {/* Main Article Content */}
               <div className="article-main-content-wrapper flex-1 min-w-0">
-                <ArticleContent article={article as unknown as Article} />
+                <ArticleContent article={serializedArticle} />
               </div>
 
               {/* Trending Sidebar */}

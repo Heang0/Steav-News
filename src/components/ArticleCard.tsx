@@ -13,10 +13,10 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
     ? formatDate(article.createdAt)
     : article.date || 'Unknown Date';
 
-  // Use shortId for clean URLs if available
+  // Always use clean URL format: /a/shortId or /a/objectId
   const articleHref = article.shortId 
-    ? `/a/${article.shortId}` 
-    : `/article?id=${article._id}`;
+    ? `/a/${article.shortId}`
+    : `/a/${article._id}`;
 
   if (variant === 'spotlight') {
     return (

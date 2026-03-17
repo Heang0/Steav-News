@@ -40,9 +40,10 @@ export default function ArticleContent({ article }: ArticleContentProps) {
     const baseUrl = typeof window !== 'undefined' 
       ? window.location.origin 
       : 'https://steav-news.onrender.com';
+    // Always use clean URL format
     const cleanUrl = article.shortId 
       ? `${baseUrl}/a/${article.shortId}`
-      : `${baseUrl}/article?id=${article._id}`;
+      : `${baseUrl}/a/${article._id}`;
     const url = encodeURIComponent(cleanUrl);
     const title = encodeURIComponent(article.title);
 

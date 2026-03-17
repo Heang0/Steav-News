@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import ArticleForm from '@/components/ArticleForm';
 import ArticleList from '@/components/ArticleList';
 import { Article } from '@/types';
@@ -91,7 +89,7 @@ export default function AdminPanel() {
             <h2 className="text-3xl font-bold text-primary text-center mb-6">
               Admin Login
             </h2>
-            
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -107,7 +105,7 @@ export default function AdminPanel() {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Password
@@ -122,11 +120,11 @@ export default function AdminPanel() {
                   required
                 />
               </div>
-              
+
               {loginError && (
                 <p className="text-red-500 text-sm text-center">{loginError}</p>
               )}
-              
+
               <button
                 type="submit"
                 className="btn-primary w-full py-3 text-lg"
@@ -136,17 +134,13 @@ export default function AdminPanel() {
             </form>
           </div>
         </main>
-        
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      <Header />
-      
-      <main className="flex-grow py-8 px-4">
+    <div className="min-h-screen bg-gray-100">
+      <main className="py-8 px-4">
         <div className="admin-container max-w-6xl mx-auto bg-white rounded-xl shadow-lg">
           {/* Admin Header */}
           <div className="flex justify-between items-center p-6 border-b">
@@ -193,7 +187,7 @@ export default function AdminPanel() {
             {activeTab === 'create' && (
               <ArticleForm onSuccess={handleArticleCreated} />
             )}
-            
+
             {activeTab === 'edit' && editingArticle && (
               <ArticleForm
                 article={editingArticle}
@@ -201,15 +195,13 @@ export default function AdminPanel() {
                 onCancel={() => setActiveTab('list')}
               />
             )}
-            
+
             {activeTab === 'list' && (
               <ArticleList onEdit={handleEditArticle} />
             )}
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }
