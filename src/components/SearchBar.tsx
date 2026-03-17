@@ -37,12 +37,12 @@ export default function SearchBar() {
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Search articles by title or content..."
-          className="input-field flex-grow text-sm sm:text-base py-2 sm:py-2.5"
+          className="input-field flex-grow text-base sm:text-base py-2.5 sm:py-2.5 min-h-[44px]"
         />
         <button
           id="searchButton"
           onClick={handleSearch}
-          className="btn-primary px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base whitespace-nowrap"
+          className="btn-primary px-4 sm:px-6 py-2.5 sm:py-2.5 text-base sm:text-base whitespace-nowrap min-h-[44px]"
         >
           Search
         </button>
