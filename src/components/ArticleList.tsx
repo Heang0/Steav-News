@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Article } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, shouldBypassNextImageOptimization } from '@/lib/utils';
 
 interface ArticleListProps {
   onEdit: (article: Article) => void;
@@ -125,6 +125,7 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                       fill
                       className="object-cover"
                       sizes="96px"
+                      unoptimized={shouldBypassNextImageOptimization(article.image || '')}
                     />
                   </div>
                 </td>

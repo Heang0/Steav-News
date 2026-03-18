@@ -8,6 +8,7 @@ export interface Comment {
 export interface Article {
   _id: string;
   shortId: string;
+  publicId: string;
   title: string;
   image: string;
   date: string;

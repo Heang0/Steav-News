@@ -3,6 +3,7 @@ import { getDb } from '@/lib/mongodb';
 import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
 import { ObjectId } from 'mongodb';
 import { CATEGORIES } from '@/lib/utils';
+import { buildArticlePublicId, getNextShortId } from '@/lib/articles';
 
 function isAuthenticated(request: NextRequest): boolean {
   const sessionId = request.headers.get('x-session-id');
@@ -60,10 +61,12 @@ export async function POST(request: NextRequest) {
     const db = await getDb();
     const newsCollection = db.collection('articles');
 
-    const articleCount = await newsCollection.countDocuments();
-    const shortId = (articleCount + 1).toString().padStart(4, '0');
+    const newId = new ObjectId();
+    const shortId = await getNextShortId(newsCollection);
+    const publicId = buildArticlePublicId(newId);
 
     const newArticle = {
+      _id: newId,
       title,
       image: imagePath,
       date,
@@ -75,6 +78,7 @@ export async function POST(request: NextRequest) {
       category: category || 'កម្សាន្ត',
       comments: [] as any[],
       shortId,
+      publicId,
     };
 
     const result = await newsCollection.insertOne(newArticle);

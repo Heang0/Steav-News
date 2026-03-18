@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { getSiteUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
     type: 'website',
     locale: 'km_KH',

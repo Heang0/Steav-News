@@ -1,19 +1,23 @@
 import type { Metadata, ResolvingMetadata } from 'next';
 import { getDb } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { escapeHtml, stripHtml, formatDate, getFacebookOptimizedImageUrl } from '@/lib/utils';
+import { escapeHtml, stripHtml, formatDate, getFacebookOptimizedImageUrl, getSiteUrl } from '@/lib/utils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrendingArticles from '@/components/TrendingArticles';
 import ArticleContent from '@/components/ArticleContent';
 import RelatedArticles from '@/components/RelatedArticles';
-import { getRelatedArticles, serializeArticle } from '@/lib/articles';
+import {
+  findArticleByIdentifier,
+  findAndIncrementArticleByIdentifier,
+  getArticlePublicId,
+  getRelatedArticles,
+  serializeArticle,
+} from '@/lib/articles';
 
 type PageProps = {
   searchParams: Promise<{ id?: string }>;
 };
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -33,15 +37,7 @@ export async function generateMetadata(
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-
-    let article;
-    // Try to find by shortId first
-    article = await newsCollection.findOne({ shortId: id });
-
-    // If not found, try ObjectId
-    if (!article && ObjectId.isValid(id)) {
-      article = await newsCollection.findOne({ _id: new ObjectId(id) });
-    }
+    const article = await findArticleByIdentifier(newsCollection, id);
 
     if (!article) {
       return {
@@ -55,10 +51,7 @@ export async function generateMetadata(
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
     const imageUrl = getFacebookOptimizedImageUrl(article.image);
-    // Always use clean URL for sharing
-    const articleUrl = article.shortId
-      ? `https://steav-news.onrender.com/a/${article.shortId}`
-      : `https://steav-news.onrender.com/a/${article._id}`;
+    const articleUrl = `${getSiteUrl()}/a/${getArticlePublicId(article)}`;
 
     return {
       title: `${title} - STEAV NEWS`,
@@ -120,30 +113,7 @@ export default async function ArticlePage({ searchParams }: PageProps) {
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-
-    let article: any = null;
-    
-    // Try to find by shortId first and increment views
-    let result = await newsCollection.findOneAndUpdate(
-      { shortId: id },
-      { $inc: { views: 1 } },
-      { returnDocument: 'after' }
-    );
-    article = result?.value !== undefined ? result.value : result;
-
-    // If not found, try ObjectId
-    if ((!article || !article._id) && ObjectId.isValid(id)) {
-      result = await newsCollection.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $inc: { views: 1 } },
-        { returnDocument: 'after' }
-      );
-      article = result?.value !== undefined ? result.value : result;
-    }
-
-    if (!article || !article._id) {
-      article = null;
-    }
+    const article: any = await findAndIncrementArticleByIdentifier(newsCollection, id);
 
     if (!article) {
       return (
@@ -161,7 +131,6 @@ export default async function ArticlePage({ searchParams }: PageProps) {
       );
     }
 
-    // Serialize the article to plain object
     const serializedArticle = serializeArticle(article);
     const relatedArticles = await getRelatedArticles(newsCollection, article);
 
@@ -172,13 +141,11 @@ export default async function ArticlePage({ searchParams }: PageProps) {
         <main className="flex-grow pt-[56px] sm:pt-[64px]">
           <div className="article-page container mx-auto px-3 sm:px-4 py-5 sm:py-8 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
-              {/* Main Article Content */}
               <div className="article-main-content-wrapper flex-1 min-w-0">
                 <ArticleContent article={serializedArticle} />
                 <RelatedArticles articles={relatedArticles} />
               </div>
 
-              {/* Trending Sidebar */}
               <div className="lg:w-80 xl:w-96 flex-shrink-0">
                 <TrendingArticles />
               </div>

@@ -1,20 +1,24 @@
 import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
-import { escapeHtml, stripHtml, getFacebookOptimizedImageUrl } from '@/lib/utils';
+import { escapeHtml, stripHtml, getFacebookOptimizedImageUrl, getSiteUrl } from '@/lib/utils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrendingArticles from '@/components/TrendingArticles';
 import ArticleContent from '@/components/ArticleContent';
 import RelatedArticles from '@/components/RelatedArticles';
-import { getRelatedArticles, serializeArticle } from '@/lib/articles';
+import {
+  findArticleByIdentifier,
+  findAndIncrementArticleByIdentifier,
+  getArticlePublicId,
+  getRelatedArticles,
+  serializeArticle,
+} from '@/lib/articles';
 import type { Metadata } from 'next';
 
 type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-// Force dynamic rendering - NO CACHING
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
@@ -25,13 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-
-    let article;
-    article = await newsCollection.findOne({ shortId: id });
-
-    if (!article && ObjectId.isValid(id)) {
-      article = await newsCollection.findOne({ _id: new ObjectId(id) });
-    }
+    const article = await findArticleByIdentifier(newsCollection, id);
 
     if (!article) {
       return {
@@ -45,9 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
     const imageUrl = getFacebookOptimizedImageUrl(article.image);
-    const articleUrl = article.shortId
-      ? `https://steav-news.onrender.com/a/${article.shortId}`
-      : `https://steav-news.onrender.com/a/${article._id}`;
+    const articleUrl = `${getSiteUrl()}/a/${getArticlePublicId(article)}`;
 
     return {
       title: `${title} - STEAV NEWS`,
@@ -86,53 +82,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ArticlePage({ params }: PageProps) {
   const { id } = await params;
 
-  console.log('🔍 Article lookup - ID:', id);
+  console.log('Article lookup - ID:', id);
 
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-
-    let article: any = null;
-
-    // Try to find by shortId first and increment views
-    let result = await newsCollection.findOneAndUpdate(
-      { shortId: id },
-      { $inc: { views: 1 } },
-      { returnDocument: 'after' }
-    );
-    
-    // In newer MongoDB Node drivers, findOneAndUpdate returns the document directly
-    // In older versions, it returns { lastErrorObject, value, ok }
-    article = result?.value !== undefined ? result.value : result;
-
-    if (article && article._id) {
-      console.log('✅ Found by shortId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
-    } else {
-      console.log('❌ Not found by shortId, trying ObjectId...');
-      // If not found, try ObjectId
-      if (ObjectId.isValid(id)) {
-        result = await newsCollection.findOneAndUpdate(
-          { _id: new ObjectId(id) },
-          { $inc: { views: 1 } },
-          { returnDocument: 'after' }
-        );
-        article = result?.value !== undefined ? result.value : result;
-        if (article && article._id) {
-          console.log('✅ Found by ObjectId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
-        } else {
-          article = null;
-        }
-      } else {
-        article = null;
-      }
-    }
+    const article: any = await findAndIncrementArticleByIdentifier(newsCollection, id);
 
     if (!article) {
-      console.error('❌ Article not found:', id);
+      console.error('Article not found:', id);
       notFound();
     }
 
-    // Serialize the article to plain object
+    if (article.publicId === id.toLowerCase()) {
+      console.log('Found by publicId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
+    } else if (article.shortId === id) {
+      console.log('Found by shortId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
+    } else {
+      console.log('Found by ObjectId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
+    }
+
     const serializedArticle = serializeArticle(article);
     const relatedArticles = await getRelatedArticles(newsCollection, article);
 
@@ -143,13 +112,11 @@ export default async function ArticlePage({ params }: PageProps) {
         <main className="flex-grow pt-[60px] sm:pt-[65px] md:pt-[70px]">
           <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
-              {/* Main Article Content */}
               <div className="article-main-content-wrapper flex-1 min-w-0">
                 <ArticleContent article={serializedArticle} />
                 <RelatedArticles articles={relatedArticles} />
               </div>
 
-              {/* Trending Sidebar */}
               <div className="lg:w-80 xl:w-96 flex-shrink-0">
                 <TrendingArticles />
               </div>

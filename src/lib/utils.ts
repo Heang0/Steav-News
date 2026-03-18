@@ -58,4 +58,23 @@ export function getOptimizedImageUrl(
   return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
 }
 
+export function shouldBypassNextImageOptimization(url: string): boolean {
+  return /^https?:\/\//.test(url);
+}
+
+export function getSiteUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, '');
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    const normalizedVercelUrl = vercelUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    return `https://${normalizedVercelUrl}`;
+  }
+
+  return 'https://steav-news.vercel.app';
+}
+
 export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'កីឡា', 'ពិភពលោក'];

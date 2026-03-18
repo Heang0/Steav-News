@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Article, Comment } from '@/types';
-import { formatDate, getOptimizedImageUrl } from '@/lib/utils';
+import { formatDate, getOptimizedImageUrl, getSiteUrl, shouldBypassNextImageOptimization } from '@/lib/utils';
 
 interface ArticleContentProps {
   article: Article;
@@ -21,6 +21,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
     height: 900,
     crop: 'limit',
   });
+  const unoptimizedHero = shouldBypassNextImageOptimization(heroImage);
 
   const handleLike = async () => {
     if (hasLiked) return;
@@ -39,10 +40,8 @@ export default function ArticleContent({ article }: ArticleContentProps) {
   const handleShare = (platform: string) => {
     const baseUrl = typeof window !== 'undefined'
       ? window.location.origin
-      : 'https://steav-news.onrender.com';
-    const cleanUrl = article.shortId
-      ? `${baseUrl}/a/${article.shortId}`
-      : `${baseUrl}/a/${article._id}`;
+      : getSiteUrl();
+    const cleanUrl = `${baseUrl}/a/${article.publicId || article._id}`;
     const url = encodeURIComponent(cleanUrl);
     const title = encodeURIComponent(article.title);
     const shareUrls: Record<string, string> = {
@@ -120,6 +119,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
             className="object-cover"
             priority
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
+            unoptimized={unoptimizedHero}
           />
           {/* Subtle bottom gradient for smooth transition */}
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from '@/types';
-import { formatDate, getOptimizedImageUrl } from '@/lib/utils';
+import { formatDate, getOptimizedImageUrl, shouldBypassNextImageOptimization } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: Article;
@@ -17,10 +17,9 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
     height: variant === 'trending' ? 160 : 500,
     crop: 'fill',
   });
+  const unoptimizedImage = shouldBypassNextImageOptimization(cardImage);
 
-  const articleHref = article.shortId
-    ? `/a/${article.shortId}`
-    : `/a/${article._id}`;
+  const articleHref = `/a/${article.publicId || article._id}`;
 
   if (variant === 'spotlight') {
     return (
@@ -32,6 +31,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 650px"
+            unoptimized={unoptimizedImage}
           />
           {/* Category overlay */}
           {article.category && (
@@ -77,6 +77,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="72px"
+              unoptimized={unoptimizedImage}
             />
           </div>
           <div className="flex-grow min-w-0">
@@ -111,6 +112,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
+          unoptimized={unoptimizedImage}
         />
         {article.category && (
           <div className="absolute top-2 left-2">
