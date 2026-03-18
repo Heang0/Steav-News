@@ -6,7 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrendingArticles from '@/components/TrendingArticles';
 import ArticleContent from '@/components/ArticleContent';
-import { Article } from '@/types';
+import RelatedArticles from '@/components/RelatedArticles';
+import { getRelatedArticles, serializeArticle } from '@/lib/articles';
 
 type PageProps = {
   searchParams: Promise<{ id?: string }>;
@@ -15,29 +16,6 @@ type PageProps = {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-// Convert MongoDB object to plain object for serialization
-function serializeArticle(article: any): Article {
-  return {
-    _id: article._id ? article._id.toString() : '',
-    shortId: article.shortId || '',
-    title: article.title || '',
-    image: article.image || '',
-    date: article.date || '',
-    content: article.content || '',
-    createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
-    trending: article.trending || false,
-    likes: article.likes || 0,
-    views: article.views || 0,
-    category: article.category || '',
-    comments: (article.comments || []).map((c: any) => ({
-      _id: c._id?.toString() || '',
-      author: c.author || '',
-      text: c.text || '',
-      createdAt: c.createdAt instanceof Date ? c.createdAt.toISOString() : c.createdAt,
-    })),
-  };
-}
 
 export async function generateMetadata(
   { searchParams }: PageProps,
@@ -185,6 +163,7 @@ export default async function ArticlePage({ searchParams }: PageProps) {
 
     // Serialize the article to plain object
     const serializedArticle = serializeArticle(article);
+    const relatedArticles = await getRelatedArticles(newsCollection, article);
 
     return (
       <div className="min-h-screen flex flex-col">
@@ -196,6 +175,7 @@ export default async function ArticlePage({ searchParams }: PageProps) {
               {/* Main Article Content */}
               <div className="article-main-content-wrapper flex-1 min-w-0">
                 <ArticleContent article={serializedArticle} />
+                <RelatedArticles articles={relatedArticles} />
               </div>
 
               {/* Trending Sidebar */}

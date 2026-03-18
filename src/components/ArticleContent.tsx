@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Article, Comment } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getOptimizedImageUrl } from '@/lib/utils';
 
 interface ArticleContentProps {
   article: Article;
@@ -16,6 +16,11 @@ export default function ArticleContent({ article }: ArticleContentProps) {
   const [commentAuthor, setCommentAuthor] = useState('');
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const heroImage = getOptimizedImageUrl(article.image, {
+    width: 1400,
+    height: 900,
+    crop: 'limit',
+  });
 
   const handleLike = async () => {
     if (hasLiked) return;
@@ -109,7 +114,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
       {article.image && (
         <div className="relative w-full h-[220px] sm:h-[340px] md:h-[460px] mt-2">
           <Image
-            src={article.image || 'https://placehold.co/800x400/cccccc/ffffff?text=No+Image'}
+            src={heroImage || 'https://placehold.co/800x400/cccccc/ffffff?text=No+Image'}
             alt={article.title}
             fill
             className="object-cover"

@@ -36,6 +36,8 @@ export default async function Home({ searchParams }: HomeProps) {
   const resolvedSearchParams = await searchParams;
   const category = resolvedSearchParams.category || null;
   const search = resolvedSearchParams.search || null;
+  const page = Number.parseInt(resolvedSearchParams.page || '1', 10);
+  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -54,7 +56,7 @@ export default async function Home({ searchParams }: HomeProps) {
               <CategorySpotlightsSection category={category} search={search} />
 
               {/* Latest Articles */}
-              <LatestArticlesSection category={category} search={search} />
+              <LatestArticlesSection category={category} search={search} page={currentPage} />
             </div>
 
             {/* Trending Sidebar - Right Column */}

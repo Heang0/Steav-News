@@ -1,6 +1,4 @@
-'use client';
-
-import { useCategorySpotlights } from '@/hooks/useCategorySpotlights';
+import { getCategorySpotlights } from '@/lib/article-queries';
 import ArticleCard from './ArticleCard';
 
 interface CategorySpotlightsSectionProps {
@@ -8,10 +6,10 @@ interface CategorySpotlightsSectionProps {
   search: string | null;
 }
 
-export default function CategorySpotlightsSection({ category, search }: CategorySpotlightsSectionProps) {
-  const { spotlights, loading: spotlightsLoading, shouldShow } = useCategorySpotlights();
+export default async function CategorySpotlightsSection({ category, search }: CategorySpotlightsSectionProps) {
+  if (category || search) return null;
 
-  if (!shouldShow) return null;
+  const spotlights = await getCategorySpotlights();
 
   return (
     <section className="mb-6 sm:mb-8">
@@ -24,18 +22,7 @@ export default function CategorySpotlightsSection({ category, search }: Category
         </h2>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-4">
-        {spotlightsLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl overflow-hidden bg-gray-100 animate-pulse">
-              <div className="pb-[62%] bg-gray-200" />
-              <div className="p-3 space-y-2">
-                <div className="h-2.5 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-5/6" />
-              </div>
-            </div>
-          ))
-        ) : spotlights.length === 0 ? (
+        {spotlights.length === 0 ? (
           <p className="text-gray-400 text-center col-span-full py-8 text-sm">
             No category spotlights available yet.
           </p>

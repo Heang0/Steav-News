@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import cloudinary, { commonCloudinaryParams } from '@/lib/cloudinary';
+import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
 import { ObjectId } from 'mongodb';
 import { CATEGORIES } from '@/lib/utils';
 
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     if (thumbnail && thumbnail.size > 0) {
       const bytes = await thumbnail.arrayBuffer();
       const buffer = Buffer.from(bytes);
+      const optimizedBuffer = await optimizeImageBuffer(buffer, thumbnail.type);
 
       const uploadResult = await new Promise<any>((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
             else resolve(result);
           }
         );
-        uploadStream.end(buffer);
+        uploadStream.end(optimizedBuffer);
       });
 
       imagePath = uploadResult.secure_url;

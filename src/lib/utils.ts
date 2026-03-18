@@ -34,4 +34,28 @@ export function getFacebookOptimizedImageUrl(url: string): string {
   return url;
 }
 
+export function getOptimizedImageUrl(
+  url: string,
+  options: {
+    width?: number;
+    height?: number;
+    quality?: string | number;
+    crop?: 'fill' | 'fit' | 'limit';
+  } = {}
+): string {
+  if (!url || !url.includes('cloudinary.com')) {
+    return url;
+  }
+
+  const transforms = [
+    options.width ? `w_${options.width}` : '',
+    options.height ? `h_${options.height}` : '',
+    options.crop ? `c_${options.crop}` : '',
+    `q_${options.quality || 'auto:good'}`,
+    'f_auto',
+  ].filter(Boolean);
+
+  return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
+}
+
 export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'កីឡា', 'ពិភពលោក'];

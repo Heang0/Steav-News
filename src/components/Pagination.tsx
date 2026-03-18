@@ -1,13 +1,25 @@
-'use client';
+import Link from 'next/link';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  category?: string | null;
+  search?: string | null;
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+export default function Pagination({ currentPage, totalPages, category, search }: PaginationProps) {
   if (totalPages <= 1) return null;
+
+  const buildPageHref = (page: number) => {
+    const params = new URLSearchParams();
+
+    if (category) params.set('category', category);
+    if (search) params.set('search', search);
+    if (page > 1) params.set('page', String(page));
+
+    const query = params.toString();
+    return query ? `/?${query}` : '/';
+  };
 
   const appendPaginationItem = (
     page: number | null,
@@ -27,27 +39,26 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     }
 
     return (
-      <button
+      <Link
         key={`page-${page}`}
+        href={buildPageHref(page)}
         className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sm font-bold transition-all duration-200
           ${isActive
             ? 'bg-primary text-white shadow-md shadow-red-200'
             : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:-translate-y-0.5 hover:shadow-sm'
           }`}
-        onClick={() => onPageChange(page)}
-        disabled={isDisabled}
+        aria-current={isActive ? 'page' : undefined}
       >
         {text}
-      </button>
+      </Link>
     );
   };
 
   const renderPaginationItems = () => {
     const items: React.ReactNode[] = [];
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+    const compactPagination = totalPages > 5;
 
-    if (isMobile) {
-      // Simplified mobile pagination
+    if (compactPagination) {
       let pagesToDisplay = new Set<number>();
       pagesToDisplay.add(1);
       if (totalPages >= 2) pagesToDisplay.add(2);
@@ -98,27 +109,40 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
   };
 
   const arrowBtn = (page: number, direction: 'prev' | 'next', disabled: boolean) => (
-    <button
-      key={direction}
-      onClick={() => !disabled && onPageChange(page)}
-      disabled={disabled}
-      aria-label={direction === 'prev' ? 'Previous page' : 'Next page'}
-      className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm transition-all duration-200
-        ${disabled
-          ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-          : 'bg-gray-100 hover:bg-primary hover:text-white text-gray-600 hover:shadow-md hover:-translate-y-0.5'
-        }`}
-    >
-      {direction === 'prev' ? (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      ) : (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      )}
-    </button>
+    disabled ? (
+      <span
+        key={direction}
+        aria-disabled="true"
+        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-300 cursor-not-allowed"
+      >
+        {direction === 'prev' ? (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        )}
+      </span>
+    ) : (
+      <Link
+        key={direction}
+        href={buildPageHref(page)}
+        aria-label={direction === 'prev' ? 'Previous page' : 'Next page'}
+        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm transition-all duration-200 bg-gray-100 hover:bg-primary hover:text-white text-gray-600 hover:shadow-md hover:-translate-y-0.5"
+      >
+        {direction === 'prev' ? (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        )}
+      </Link>
+    )
   );
 
   return (

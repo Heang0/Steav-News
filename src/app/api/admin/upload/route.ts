@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import cloudinary, { commonCloudinaryParams } from '@/lib/cloudinary';
+import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
 
 function isAuthenticated(request: NextRequest): boolean {
   const sessionId = request.headers.get('x-session-id');
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const optimizedBuffer = await optimizeImageBuffer(buffer, image.type);
 
     const uploadResult = await new Promise<any>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
           else resolve(result);
         }
       );
-      uploadStream.end(buffer);
+      uploadStream.end(optimizedBuffer);
     });
 
     return NextResponse.json({

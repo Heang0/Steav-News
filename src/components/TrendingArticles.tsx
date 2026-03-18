@@ -1,25 +1,8 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { getTrendingArticles } from '@/lib/article-queries';
 import ArticleCard from './ArticleCard';
-import { Article } from '@/types';
-
-export default function TrendingArticles() {
-  const [trendingArticles, setTrendingArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/trending')
-      .then((res) => res.json())
-      .then((data) => {
-        setTrendingArticles(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch trending articles:', err);
-        setLoading(false);
-      });
-  }, []);
+ 
+export default async function TrendingArticles() {
+  const trendingArticles = await getTrendingArticles(5);
 
   return (
     <aside className="sticky top-[80px] mb-8">
@@ -34,20 +17,7 @@ export default function TrendingArticles() {
         </h2>
       </div>
 
-      {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex gap-3 animate-pulse">
-              <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] flex-shrink-0 rounded-xl bg-gray-200" />
-              <div className="flex-grow space-y-2 py-1">
-                <div className="h-3 bg-gray-200 rounded w-full" />
-                <div className="h-3 bg-gray-200 rounded w-4/5" />
-                <div className="h-2 bg-gray-100 rounded w-1/3 mt-1" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : trendingArticles.length === 0 ? (
+      {trendingArticles.length === 0 ? (
         <p className="text-gray-400 text-center text-sm py-6">No trending articles.</p>
       ) : (
         <ul className="divide-y divide-gray-50">

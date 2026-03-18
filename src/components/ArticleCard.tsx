@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, getOptimizedImageUrl } from '@/lib/utils';
 
 interface ArticleCardProps {
   article: Article;
@@ -12,6 +12,11 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
   const articleDate = article.createdAt
     ? formatDate(article.createdAt)
     : article.date || 'Unknown Date';
+  const cardImage = getOptimizedImageUrl(article.image, {
+    width: variant === 'trending' ? 160 : 800,
+    height: variant === 'trending' ? 160 : 500,
+    crop: 'fill',
+  });
 
   const articleHref = article.shortId
     ? `/a/${article.shortId}`
@@ -22,7 +27,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
       <Link href={articleHref} className="block group rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}>
         <div className="relative w-full pb-[62%] overflow-hidden">
           <Image
-            src={article.image || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}
+            src={cardImage || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}
             alt={article.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -67,7 +72,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
         <Link href={articleHref} className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0 hover:bg-gray-50 rounded-lg px-1 transition-colors">
           <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] flex-shrink-0 rounded-xl overflow-hidden">
             <Image
-              src={article.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image'}
+              src={cardImage || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image'}
               alt={article.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -101,7 +106,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
     <Link href={articleHref} className="block group rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}>
       <div className="relative w-full pb-[62%] overflow-hidden">
         <Image
-          src={article.image || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}
+          src={cardImage || 'https://placehold.co/400x250/cccccc/ffffff?text=No+Image'}
           alt={article.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
