@@ -103,7 +103,7 @@ export default async function ArticlePage({ params }: PageProps) {
     }
 
     const serializedArticle = serializeArticle(article);
-    const relatedArticles = await getRelatedArticles(newsCollection, article);
+    const relatedArticles = await getRelatedArticles(newsCollection, article, 6);
 
     return (
       <div className="min-h-screen flex flex-col">

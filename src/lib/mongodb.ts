@@ -1,4 +1,8 @@
 import { MongoClient } from 'mongodb';
+import dns from 'dns';
+
+// Fix Node.js DNS resolution issues on some Windows systems
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please add your Mongo URI to .env.local');
