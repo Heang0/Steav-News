@@ -20,18 +20,24 @@ export function formatDate(dateString: string): string {
 }
 
 export function buildImageUrl(imagePath: string): string {
-  if (!imagePath) return '/images/default_og_image.jpg';
+  if (!imagePath) return `${getSiteUrl()}/images/default_og_image.jpg`;
   if (imagePath.startsWith('http')) return imagePath;
-  if (imagePath.startsWith('/')) return imagePath;
-  return `/uploads${imagePath}`;
+  if (imagePath.startsWith('/')) return `${getSiteUrl()}${imagePath}`;
+  return `${getSiteUrl()}/uploads${imagePath}`;
 }
 
 export function getFacebookOptimizedImageUrl(url: string): string {
-  if (!url) return url;
-  if (url.includes('cloudinary.com')) {
-    return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto:best,f_auto/');
+  if (!url) return buildImageUrl('');
+  
+  let absoluteUrl = url;
+  if (!url.startsWith('http')) {
+    absoluteUrl = buildImageUrl(url);
   }
-  return url;
+
+  if (absoluteUrl.includes('cloudinary.com')) {
+    return absoluteUrl.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto:best,f_auto/');
+  }
+  return absoluteUrl;
 }
 
 export function getOptimizedImageUrl(
