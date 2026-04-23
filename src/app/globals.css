@@ -192,3 +192,9 @@
   border-radius: 99px;
   border: 1px solid rgba(230,0,0,0.18);
 }
+
+/* ===================== KHQR MODAL ANIMATION ===================== */
+@keyframes khqrIn {
+  from { opacity: 0; transform: scale(0.85) translateY(24px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
