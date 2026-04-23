@@ -7,4 +7,4 @@ Allow: /
 User-agent: Facebot
 Allow: /
 
-Sitemap: https://steav-news.onrender.com/sitemap.xml
+Sitemap: https://www.steavnews.site/sitemap.xml
