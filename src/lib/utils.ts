@@ -68,12 +68,7 @@ export function getSiteUrl(): string {
     return configuredUrl.replace(/\/$/, '');
   }
 
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    const normalizedVercelUrl = vercelUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    return `https://${normalizedVercelUrl}`;
-  }
-
+  // Always fallback to the custom domain as the primary choice
   return 'https://www.steavnews.site';
 }
 

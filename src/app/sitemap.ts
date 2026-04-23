@@ -4,7 +4,7 @@ import { getSiteUrl } from '@/lib/utils';
 import { getArticlePublicId } from '@/lib/articles';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = getSiteUrl();
+  const baseUrl = 'https://www.steavnews.site';
   const db = await getDb();
   const articles = await db.collection('articles')
     .find({}, { projection: { _id: 1, publicId: 1, shortId: 1, updatedAt: 1, createdAt: 1 } })
