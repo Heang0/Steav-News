@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Article, Comment } from '@/types';
-import { formatDate, getOptimizedImageUrl, getSiteUrl, shouldBypassNextImageOptimization } from '@/lib/utils';
+import { formatDate, getOptimizedImageUrl, getSiteUrl, shouldBypassNextImageOptimization, stripHtml } from '@/lib/utils';
 
 interface ArticleContentProps {
   article: Article;
