@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
+import '@/app/globals.css';
 import { getSiteUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
