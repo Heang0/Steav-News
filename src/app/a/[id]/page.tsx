@@ -109,6 +109,28 @@ export default async function ArticlePage({ params }: PageProps) {
       <div className="min-h-screen flex flex-col">
         <Header />
 
+        {/* JSON-LD Structured Data for NewsArticle */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'NewsArticle',
+              headline: serializedArticle.title,
+              image: [serializedArticle.image],
+              datePublished: serializedArticle.createdAt || serializedArticle.date,
+              dateModified: serializedArticle.updatedAt || serializedArticle.createdAt || serializedArticle.date,
+              author: [
+                {
+                  '@type': 'Organization',
+                  name: 'STEAV NEWS',
+                  url: getSiteUrl(),
+                },
+              ],
+            }),
+          }}
+        />
+
         <main className="flex-grow pt-[60px] sm:pt-[65px] md:pt-[70px]">
           <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
