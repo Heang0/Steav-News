@@ -19,6 +19,7 @@ export interface Article {
   views: number;
   category: string;
   comments: Comment[];
+  updatedAt?: string;
 }
 
 export interface StaffCard {

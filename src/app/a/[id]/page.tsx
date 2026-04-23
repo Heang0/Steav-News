@@ -118,8 +118,8 @@ export default async function ArticlePage({ params }: PageProps) {
               '@type': 'NewsArticle',
               headline: serializedArticle.title,
               image: [serializedArticle.image],
-              datePublished: serializedArticle.createdAt || serializedArticle.date,
-              dateModified: serializedArticle.updatedAt || serializedArticle.createdAt || serializedArticle.date,
+              datePublished: (serializedArticle as any).createdAt || (serializedArticle as any).date,
+              dateModified: (serializedArticle as any).updatedAt || (serializedArticle as any).createdAt || (serializedArticle as any).date,
               author: [
                 {
                   '@type': 'Organization',
