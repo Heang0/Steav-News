@@ -101,8 +101,28 @@ export default function ArticleContent({ article }: ArticleContentProps) {
     }
   };
 
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const currentScroll = window.scrollY;
+      setScrollProgress((currentScroll / totalHeight) * 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <>
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 w-full h-1 z-[100] pointer-events-none">
+        <div 
+          className="h-full bg-primary shadow-[0_0_8px_rgba(230,0,0,0.6)] transition-all duration-150 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       {/* KHQR Donation Modal */}
       {showKhqr && (
         <div
@@ -193,6 +213,12 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               </svg>
               {Intl.NumberFormat('en-US', { notation: 'compact' }).format(article.views || 0)} views
             </span>
+            <span className="text-gray-400 text-xs sm:text-sm flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {Math.max(1, Math.ceil(stripHtml(article.content).split(/\s+/).length / 200))} min read
+            </span>
           </div>
 
           {/* Title */}
@@ -261,6 +287,20 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                 >
                   <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" /></svg>
                   <span className="hidden xs:inline">Twitter</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const baseUrl = typeof window !== 'undefined' ? window.location.origin : getSiteUrl();
+                    const cleanUrl = `${baseUrl}/a/${article.publicId || article._id}`;
+                    navigator.clipboard.writeText(cleanUrl);
+                    alert('Link copied to clipboard!');
+                  }}
+                  className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all shadow-sm hover:shadow-md ml-1"
+                  title="Copy link"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
                 </button>
               </div>
             </div>
