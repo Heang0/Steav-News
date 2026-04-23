@@ -7,7 +7,7 @@ const navLinks = [
   { href: '/', label: 'ទំព័រដើម' },
   { href: '/?category=កម្សាន្ត', label: 'កម្សាន្ត' },
   { href: '/?category=សង្គម', label: 'សង្គម' },
-  { href: '/?category=កីឡា', label: 'កីឡា' },
+  { href: '/?category=ស្នេហា', label: 'ស្នេហា' },
   { href: '/?category=ពិភពលោក', label: 'ពិភពលោក' },
 ];
 

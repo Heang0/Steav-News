@@ -29,7 +29,12 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [content, setContent] = useState(article?.content || '');
   const [title, setTitle] = useState(article?.title || '');
-  const [date, setDate] = useState(article?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => {
+    if (article?.date) {
+      return article.date.split('T')[0];
+    }
+    return new Date().toISOString().split('T')[0];
+  });
   const [category, setCategory] = useState(article?.category || CATEGORIES[0]);
   const [trending, setTrending] = useState(article?.trending || false);
   const [imageUrl, setImageUrl] = useState(article?.image || '');
@@ -306,6 +311,18 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         
         {/* Formatting Toolbar */}
         <div className="flex flex-wrap gap-1.5 p-3 bg-gray-50 rounded-t-xl border border-gray-200 border-b-0">
+          {/* Spacing Group - Moved to start for visibility */}
+          <ToolbarButton onClick={() => insertHtml('<p>', '</p>')} title="Paragraph (ចុះបន្ទាត់)">
+            <span className="font-bold text-sm">P</span>
+          </ToolbarButton>
+          <ToolbarButton onClick={() => insertHtml('<br />')} title="Line Break (ចុះមួយបន្ទាត់)">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l4 4m-4-4l4-4" />
+            </svg>
+          </ToolbarButton>
+          
+          <div className="w-px h-9 bg-gray-300 mx-1 self-center"></div>
+
           <ToolbarButton onClick={() => insertHtml('<b>', '</b>')} title="Bold">
             <span className="font-bold text-base">B</span>
           </ToolbarButton>

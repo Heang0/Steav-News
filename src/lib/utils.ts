@@ -77,4 +77,4 @@ export function getSiteUrl(): string {
   return 'https://steav-news.vercel.app';
 }
 
-export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'កីឡា', 'ពិភពលោក'];
+export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'ស្នេហា', 'ពិភពលោក'];

@@ -19,7 +19,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
 
   // KHQR donation modal
   const [showKhqr, setShowKhqr] = useState(true);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(5);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
               <div
                 className="h-full bg-gradient-to-r from-red-400 to-red-600 rounded-full transition-all duration-1000 ease-linear"
-                style={{ width: `${(countdown / 4) * 100}%` }}
+                style={{ width: `${(countdown / 5) * 100}%` }}
               />
             </div>
 
