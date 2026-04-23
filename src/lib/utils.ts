@@ -69,7 +69,7 @@ export function getSiteUrl(): string {
   }
 
   // Always fallback to the custom domain as the primary choice
-  return 'https://www.steavnews.site';
+  return 'https://steavnews.site';
 }
 
 export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'ស្នេហា', 'ពិភពលោក'];

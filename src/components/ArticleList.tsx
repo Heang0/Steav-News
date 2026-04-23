@@ -151,7 +151,7 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-semibold rounded-full bg-primary/10 text-primary">
+                    <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-primary/10 text-primary border border-primary/10">
                       {article.category}
                     </span>
                   </td>
@@ -171,19 +171,25 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => onEdit(article)}
-                      className="text-primary hover:text-primary-dark mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(article._id)}
-                      disabled={deletingId === article._id}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
-                    >
-                      {deletingId === article._id ? 'Deleting...' : 'Delete'}
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => onEdit(article)}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+                            handleDelete(article._id);
+                          }
+                        }}
+                        disabled={deletingId === article._id}
+                        className="text-red-600 hover:text-red-800 font-medium text-sm transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === article._id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

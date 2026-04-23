@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ArticleForm from '@/components/ArticleForm';
 import ArticleList from '@/components/ArticleList';
+import Dashboard from '@/components/Dashboard';
 import { Article } from '@/types';
 
 export default function AdminPanel() {
@@ -12,7 +13,7 @@ export default function AdminPanel() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'create' | 'edit' | 'list'>('create');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'create' | 'edit' | 'list'>('dashboard');
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const router = useRouter();
@@ -202,10 +203,23 @@ export default function AdminPanel() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <div className="flex">
+            <div className="flex overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+                  activeTab === 'dashboard'
+                    ? 'text-primary border-primary bg-primary/5'
+                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </button>
               <button
                 onClick={() => setActiveTab('list')}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 ${
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
                   activeTab === 'list'
                     ? 'text-primary border-primary bg-primary/5'
                     : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
@@ -221,7 +235,7 @@ export default function AdminPanel() {
                   setEditingArticle(null);
                   setActiveTab('create');
                 }}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 ${
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
                   activeTab === 'create'
                     ? 'text-primary border-primary bg-primary/5'
                     : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
@@ -237,6 +251,10 @@ export default function AdminPanel() {
 
           {/* Tab Content */}
           <div className="p-6">
+            {activeTab === 'dashboard' && (
+              <Dashboard />
+            )}
+
             {activeTab === 'create' && (
               <ArticleForm onSuccess={handleArticleCreated} />
             )}
