@@ -22,14 +22,16 @@ export interface Article {
   updatedAt?: string;
 }
 
-export interface StaffCard {
-  _id: string;
+export interface Staff {
+  _id?: string;
+  staffId: string;
   name: string;
-  position: string;
-  organization: string;
-  image: string;
-  id: string;
+  role: string;
+  phone: string;
+  photo: string;
+  createdAt: string;
 }
+
 
 export interface ApiResponse<T> {
   success: boolean;
