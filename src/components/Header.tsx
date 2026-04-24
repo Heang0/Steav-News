@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/?category=សង្គម', label: 'សង្គម' },
   { href: '/?category=ស្នេហា', label: 'ស្នេហា' },
   { href: '/?category=ពិភពលោក', label: 'ពិភពលោក' },
+  { href: '/card', label: 'ធ្វើកាត' },
 ];
 
 export default function Header() {
@@ -59,10 +60,16 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="relative text-white/90 font-bold text-sm px-4 py-2 rounded-xl hover:text-white hover:bg-white/10 transition-all duration-200 group"
+              className={`relative font-bold text-sm px-4 py-2 rounded-xl transition-all duration-200 group ${
+                link.href === '/card'
+                  ? 'bg-white text-primary hover:bg-gray-100 hover:shadow-md ml-2 border-2 border-white'
+                  : 'text-white/90 hover:text-white hover:bg-white/10'
+              }`}
             >
               {link.label}
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-white rounded-full group-hover:w-1/2 transition-all duration-200" />
+              {link.href !== '/card' && (
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-white rounded-full group-hover:w-1/2 transition-all duration-200" />
+              )}
             </Link>
           ))}
         </nav>
@@ -82,7 +89,7 @@ export default function Header() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-primary border-t border-white/20 shadow-lg ${
-          isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="px-4 py-3 flex flex-col gap-1">
@@ -90,7 +97,11 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-white/90 font-bold text-base py-3 px-4 rounded-xl hover:bg-white/10 hover:text-white transition-colors"
+              className={`font-bold text-base py-3 px-4 rounded-xl transition-colors ${
+                link.href === '/card'
+                  ? 'bg-white text-primary mt-2 text-center shadow-sm border border-white'
+                  : 'text-white/90 hover:bg-white/10 hover:text-white'
+              }`}
               onClick={() => setIsMenuOpen(false)}
             >
               {link.label}

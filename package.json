@@ -13,6 +13,7 @@
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
     "cloudinary": "^1.41.3",
+    "html2canvas": "^1.4.1",
     "mongodb": "^5.9.2",
     "next": "^16.1.6",
     "postcss": "^8.5.8",

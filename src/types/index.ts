@@ -29,6 +29,8 @@ export interface Staff {
   role: string;
   phone: string;
   photo: string;
+  dob?: string;
+  validUntil?: string;
   createdAt: string;
 }
 
