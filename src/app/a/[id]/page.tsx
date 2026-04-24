@@ -56,9 +56,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: [
           {
             url: imageUrl,
+            secureUrl: imageUrl,
             width: 1200,
             height: 630,
             alt: title,
+            type: 'image/jpeg',
           },
         ],
         url: articleUrl,

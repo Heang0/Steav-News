@@ -20,10 +20,15 @@ export function formatDate(dateString: string): string {
 }
 
 export function buildImageUrl(imagePath: string): string {
-  if (!imagePath) return `${getSiteUrl()}/images/default_og_image.jpg`;
+  if (!imagePath) return `${getSiteUrl()}/uploads/images/favicon.jpg`;
   if (imagePath.startsWith('http')) return imagePath;
-  if (imagePath.startsWith('/')) return `${getSiteUrl()}${imagePath}`;
-  return `${getSiteUrl()}/uploads${imagePath}`;
+  const siteUrl = getSiteUrl();
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  if (cleanPath.startsWith('/uploads')) {
+    return `${siteUrl}${cleanPath}`;
+  }
+  return `${siteUrl}/uploads${cleanPath}`;
 }
 
 export function getFacebookOptimizedImageUrl(url: string): string {
@@ -34,8 +39,12 @@ export function getFacebookOptimizedImageUrl(url: string): string {
     absoluteUrl = buildImageUrl(url);
   }
 
+  // Cloudinary optimization for Facebook (1200x630 is the standard)
   if (absoluteUrl.includes('cloudinary.com')) {
-    return absoluteUrl.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto:best,f_auto/');
+    // Ensure we use a compatible format (jpg) and extension for better scraper support
+    return absoluteUrl
+      .replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/')
+      .replace(/\.[^/.]+$/, '.jpg');
   }
   return absoluteUrl;
 }
