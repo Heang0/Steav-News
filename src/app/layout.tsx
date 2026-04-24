@@ -28,6 +28,11 @@ export const metadata: Metadata = {
   icons: {
     icon: '/uploads/images/favicon.jpg',
   },
+  verification: {
+    other: {
+      'msvalidate.01': '63DE1EBAADD223E17DB668D905F5AE56',
+    },
+  },
 };
 
 import ScrollToTop from '@/components/ScrollToTop';
