@@ -66,7 +66,7 @@ export function getOptimizedImageUrl(
     options.width ? `w_${options.width}` : '',
     options.height ? `h_${options.height}` : '',
     options.crop ? `c_${options.crop}` : '',
-    `q_${options.quality || 'auto:good'}`,
+    `q_${options.quality || 'auto:best'}`, // Upgraded from auto:good to auto:best for maximum quality
     'f_auto',
   ].filter(Boolean);
 
