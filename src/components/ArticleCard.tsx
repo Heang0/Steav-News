@@ -41,7 +41,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           )}
         </div>
         <div className="p-2.5 sm:p-4">
-          <h3 className="text-sm sm:text-[0.95rem] font-bold text-gray-800 line-clamp-3 mb-1.5 leading-[1.35] group-hover:text-primary transition-colors">
+          <h3 data-nosnippet className="text-sm sm:text-[0.95rem] font-bold text-gray-800 line-clamp-3 mb-1.5 leading-[1.35] group-hover:text-primary transition-colors">
             {article.title}
           </h3>
           <div className="flex items-center gap-3 text-gray-400 text-[11px] sm:text-xs">
@@ -81,7 +81,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
             />
           </div>
           <div className="flex-grow min-w-0">
-            <span className="block font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+            <span data-nosnippet className="block font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors">
               {article.title}
             </span>
             <div className="flex items-center gap-3 text-gray-400 text-[11px] mt-1.5">
@@ -138,7 +138,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
             </span>
           )}
         </div>
-        <h3 className="text-sm sm:text-[0.95rem] font-bold text-gray-800 line-clamp-3 leading-[1.35] group-hover:text-primary transition-colors">
+        <h3 data-nosnippet className="text-sm sm:text-[0.95rem] font-bold text-gray-800 line-clamp-3 leading-[1.35] group-hover:text-primary transition-colors">
           {article.title}
         </h3>
       </div>
