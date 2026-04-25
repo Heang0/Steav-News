@@ -135,6 +135,17 @@ export default async function ArticlePage({ params }: PageProps) {
                   url: getSiteUrl(),
                 },
               ],
+              publisher: {
+                '@type': 'Organization',
+                name: 'STEAV NEWS',
+                logo: {
+                  '@type': 'ImageObject',
+                  url: `${getSiteUrl()}/uploads/images/favicon.jpg`
+                },
+                sameAs: [
+                  'https://www.facebook.com/steavnews'
+                ]
+              }
             }),
           }}
         />

@@ -65,6 +65,23 @@ export default function RootLayout({
         {/* Facebook Page Link for News Integrity */}
         <meta property="article:publisher" content="https://www.facebook.com/steavnews" />
         <meta property="fb:pages" content="111592210211644" />
+        {/* Global Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'STEAV NEWS',
+              url: 'https://steavnews.site/',
+              publisher: {
+                '@type': 'Organization',
+                name: 'STEAV NEWS',
+                sameAs: ['https://www.facebook.com/steavnews']
+              }
+            })
+          }}
+        />
       </head>
       <body className="antialiased">
         {children}
