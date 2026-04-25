@@ -74,6 +74,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description,
         images: [imageUrl],
       },
+      other: {
+        'article:publisher': 'https://www.facebook.com/steavnews',
+      },
     };
   } catch (error) {
     console.error('Error generating metadata:', error);
