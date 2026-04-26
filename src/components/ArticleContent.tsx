@@ -360,7 +360,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                   id="author"
                   value={commentAuthor}
                   onChange={(e) => setCommentAuthor(e.target.value)}
-                  className="input-field text-sm sm:text-base"
+                  className="input-field text-base"
                   placeholder="Your name"
                   maxLength={50}
                 />
@@ -373,7 +373,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                   id="comment"
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className="input-field min-h-[90px] sm:min-h-[110px] resize-vertical text-sm sm:text-base"
+                  className="input-field min-h-[90px] sm:min-h-[110px] resize-vertical text-base"
                   placeholder="Write your comment..."
                   required
                 />
