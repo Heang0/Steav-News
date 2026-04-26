@@ -18,7 +18,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
   const [submittingComment, setSubmittingComment] = useState(false);
 
   // KHQR donation modal
-  const [showKhqr, setShowKhqr] = useState(true);
+  const [showKhqr, setShowKhqr] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
