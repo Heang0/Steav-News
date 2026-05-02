@@ -246,9 +246,28 @@ export default function NewspaperGenerator() {
     const canvas = canvasRef.current; if (!canvas) return;
     setIsGenerating(true);
     try {
-      const link = document.createElement('a'); link.download = `steav-news-${template}-${Date.now()}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.92); link.click();
-    } catch (e) { alert('កំហុសក្នុងការទាញយក!'); } finally { setIsGenerating(false); }
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert('កំហុសក្នុងការទាញយក!');
+          setIsGenerating(false);
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `steav-news-${template}-${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up memory after a short delay
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        setIsGenerating(false);
+      }, 'image/jpeg', 0.92);
+    } catch (e) { 
+      alert('កំហុសក្នុងការទាញយក!'); 
+      setIsGenerating(false);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
