@@ -189,7 +189,8 @@ export default function NewspaperGenerator() {
 
     // 4. HEADLINE
     const wrapText = (text: string, xPos: number, yPos: number, maxWidth: number, lineHeight: number) => {
-      const segmenter = new Intl.Segmenter('km', { granularity: 'grapheme' });
+      // Use 'word' granularity to keep Khmer words/names together (e.g., ព្រះវិហារ stays together)
+      const segmenter = new Intl.Segmenter('km', { granularity: 'word' });
       const segments = Array.from(segmenter.segment(text)).map(s => s.segment);
       let line = '';
       for (let n = 0; n < segments.length; n++) {
@@ -205,7 +206,7 @@ export default function NewspaperGenerator() {
     const displayHeadline = headline || 'សូមបំពេញចំណងជើងធំ!';
     if (!headline) ctx.globalAlpha = 0.3;
     ctx.font = displayHeadline.length > 50 ? '60px Moul' : '80px Moul';
-    const lastY = wrapText(displayHeadline, canvas.width / 2, 615, 1100, 110);
+    const lastY = wrapText(displayHeadline, canvas.width / 2, 615, 1300, 110);
     ctx.globalAlpha = 1.0;
 
     const displaySub = subHeadline || 'សូមបំពេញចំណងជើងរងនៅទីនេះ...';
