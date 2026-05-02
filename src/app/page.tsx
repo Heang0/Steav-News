@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     description: 'Read the latest news from STEAV NEWS',
     type: 'website',
     siteName: 'STEAV NEWS',
+    url: 'https://steavnews.site/',
     images: [
       {
         url: '/uploads/images/banner1.jpg',
