@@ -130,7 +130,7 @@ export default function NewspaperGenerator() {
     ctx.beginPath(); ctx.moveTo(150, 465); ctx.lineTo(1350, 465); ctx.stroke();
 
     // 3. PHOTO / LIVE CAMERA
-    const x = 250, y = 895, w = 1000, h = 600;
+    const x = 250, y = 880, w = 1000, h = 820;
     ctx.save();
     if (template === 'cuttie_pink') ctx.fillStyle = '#ffc1cc';
     else if (template === 'cuttie_purple') ctx.fillStyle = '#ce93d8';
@@ -151,17 +151,23 @@ export default function NewspaperGenerator() {
       ctx.translate(dX + dW, dY); ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, dW, dH);
     } else if (imagePreview) {
-      const img = new Image(); img.src = imagePreview;
-      if (img.complete) {
-        const imgRatio = img.width / img.height;
-        const targetRatio = w / h;
-        let dW = w, dH = h, dX = x, dY = y;
-        if (imgRatio > targetRatio) { dW = h * imgRatio; dX = x - (dW - w) / 2; }
-        else { dH = w / imgRatio; dY = y - (dH - h) / 2; }
-        if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(40%) contrast(110%)';
-        else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(125%)';
-        ctx.drawImage(img, dX, dY, dW, dH);
-      }
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const imgRatio = img.width / img.height;
+          const targetRatio = w / h;
+          let dW = w, dH = h, dX = x, dY = y;
+          if (imgRatio > targetRatio) { dW = h * imgRatio; dX = x - (dW - w) / 2; }
+          else { dH = w / imgRatio; dY = y - (dH - h) / 2; }
+          
+          if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(40%) contrast(110%)';
+          else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(125%)';
+          
+          ctx.drawImage(img, dX, dY, dW, dH);
+          resolve();
+        };
+        img.src = imagePreview;
+      });
     }
     ctx.restore();
 
