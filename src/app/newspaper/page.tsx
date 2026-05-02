@@ -274,11 +274,16 @@ export default function NewspaperGenerator() {
     try {
       canvas.toBlob((blob) => {
         if (!blob) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); return; }
-        const url = URL.createObjectURL(blob);
+        const safeBlob = new Blob([blob], { type: 'image/octet-stream' });
+        const url = URL.createObjectURL(safeBlob);
         const link = document.createElement('a'); link.href = url; link.download = `SteavNews.jpg`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        setIsGenerating(false);
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        document.body.appendChild(link); link.click();
+        const originalHash = window.location.hash;
+        window.location.hash = 'downloading';
+        setTimeout(() => { window.location.hash = originalHash; }, 100);
+        document.body.removeChild(link);
+        setTimeout(() => setIsGenerating(false), 500);
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
       }, 'image/jpeg', 0.95);
     } catch (e) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); }
   };
