@@ -32,7 +32,9 @@ export default function NewspaperGenerator() {
     if (savedHeadline) setHeadline(savedHeadline);
     if (savedSub) setSubHeadline(savedSub);
     if (savedImg) setImagePreview(savedImg);
-    if (savedTemplate) setTemplate(savedTemplate);
+    if (savedTemplate && ['vintage_antique', 'vintage_classic', 'royal_luxury'].includes(savedTemplate)) {
+      setTemplate(savedTemplate);
+    }
     
     setDate(new Date().toLocaleDateString('km-KH', { day: 'numeric', month: 'long', year: 'numeric' }));
     return () => stopCamera();
@@ -43,7 +45,7 @@ export default function NewspaperGenerator() {
     localStorage.setItem('sn_headline', headline);
     localStorage.setItem('sn_sub', subHeadline);
     localStorage.setItem('sn_template', template);
-    if (imagePreview && imagePreview.length < 2000000) { // Only save if < 2MB to avoid quota issues
+    if (imagePreview && imagePreview.length < 2000000) { 
       localStorage.setItem('sn_img', imagePreview);
     }
   }, [headline, subHeadline, template, imagePreview]);
@@ -244,7 +246,6 @@ export default function NewspaperGenerator() {
     const displaySub = subHeadline || 'សូមបំពេញចំណងជើងរងនៅទីនេះ...';
     if (!subHeadline) ctx.globalAlpha = 0.3;
     ctx.font = '38px Koulen';
-    // Use wrapText for sub-headline too
     wrapText(displaySub, canvas.width / 2, lastY + 80, 1300, 55);
     ctx.globalAlpha = 1.0;
     
@@ -258,23 +259,70 @@ export default function NewspaperGenerator() {
 
   const startRecording = () => {
     const canvas = canvasRef.current; if (!canvas) return;
-    chunksRef.current = []; const stream = canvas.captureStream(30);
-    let mimeType = 'video/mp4';
-    if (!MediaRecorder.isTypeSupported('video/mp4')) {
-      mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    chunksRef.current = [];
+    const stream = canvas.captureStream(30);
+    
+    // Attempt high-quality MP4 first, then fallback to WebM
+    let mimeType = 'video/mp4;codecs=avc1';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
     }
-    const mediaRecorder = new MediaRecorder(stream, { mimeType });
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-      const blob = new Blob(chunksRef.current, { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = `SteavNews_Live.${ext}`; link.click();
+
+    try {
+      const mediaRecorder = new MediaRecorder(stream, { 
+        mimeType,
+        videoBitsPerSecond: 5000000 // 5Mbps for high quality
+      });
+      
+      mediaRecorder.ondataavailable = (e) => { 
+        if (e.data.size > 0) chunksRef.current.push(e.data); 
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const fileName = `SteavNews_Live_${Date.now()}.mp4`;
+        const file = new File([blob], fileName, { type: "video/mp4" });
+
+        // Native Share for mobile (best way to save MP4 to Photos)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'កាសែតស្ទាវញ៉ូស៍',
+              text: 'វីដេអូកាសែតដែលបានបង្កើតដោយ Steav News',
+            });
+            setIsRecording(false);
+            return;
+          } catch (err) {}
+        }
+
+        // Fallback Link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setIsRecording(false);
+        setTimeout(() => URL.revokeObjectURL(url), 20000);
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      
+      // Auto-stop after 5 seconds
+      setTimeout(() => { 
+        if (mediaRecorder.state === 'recording') mediaRecorder.stop(); 
+      }, 5000);
+    } catch (err) {
+      alert('មិនអាចថតវីដេអូបានទេ!');
       setIsRecording(false);
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    };
-    mediaRecorder.start(); mediaRecorderRef.current = mediaRecorder; setIsRecording(true);
-    setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 5000);
+    }
   };
 
   const downloadNewspaper = () => {
@@ -283,36 +331,18 @@ export default function NewspaperGenerator() {
     try {
       canvas.toBlob(async (blob) => {
         if (!blob) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); return; }
-        
         const fileName = "SteavNews.jpg";
         const file = new File([blob], fileName, { type: "image/jpeg" });
-
-        // NATIVE SHARE (Best for mobile)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
-            await navigator.share({
-              files: [file],
-              title: 'កាសែតស្ទាវញ៉ូស៍',
-              text: 'រូបភាពកាសែតដែលបានបង្កើតដោយ Steav News',
-            });
-            setIsGenerating(false);
-            return;
-          } catch (err) {
-            // Fallback if user cancelled or share failed
-          }
+            await navigator.share({ files: [file], title: 'កាសែតស្ទាវញ៉ូស៍', text: 'រូបភាពកាសែតដែលបានបង្កើតដោយ Steav News', });
+            setIsGenerating(false); return;
+          } catch (err) {}
         }
-
-        // FALLBACK for PC/Old phones
         const url = URL.createObjectURL(file);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-          window.location.assign(url);
-        }
+        const link = document.createElement('a'); link.href = url; link.download = fileName;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) { window.location.assign(url); }
         setTimeout(() => setIsGenerating(false), 500);
         setTimeout(() => URL.revokeObjectURL(url), 20000);
       }, 'image/jpeg', 0.95);
@@ -359,7 +389,7 @@ export default function NewspaperGenerator() {
                 <div className="grid grid-cols-2 gap-3">
                   <button onClick={() => setTemplate('vintage_antique')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'vintage_antique' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-500'}`}>បុរាណ (Antique)</button>
                   <button onClick={() => setTemplate('vintage_classic')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'vintage_classic' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-500'}`}>សម័យមុន (Classic)</button>
-                  <button onClick={() => setTemplate('royal_luxury')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold col-span-2 ${template === 'royal_luxury' ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : 'border-gray-100 text-gray-500'}`}>Royal Luxury (មាសសន្លឹក)</button>
+                  <button onClick={() => setTemplate('royal_luxury')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold col-span-2 ${template === 'royal_luxury' ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : 'border-gray-100 text-gray-500'}`}>Royal Luxury</button>
                 </div>
               </div>
               <div className="space-y-3">
