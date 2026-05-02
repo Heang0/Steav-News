@@ -94,7 +94,7 @@ export default function NewspaperGenerator() {
         ctx.bezierCurveTo(hx, hy - size, hx - size, hy - size, hx - size, hy);
         ctx.bezierCurveTo(hx - size, hy + size, hx, hy + size, hx, hy + size * 1.5);
         ctx.bezierCurveTo(hx, hy + size, hx + size, hy + size, hx + size, hy);
-        ctx.bezierCurveTo(hx + size, hy - size, hx, hy - size, hx, hy);
+        ctx.bezierCurveTo(hx, hy - size, hx, hy - size, hx, hy);
         ctx.fill();
       };
       drawHeart(150, 150, 40); drawHeart(1350, 150, 40); drawHeart(150, 1971, 40); drawHeart(1350, 1971, 40);
@@ -207,10 +207,13 @@ export default function NewspaperGenerator() {
     chunksRef.current = [];
     const stream = canvas.captureStream(30);
     
-    // Choose compatible format for mobile (MP4 for iOS, WebM for Android)
-    let mimeType = 'video/webm;codecs=vp9';
-    if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
-    else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
+    // Choose compatible format for mobile (Prioritize MP4 for both iOS/Android)
+    let mimeType = 'video/mp4';
+    if (!MediaRecorder.isTypeSupported('video/mp4')) {
+      mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
+        ? 'video/webm;codecs=vp9' 
+        : 'video/webm';
+    }
 
     const mediaRecorder = new MediaRecorder(stream, { mimeType });
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
@@ -268,8 +271,27 @@ export default function NewspaperGenerator() {
                   </label>
                 </div>
                 <div className="space-y-4">
-                  <div><label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងធំ</label><input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="សូមបំពេញចំណងជើង!" className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none font-bold text-black placeholder:text-gray-400 placeholder:font-normal" style={{ fontFamily: "'Battambang', sans-serif" }} /></div>
-                  <div><label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងរង</label><textarea value={subHeadline} onChange={(e) => setSubHeadline(e.target.value)} placeholder="សូមបំពេញចំណងជើងរង!" className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none h-20 resize-none text-sm text-black placeholder:text-gray-400 placeholder:font-normal" style={{ fontFamily: "'Battambang', sans-serif" }} /></div>
+                  <div>
+                    <label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងធំ</label>
+                    <input 
+                      type="text" 
+                      value={headline} 
+                      onChange={(e) => setHeadline(e.target.value)} 
+                      placeholder="សូមបំពេញចំណងជើង!" 
+                      className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none font-bold text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" 
+                      style={{ fontFamily: "'Battambang', sans-serif" }} 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងរង</label>
+                    <textarea 
+                      value={subHeadline} 
+                      onChange={(e) => setSubHeadline(e.target.value)} 
+                      placeholder="សូមបំពេញចំណងជើងរង!" 
+                      className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none h-20 resize-none text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" 
+                      style={{ fontFamily: "'Battambang', sans-serif" }} 
+                    />
+                  </div>
                 </div>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -283,7 +305,7 @@ export default function NewspaperGenerator() {
               </div>
               <div className="space-y-3">
                 <button onClick={downloadNewspaper} disabled={isGenerating || (!imagePreview && !isCameraActive)} className="w-full bg-primary hover:bg-primary-dark text-white font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50" style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>ទាញយកជារូបភាព (JPG)</button>
-                <button onClick={startRecording} disabled={!isCameraActive || isRecording} className={`w-full font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-white'}`} style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>{isRecording ? 'កំពុងថត...' : 'ទាញយកជាវីដេអូ (Mobile OK)'}</button>
+                <button onClick={startRecording} disabled={!isCameraActive || isRecording} className={`w-full font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-white'}`} style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>{isRecording ? 'កំពុងថត...' : 'ទាញយកជាវីដេអូ (MP4)'}</button>
               </div>
             </div>
             <div className="w-full lg:w-2/3 flex flex-col items-center">
