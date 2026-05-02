@@ -140,7 +140,7 @@ export default function NewspaperGenerator() {
       ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 20px Koulen'; ctx.fillText('PREMIUM', 0, 8); ctx.restore();
     }
 
-    // 3. PHOTO
+    // 3. PHOTO / LIVE CAMERA
     const x = 250, y = 900, w = 1000, h = 600;
     ctx.save();
     if (template === 'royal_luxury') ctx.fillStyle = '#064e3b';
@@ -153,6 +153,39 @@ export default function NewspaperGenerator() {
     }
     ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
 
+    const applyVintageEffect = (source: HTMLVideoElement | HTMLImageElement, dX: number, dY: number, dW: number, dH: number) => {
+      // 1. Draw original
+      if (source instanceof HTMLVideoElement) {
+        ctx.translate(dX + dW, dY); ctx.scale(-1, 1);
+        ctx.drawImage(source, 0, 0, dW, dH);
+        ctx.scale(-1, 1); ctx.translate(-(dX + dW), -dY); // Reset for overlay
+      } else {
+        ctx.drawImage(source, dX, dY, dW, dH);
+      }
+
+      // 2. Force Grayscale (Works on ALL mobile browsers)
+      if (template.includes('vintage')) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'saturation';
+        ctx.fillStyle = 'black';
+        ctx.fillRect(dX, dY, dW, dH);
+        ctx.restore();
+
+        // 3. Adjust Contrast/Brightness manually via Overlay
+        if (template === 'vintage_classic') {
+          ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = 'rgba(255,255,255,0.2)';
+          ctx.fillRect(dX, dY, dW, dH); ctx.restore();
+        }
+
+        // 4. Add Sepia Tone for Antique
+        if (template === 'vintage_antique') {
+          ctx.save(); ctx.globalCompositeOperation = 'color';
+          ctx.fillStyle = 'rgba(112, 66, 20, 0.35)'; // Sepia tone
+          ctx.fillRect(dX, dY, dW, dH); ctx.restore();
+        }
+      }
+    };
+
     if (isCameraActive && videoRef.current) {
       const video = videoRef.current;
       const videoRatio = video.videoWidth / video.videoHeight;
@@ -160,11 +193,7 @@ export default function NewspaperGenerator() {
       let dW = w, dH = h, dX = x, dY = y;
       if (videoRatio > targetRatio) { dW = h * videoRatio; dX = x - (dW - w) / 2; }
       else { dH = w / videoRatio; dY = y - (dH - h) / 2; }
-      ctx.filter = 'none';
-      if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(50%) contrast(110%) brightness(95%)';
-      else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(140%) brightness(105%)';
-      else if (template === 'royal_luxury') ctx.filter = 'contrast(120%) saturate(110%)';
-      ctx.translate(dX + dW, dY); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, dW, dH); ctx.filter = 'none';
+      applyVintageEffect(video, dX, dY, dW, dH);
     } else if (imagePreview) {
       await new Promise<void>((resolve) => {
         const img = new Image();
@@ -174,10 +203,7 @@ export default function NewspaperGenerator() {
           let dW = w, dH = h, dX = x, dY = y;
           if (imgRatio > targetRatio) { dW = h * imgRatio; dX = x - (dW - w) / 2; }
           else { dH = w / imgRatio; dY = y - (dH - h) / 2; }
-          ctx.filter = 'none';
-          if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(50%) contrast(110%)';
-          else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(140%)';
-          ctx.drawImage(img, dX, dY, dW, dH); ctx.filter = 'none'; resolve();
+          applyVintageEffect(img, dX, dY, dW, dH); resolve();
         };
         img.src = imagePreview;
       });
@@ -189,7 +215,6 @@ export default function NewspaperGenerator() {
 
     // 4. HEADLINE
     const wrapText = (text: string, xPos: number, yPos: number, maxWidth: number, lineHeight: number) => {
-      // Use 'word' granularity to keep Khmer words/names together (e.g., ព្រះវិហារ stays together)
       const segmenter = new Intl.Segmenter('km', { granularity: 'word' });
       const segments = Array.from(segmenter.segment(text)).map(s => s.segment);
       let line = '';
@@ -235,8 +260,9 @@ export default function NewspaperGenerator() {
       const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
       const blob = new Blob(chunksRef.current, { type: mimeType });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = `steav-news-live-${Date.now()}.${ext}`; link.click();
+      const link = document.createElement('a'); link.href = url; link.download = `SteavNews_Live.${ext}`; link.click();
       setIsRecording(false);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     };
     mediaRecorder.start(); mediaRecorderRef.current = mediaRecorder; setIsRecording(true);
     setTimeout(() => { if (mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 5000);
@@ -247,30 +273,14 @@ export default function NewspaperGenerator() {
     setIsGenerating(true);
     try {
       canvas.toBlob((blob) => {
-        if (!blob) {
-          alert('កំហុសក្នុងការទាញយក!');
-          setIsGenerating(false);
-          return;
-        }
+        if (!blob) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); return; }
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        // Short, clean filename
-        link.download = `SteavNews.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // RESET UI immediately
+        const link = document.createElement('a'); link.href = url; link.download = `SteavNews.jpg`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         setIsGenerating(false);
-        
-        // Clean up memory after a LONG delay (10s) to give iOS Safari time to process
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       }, 'image/jpeg', 0.95);
-    } catch (e) { 
-      alert('កំហុសក្នុងការទាញយក!'); 
-      setIsGenerating(false);
-    }
+    } catch (e) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
