@@ -17,12 +17,17 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        // Fetch all articles to calculate stats (in a real app, this would be a single API call)
-        const res = await fetch('/api/articles?limit=1000');
-        const data = await res.json();
+        // Fetch all articles to calculate stats and total count
+        const [res, countRes] = await Promise.all([
+          fetch('/api/articles?limit=1000'),
+          fetch('/api/articles/count')
+        ]);
         
-        if (data.success && data.articles) {
-          const articles: Article[] = data.articles;
+        const data = await res.json();
+        const countData = countRes.ok ? await countRes.json() : { count: 0 };
+        
+        if (Array.isArray(data)) {
+          const articles: Article[] = data;
           const categories: Record<string, number> = {};
           let views = 0;
           let likes = 0;
@@ -34,7 +39,7 @@ export default function Dashboard() {
           });
 
           setStats({
-            total: data.total || articles.length,
+            total: countData.count || articles.length,
             categories,
             totalViews: views,
             totalLikes: likes

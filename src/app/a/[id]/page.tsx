@@ -65,6 +65,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         ],
         url: articleUrl,
       },
+      alternates: {
+        canonical: `/a/${getArticlePublicId(article)}`,
+      },
       facebook: {
         appId: '966242223397117', // Common placeholder or user's app ID if available
       },

@@ -16,6 +16,14 @@ export const metadata: Metadata = {
     description: 'Read the latest news from STEAV NEWS',
     type: 'website',
     siteName: 'STEAV NEWS',
+    images: [
+      {
+        url: '/uploads/images/banner1.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'STEAV NEWS - Cambodia Trusted News',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',

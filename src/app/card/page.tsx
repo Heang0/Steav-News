@@ -12,7 +12,7 @@ export default function IdGeneratorPage() {
     const nextYear = new Date();
     nextYear.setFullYear(nextYear.getFullYear() + 1);
     const validUntilDefault = `${nextYear.getFullYear()}-${String(nextYear.getMonth() + 1).padStart(2, '0')}`;
-    
+
     return {
       name: '',
       role: '',
@@ -29,7 +29,7 @@ export default function IdGeneratorPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedStaff, setGeneratedStaff] = useState<any>(null);
   const [isFlipped, setIsFlipped] = useState(false);
-  
+
   const cardRef = useRef<HTMLDivElement>(null);
   const frontRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ export default function IdGeneratorPage() {
         body: submitData,
       });
       const data = await res.json();
-      
+
       if (data.success) {
         setGeneratedStaff(data.data);
       } else {
@@ -95,29 +95,29 @@ export default function IdGeneratorPage() {
   const handleDownload = async (side: 'front' | 'back') => {
     const targetRef = side === 'front' ? frontRef : backRef;
     if (!targetRef.current) return;
-    
+
     // Store original state
     const parent = targetRef.current.parentElement;
     if (!parent) return;
-    
+
     const originalParentTransform = parent.style.transform;
     const originalParentTransition = parent.style.transition;
     const originalBackTransform = backRef.current?.style.transform || '';
-    
+
     // Disable transition temporarily to prevent capturing mid-animation
     parent.style.transition = 'none';
-    
+
     // Flatten everything to face front so html2canvas doesn't mirror the text
     parent.style.transform = 'rotateY(0deg)';
     if (side === 'back' && backRef.current) {
       backRef.current.style.transform = 'rotateY(0deg)';
     }
-    
+
     // Small delay to ensure the DOM has updated
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     try {
-      const canvas = await html2canvas(targetRef.current, { 
+      const canvas = await html2canvas(targetRef.current, {
         scale: 3, // High resolution
         useCORS: true,
         backgroundColor: '#ffffff'
@@ -141,7 +141,7 @@ export default function IdGeneratorPage() {
   };
 
   // The URL encoded in the QR code
-  const verificationUrl = generatedStaff 
+  const verificationUrl = generatedStaff
     ? `https://steavnews.site/staff/${generatedStaff.publicId}`
     : 'https://steavnews.site';
 
@@ -207,7 +207,7 @@ export default function IdGeneratorPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
                   <input
@@ -221,7 +221,7 @@ export default function IdGeneratorPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Profile Photo *</label>
-                  
+
                   {/* File Upload UI */}
                   <div className="flex items-start gap-4 mb-2">
                     <label className="flex-1 cursor-pointer">
@@ -233,7 +233,7 @@ export default function IdGeneratorPage() {
                       </div>
                       <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
-                    
+
                     {imagePreview && (
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shadow-sm flex-shrink-0">
                         <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -315,8 +315,8 @@ export default function IdGeneratorPage() {
             <div className="w-full lg:w-2/3 flex flex-col items-center gap-6 print-section">
               <div className="text-center no-print w-full flex items-center justify-center gap-4">
                 <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">Live Preview</span>
-                <button 
-                  onClick={() => setIsFlipped(!isFlipped)} 
+                <button
+                  onClick={() => setIsFlipped(!isFlipped)}
                   className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold px-4 py-1.5 rounded-full transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,131 +327,131 @@ export default function IdGeneratorPage() {
               </div>
 
               {/* 3D Flip Container */}
-              <div 
+              <div
                 className="relative cursor-pointer group"
                 style={{ width: '3.375in', height: '5.375in', perspective: '1000px' }}
                 onClick={() => setIsFlipped(!isFlipped)}
               >
-                <div 
+                <div
                   className="w-full h-full transition-transform duration-700 ease-in-out"
                   style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
                 >
                   {/* CARD FRONT */}
-                  <div 
+                  <div
                     ref={frontRef}
                     className="absolute top-0 left-0 w-full h-full bg-white rounded-[15px] shadow-2xl overflow-hidden border border-gray-200"
                     style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                   >
-                {/* Header Graphic */}
-                <div className="absolute top-0 left-0 w-full h-32 bg-primary flex flex-col items-center justify-center pt-2 px-4 text-center">
-                  <div className="text-white font-black text-[22px] tracking-tight leading-tight uppercase">
-                    STEAV NEWS <span className="text-white/80 text-lg mx-0.5">x</span> BCWAM
-                  </div>
-                  <div className="text-white/80 text-[10px] font-bold tracking-[0.2em] uppercase mt-1">Official Press Pass</div>
-                </div>
-
-                {/* Photo */}
-                <div className="absolute top-[80px] left-1/2 -translate-x-1/2">
-                  <div className="w-[140px] h-[140px] rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                    {(imagePreview || formData.photo || generatedStaff?.photo) ? (
-                      <Image 
-                        src={imagePreview || generatedStaff?.photo || formData.photo} 
-                        alt="Staff Photo" 
-                        width={140} 
-                        height={140} 
-                        className="object-cover w-full h-full"
-                        unoptimized
-                      />
-                    ) : (
-                      <svg className="w-16 h-16 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="absolute top-[230px] w-full text-center px-6">
-                  <h3 className="text-xl font-black text-gray-900 leading-tight uppercase px-2 truncate" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {generatedStaff?.name || formData.name || 'STAFF NAME'}
-                  </h3>
-                  <p className="text-[13px] font-bold text-primary mt-1 uppercase tracking-wide truncate">
-                    {generatedStaff?.role || formData.role || 'POSITION'}
-                  </p>
-                  
-                  <div className="mt-4 flex justify-center gap-8 border-t border-gray-100 pt-3 mx-4">
-                    <div className="text-center">
-                      <p className="text-[7px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">D.O.B</p>
-                      <p className="text-[10px] font-bold text-gray-800">{generatedStaff?.dob || formData.dob || 'DD/MM/YYYY'}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-[7px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Valid Until</p>
-                      <p className="text-[10px] font-bold text-gray-800">{generatedStaff?.validUntil || formData.validUntil || 'MM/YYYY'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Details */}
-                <div className="absolute bottom-[25px] w-full px-8">
-                  <div className="w-full h-[1px] bg-gray-200 mb-3"></div>
-                  <div className="flex justify-between items-end">
-                    <div className="text-left">
-                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">ID Number</p>
-                      <p className="text-sm font-black text-gray-800">{generatedStaff?.staffId || 'SN-XXXXX'}</p>
-                    </div>
-                    {/* Placeholder Barcode or Signature */}
-                    <div className="text-right">
-                      <div className="w-20 h-6 border-b-2 border-black/80 flex items-end justify-center mb-1 pb-1">
-                        <span className="font-[signature] text-lg text-black/80 rotate-[-5deg] inline-block" style={{ fontFamily: 'cursive' }}>
-                          {generatedStaff?.name || formData.name ? (generatedStaff?.name || formData.name).split(' ')[0] : 'Sign'}
-                        </span>
+                    {/* Header Graphic */}
+                    <div className="absolute top-0 left-0 w-full h-32 bg-primary flex flex-col items-center justify-center pt-2 px-4 text-center">
+                      <div className="text-white font-black text-[22px] tracking-tight leading-tight uppercase">
+                        STEAV NEWS <span className="text-white/80 text-lg mx-0.5">x</span> BCWAM
                       </div>
-                      <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Authorized Sign</p>
+                      <div className="text-white/80 text-[10px] font-bold tracking-[0.2em] uppercase mt-1">Official Press Pass</div>
+                    </div>
+
+                    {/* Photo */}
+                    <div className="absolute top-[80px] left-1/2 -translate-x-1/2">
+                      <div className="w-[140px] h-[140px] rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                        {(imagePreview || formData.photo || generatedStaff?.photo) ? (
+                          <Image
+                            src={imagePreview || generatedStaff?.photo || formData.photo}
+                            alt="Staff Photo"
+                            width={140}
+                            height={140}
+                            className="object-cover w-full h-full"
+                            unoptimized
+                          />
+                        ) : (
+                          <svg className="w-16 h-16 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="absolute top-[230px] w-full text-center px-6">
+                      <h3 className="text-xl font-black text-gray-900 leading-tight uppercase px-2 truncate" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {generatedStaff?.name || formData.name || 'STAFF NAME'}
+                      </h3>
+                      <p className="text-[13px] font-bold text-primary mt-1 uppercase tracking-wide truncate">
+                        {generatedStaff?.role || formData.role || 'POSITION'}
+                      </p>
+
+                      <div className="mt-4 flex justify-center gap-8 border-t border-gray-100 pt-3 mx-4">
+                        <div className="text-center">
+                          <p className="text-[7px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">D.O.B</p>
+                          <p className="text-[10px] font-bold text-gray-800">{generatedStaff?.dob || formData.dob || 'DD/MM/YYYY'}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[7px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Valid Until</p>
+                          <p className="text-[10px] font-bold text-gray-800">{generatedStaff?.validUntil || formData.validUntil || 'MM/YYYY'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Details */}
+                    <div className="absolute bottom-[25px] w-full px-8">
+                      <div className="w-full h-[1px] bg-gray-200 mb-3"></div>
+                      <div className="flex justify-between items-end">
+                        <div className="text-left">
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">ID Number</p>
+                          <p className="text-sm font-black text-gray-800">{generatedStaff?.staffId || 'SN-XXXXX'}</p>
+                        </div>
+                        {/* Placeholder Barcode or Signature */}
+                        <div className="text-right">
+                          <div className="w-20 h-6 border-b-2 border-black/80 flex items-end justify-center mb-1 pb-1">
+                            <span className="font-[signature] text-lg text-black/80 rotate-[-5deg] inline-block" style={{ fontFamily: 'cursive' }}>
+                              {generatedStaff?.name || formData.name ? (generatedStaff?.name || formData.name).split(' ')[0] : 'Sign'}
+                            </span>
+                          </div>
+                          <p className="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Authorized Sign</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom colored bar */}
+                    <div className="absolute bottom-0 left-0 w-full h-3 bg-primary"></div>
+                  </div>
+
+                  {/* CARD BACK */}
+                  <div
+                    ref={backRef}
+                    className="absolute top-0 left-0 w-full h-full bg-white rounded-[15px] shadow-2xl overflow-hidden border border-gray-200 flex flex-col items-center justify-between py-8 px-6"
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                  >
+                    <div className="text-center w-full">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4 border-b pb-2">Terms & Conditions</h4>
+                      <ul className="text-[9px] text-gray-600 text-left list-disc pl-4 space-y-1.5 leading-tight">
+                        <li>This card is the property of STEAV NEWS and must be surrendered upon request or termination of employment.</li>
+                        <li>This card is non-transferable and must be worn visibly at all times while on duty or covering events.</li>
+                        <li>If found, please return to the STEAV NEWS main office or contact us immediately.</li>
+                      </ul>
+                    </div>
+
+                    <div className="flex flex-col items-center my-4">
+                      <div className="p-2 bg-white border-2 border-gray-100 rounded-xl shadow-sm mb-2">
+                        <QRCodeSVG
+                          value={verificationUrl}
+                          size={120}
+                          level="H"
+                          includeMargin={true}
+                        />
+                      </div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Scan to Verify</p>
+                    </div>
+
+                    <div className="w-full text-center">
+                      <div className="w-full h-[1px] bg-gray-200 mb-3"></div>
+                      <p className="text-[9px] font-bold text-gray-800 mb-1">STEAV NEWS HEADQUARTERS</p>
+                      <p className="text-[8px] text-gray-500">Phnom Penh, Cambodia</p>
+                      <p className="text-[8px] text-gray-500 font-mono mt-1">{generatedStaff?.phone || formData.phone || '+855 XX XXX XXX'}</p>
                     </div>
                   </div>
-                </div>
-                
-                {/* Bottom colored bar */}
-                <div className="absolute bottom-0 left-0 w-full h-3 bg-primary"></div>
-              </div>
 
-              {/* CARD BACK */}
-              <div 
-                ref={backRef}
-                className="absolute top-0 left-0 w-full h-full bg-white rounded-[15px] shadow-2xl overflow-hidden border border-gray-200 flex flex-col items-center justify-between py-8 px-6"
-                style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >
-                <div className="text-center w-full">
-                  <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4 border-b pb-2">Terms & Conditions</h4>
-                  <ul className="text-[9px] text-gray-600 text-left list-disc pl-4 space-y-1.5 leading-tight">
-                    <li>This card is the property of STEAV NEWS and must be surrendered upon request or termination of employment.</li>
-                    <li>This card is non-transferable and must be worn visibly at all times while on duty or covering events.</li>
-                    <li>If found, please return to the STEAV NEWS main office or contact us immediately.</li>
-                  </ul>
+                  {/* End of 3D Flip Container */}
                 </div>
-
-                <div className="flex flex-col items-center my-4">
-                  <div className="p-2 bg-white border-2 border-gray-100 rounded-xl shadow-sm mb-2">
-                    <QRCodeSVG 
-                      value={verificationUrl} 
-                      size={120}
-                      level="H"
-                      includeMargin={true}
-                    />
-                  </div>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Scan to Verify</p>
-                </div>
-
-                <div className="w-full text-center">
-                  <div className="w-full h-[1px] bg-gray-200 mb-3"></div>
-                  <p className="text-[9px] font-bold text-gray-800 mb-1">STEAV NEWS HEADQUARTERS</p>
-                  <p className="text-[8px] text-gray-500">Phnom Penh, Cambodia</p>
-                  <p className="text-[8px] text-gray-500 font-mono mt-1">{generatedStaff?.phone || formData.phone || '+855 XX XXX XXX'}</p>
-                </div>
-              </div>
-              
-              {/* End of 3D Flip Container */}
-              </div>
               </div>
 
             </div>
@@ -460,7 +460,8 @@ export default function IdGeneratorPage() {
       </main>
 
       {/* Print styles */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           body * {
             visibility: hidden;

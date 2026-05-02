@@ -17,10 +17,25 @@ export const metadata: Metadata = {
     follow: true,
   },
   metadataBase: new URL(getSiteUrl()),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     type: 'website',
     locale: 'km_KH',
     siteName: 'STEAV NEWS',
+    url: getSiteUrl(),
+    images: [
+      {
+        url: '/uploads/images/banner1.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'STEAV NEWS',
+      },
+    ],
+  },
+  facebook: {
+    appId: '966242223397117',
   },
   twitter: {
     card: 'summary_large_image',
@@ -29,6 +44,7 @@ export const metadata: Metadata = {
     icon: '/uploads/images/favicon.jpg',
   },
   verification: {
+    google: 'your-google-verification-id', // Placeholder, user should update if they have one
     other: {
       'msvalidate.01': '63DE1EBAADD223E17DB668D905F5AE56',
     },
