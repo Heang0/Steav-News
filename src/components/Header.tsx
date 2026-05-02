@@ -9,7 +9,6 @@ const navLinks = [
   { href: '/?category=សង្គម', label: 'សង្គម' },
   { href: '/?category=ស្នេហា', label: 'ស្នេហា' },
   { href: '/?category=ពិភពលោក', label: 'ពិភពលោក' },
-  { href: '/card', label: 'ធ្វើកាត' },
   { href: '/newspaper', label: 'ធ្វើកាសែត' },
 ];
 
@@ -62,13 +61,13 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`relative font-bold text-sm px-4 py-2 rounded-xl transition-all duration-200 group ${
-                link.href === '/card'
+                link.href === '/newspaper'
                   ? 'bg-white text-primary hover:bg-gray-100 hover:shadow-md ml-2 border-2 border-white'
                   : 'text-white/90 hover:text-white hover:bg-white/10'
               }`}
             >
               {link.label}
-              {link.href !== '/card' && (
+              {link.href !== '/newspaper' && (
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-white rounded-full group-hover:w-1/2 transition-all duration-200" />
               )}
             </Link>
@@ -99,7 +98,7 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`font-bold text-base py-3 px-4 rounded-xl transition-colors ${
-                link.href === '/card'
+                link.href === '/newspaper'
                   ? 'bg-white text-primary mt-2 text-center shadow-sm border border-white'
                   : 'text-white/90 hover:bg-white/10 hover:text-white'
               }`}

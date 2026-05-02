@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-type TemplateType = 'vintage_antique' | 'vintage_classic' | 'cuttie_pink' | 'cuttie_purple';
+type TemplateType = 'vintage_antique' | 'vintage_classic' | 'royal_luxury';
 
 export default function NewspaperGenerator() {
   const [headline, setHeadline] = useState('');
@@ -22,6 +22,13 @@ export default function NewspaperGenerator() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
+  const particles = useRef<{x: number, y: number, s: number, vy: number, a: number}[]>([]);
+  useEffect(() => {
+    particles.current = Array.from({length: 20}, () => ({
+      x: Math.random() * 1500, y: Math.random() * 2121, s: Math.random() * 5 + 2, vy: Math.random() * 2 + 1, a: Math.random()
+    }));
+  }, []);
+
   useEffect(() => {
     setDate(new Date().toLocaleDateString('km-KH', { day: 'numeric', month: 'long', year: 'numeric' }));
     return () => stopCamera();
@@ -31,9 +38,7 @@ export default function NewspaperGenerator() {
     let animationId: number;
     const render = () => {
       drawNewspaper();
-      if (isCameraActive) {
-        animationId = requestAnimationFrame(render);
-      }
+      if (isCameraActive) animationId = requestAnimationFrame(render);
     };
     if (isCameraActive) render(); else drawNewspaper();
     return () => cancelAnimationFrame(animationId);
@@ -48,9 +53,7 @@ export default function NewspaperGenerator() {
         setIsCameraActive(true);
         setImagePreview(null);
       }
-    } catch (err) {
-      alert('មិនអាចបើកកាមេរ៉ាបានទេ!');
-    }
+    } catch (err) { alert('មិនអាចបើកកាមេរ៉ាបានទេ!'); }
   };
 
   const stopCamera = () => {
@@ -71,72 +74,83 @@ export default function NewspaperGenerator() {
     canvas.height = 2121;
     await document.fonts.ready;
 
-    // 1. BACKGROUND & DECORATIONS
-    if (template === 'vintage_antique') {
-      ctx.fillStyle = '#f4ece0';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#2c2824';
-      ctx.lineWidth = 30; ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+    // 1. BACKGROUND
+    if (template === 'royal_luxury') {
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#064e3b'); grad.addColorStop(1, '#022c22');
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 15; ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+      ctx.lineWidth = 4; ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+    } else if (template === 'vintage_antique') {
+      ctx.fillStyle = '#f4ece0'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#dcd4c8'; ctx.lineWidth = 1;
+      for (let i = 0; i < 500; i++) {
+        ctx.beginPath(); const rx = Math.random() * canvas.width, ry = Math.random() * canvas.height;
+        ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.random() * 20, ry + Math.random() * 5); ctx.stroke();
+      }
+      ctx.strokeStyle = '#2c2824'; ctx.lineWidth = 30; ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
       ctx.lineWidth = 8; ctx.strokeRect(90, 90, canvas.width - 180, canvas.height - 180);
-      ctx.globalAlpha = 0.04; ctx.fillStyle = '#000000';
-      for (let i = 0; i < 4000; i++) ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
-      ctx.globalAlpha = 1.0;
     } else if (template === 'vintage_classic') {
-      ctx.fillStyle = '#f9f9f9'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fdfdfd'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f0f0f0'; for (let i = 0; i < canvas.height; i += 4) ctx.fillRect(0, i, canvas.width, 1);
       ctx.strokeStyle = '#111827'; ctx.lineWidth = 20; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
       ctx.lineWidth = 4; ctx.strokeRect(55, 55, canvas.width - 110, canvas.height - 110);
-    } else if (template === 'cuttie_pink') {
-      ctx.fillStyle = '#fff0f3'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#ff85a1'; ctx.lineWidth = 40; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-      ctx.fillStyle = '#ff4d6d';
-      const drawHeart = (hx: number, hy: number, size: number) => {
-        ctx.beginPath(); ctx.moveTo(hx, hy);
-        ctx.bezierCurveTo(hx, hy - size, hx - size, hy - size, hx - size, hy);
-        ctx.bezierCurveTo(hx - size, hy + size, hx, hy + size, hx, hy + size * 1.5);
-        ctx.bezierCurveTo(hx, hy + size, hx + size, hy + size, hx + size, hy);
-        ctx.bezierCurveTo(hx, hy - size, hx, hy - size, hx, hy);
-        ctx.fill();
-      };
-      drawHeart(150, 150, 40); drawHeart(1350, 150, 40); drawHeart(150, 1971, 40); drawHeart(1350, 1971, 40);
-    } else if (template === 'cuttie_purple') {
-      ctx.fillStyle = '#f3e5f5'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#7b1fa2'; ctx.lineWidth = 40; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-      ctx.fillStyle = '#4a148c';
-      const drawStar = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
-        let rot = Math.PI / 2 * 3, xPos = cx, yPos = cy, step = Math.PI / spikes;
-        ctx.beginPath(); ctx.moveTo(cx, cy - outerRadius);
-        for (let i = 0; i < spikes; i++) {
-          xPos = cx + Math.cos(rot) * outerRadius; yPos = cy + Math.sin(rot) * outerRadius; ctx.lineTo(xPos, yPos); rot += step;
-          xPos = cx + Math.cos(rot) * innerRadius; yPos = cy + Math.sin(rot) * innerRadius; ctx.lineTo(xPos, yPos); rot += step;
-        }
-        ctx.lineTo(cx, cy - outerRadius); ctx.closePath(); ctx.fill();
-      };
-      drawStar(150, 150, 5, 50, 25); drawStar(1350, 150, 5, 50, 25); drawStar(150, 1971, 5, 50, 25); drawStar(1350, 1971, 5, 50, 25);
     }
 
-    // 2. HEADER TEXT
+    // Particles
+    if (isCameraActive) {
+      particles.current.forEach(p => {
+        ctx.beginPath();
+        if (template === 'royal_luxury') ctx.fillStyle = `rgba(251, 191, 36, ${p.a * 0.5})`;
+        else ctx.fillStyle = `rgba(0, 0, 0, ${p.a * 0.1})`;
+        ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill();
+        p.y -= p.vy; if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
+      });
+    }
+
+    // 2. HEADER
     ctx.textAlign = 'center';
-    if (template === 'cuttie_pink') ctx.fillStyle = '#ff4d6d';
-    else if (template === 'cuttie_purple') ctx.fillStyle = '#4a148c';
+    if (template === 'royal_luxury') ctx.fillStyle = '#fbbf24';
     else ctx.fillStyle = template === 'vintage_antique' ? '#2c2824' : '#111827';
 
     ctx.font = 'bold 28px Koulen';
-    ctx.fillText(`បង្កើតនៅឆ្នាំ ២០២៤   |   ភ្នំពេញ, កម្ពុជា   |   លេខ ៩៤ ស៊េរី ១៥២`, canvas.width / 2, 160);
-    ctx.font = '115px Moul';
-    ctx.fillText('ស្ទាវ ញ៉ូស៍', canvas.width / 2, 330);
-    ctx.font = '32px Koulen';
-    ctx.fillText(`ការបោះពុម្ពពិសេស   |   ${date}   |   តម្លៃ: ២ សេន`, canvas.width / 2, 420);
-    ctx.lineWidth = 6;
-    ctx.beginPath(); ctx.moveTo(150, 465); ctx.lineTo(1350, 465); ctx.stroke();
+    ctx.fillText(`បង្កើតនៅឆ្នាំ ២០២៥   |   ភ្នំពេញ, កម្ពុជា   |   លេខ ៩៤ ស៊េរី ១៥២`, canvas.width / 2, 160);
+    
+    if (template === 'vintage_antique') { ctx.shadowBlur = 4; ctx.shadowColor = 'rgba(44, 40, 36, 0.4)'; }
+    ctx.font = '115px Moul'; ctx.fillText('ស្ទាវ ញ៉ូស៍', canvas.width / 2, 330); ctx.shadowBlur = 0;
 
-    // 3. PHOTO / LIVE CAMERA
-    const x = 250, y = 880, w = 1000, h = 820;
+    ctx.font = '32px Koulen'; ctx.fillText(`ការបោះពុម្ពពិសេស   |   ${date}   |   តម្លៃ: ២ សេន`, canvas.width / 2, 420);
+    ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(150, 465); ctx.lineTo(1350, 465); ctx.stroke();
+
+    // Stamps
+    if (template === 'vintage_antique') {
+      ctx.save(); ctx.translate(1250, 330); ctx.rotate(Math.PI / 10);
+      ctx.strokeStyle = 'rgba(180, 40, 40, 0.7)'; ctx.lineWidth = 5; ctx.strokeRect(-90, -45, 180, 90);
+      ctx.fillStyle = 'rgba(180, 40, 40, 0.7)'; ctx.font = 'bold 26px Battambang';
+      ctx.fillText('បានពិនិត្យ', 0, 10); ctx.restore();
+    }
+    if (template === 'vintage_classic') {
+      ctx.save(); ctx.translate(150, 310);
+      ctx.fillStyle = '#111827'; ctx.fillRect(-60, -30, 120, 60);
+      ctx.fillStyle = '#fdfdfd'; ctx.font = 'bold 24px Koulen'; ctx.fillText('VOL. 1', 0, 10); ctx.restore();
+    }
+    if (template === 'royal_luxury') {
+      ctx.save(); ctx.translate(1250, 330);
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 20px Koulen'; ctx.fillText('PREMIUM', 0, 8); ctx.restore();
+    }
+
+    // 3. PHOTO
+    const x = 250, y = 900, w = 1000, h = 600;
     ctx.save();
-    if (template === 'cuttie_pink') ctx.fillStyle = '#ffc1cc';
-    else if (template === 'cuttie_purple') ctx.fillStyle = '#ce93d8';
+    if (template === 'royal_luxury') ctx.fillStyle = '#064e3b';
     else ctx.fillStyle = template === 'vintage_antique' ? '#dcd4c8' : '#e5e7eb';
     
     ctx.fillRect(x - 10, y - 10, w + 20, h + 20);
+    if (template === 'vintage_classic' || template === 'royal_luxury') {
+      ctx.strokeStyle = template === 'royal_luxury' ? '#fbbf24' : '#111827';
+      ctx.lineWidth = 5; ctx.strokeRect(x - 15, y - 15, w + 30, h + 30);
+    }
     ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
 
     if (isCameraActive && videoRef.current) {
@@ -146,10 +160,11 @@ export default function NewspaperGenerator() {
       let dW = w, dH = h, dX = x, dY = y;
       if (videoRatio > targetRatio) { dW = h * videoRatio; dX = x - (dW - w) / 2; }
       else { dH = w / videoRatio; dY = y - (dH - h) / 2; }
-      if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(40%) contrast(110%)';
-      else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(125%)';
-      ctx.translate(dX + dW, dY); ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, dW, dH);
+      ctx.filter = 'none';
+      if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(50%) contrast(110%) brightness(95%)';
+      else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(140%) brightness(105%)';
+      else if (template === 'royal_luxury') ctx.filter = 'contrast(120%) saturate(110%)';
+      ctx.translate(dX + dW, dY); ctx.scale(-1, 1); ctx.drawImage(video, 0, 0, dW, dH); ctx.filter = 'none';
     } else if (imagePreview) {
       await new Promise<void>((resolve) => {
         const img = new Image();
@@ -159,12 +174,10 @@ export default function NewspaperGenerator() {
           let dW = w, dH = h, dX = x, dY = y;
           if (imgRatio > targetRatio) { dW = h * imgRatio; dX = x - (dW - w) / 2; }
           else { dH = w / imgRatio; dY = y - (dH - h) / 2; }
-          
-          if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(40%) contrast(110%)';
-          else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(125%)';
-          
-          ctx.drawImage(img, dX, dY, dW, dH);
-          resolve();
+          ctx.filter = 'none';
+          if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(50%) contrast(110%)';
+          else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(140%)';
+          ctx.drawImage(img, dX, dY, dW, dH); ctx.filter = 'none'; resolve();
         };
         img.src = imagePreview;
       });
@@ -174,13 +187,15 @@ export default function NewspaperGenerator() {
     ctx.textAlign = 'right'; ctx.font = 'italic bold 22px Koulen';
     ctx.fillText('រូបថតដោយ៖ ស្ទាវ ញ៉ូស៍', x + w, y + h + 45);
 
-    // 4. HEADLINE & TEXT
+    // 4. HEADLINE
     const wrapText = (text: string, xPos: number, yPos: number, maxWidth: number, lineHeight: number) => {
-      const words = text.split(' '); let line = '';
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
+      const segmenter = new Intl.Segmenter('km', { granularity: 'grapheme' });
+      const segments = Array.from(segmenter.segment(text)).map(s => s.segment);
+      let line = '';
+      for (let n = 0; n < segments.length; n++) {
+        const testLine = line + segments[n];
         if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-          ctx.fillText(line, xPos, yPos); line = words[n] + ' '; yPos += lineHeight;
+          ctx.fillText(line, xPos, yPos); line = segments[n]; yPos += lineHeight;
         } else line = testLine;
       }
       ctx.fillText(line, xPos, yPos); return yPos;
@@ -189,14 +204,13 @@ export default function NewspaperGenerator() {
     ctx.textAlign = 'center';
     const displayHeadline = headline || 'សូមបំពេញចំណងជើងធំ!';
     if (!headline) ctx.globalAlpha = 0.3;
-    ctx.font = displayHeadline.length > 50 ? '62px Moul' : '82px Moul';
-    const lastY = wrapText(displayHeadline, canvas.width / 2, 655, 1100, 110);
+    ctx.font = displayHeadline.length > 50 ? '60px Moul' : '80px Moul';
+    const lastY = wrapText(displayHeadline, canvas.width / 2, 615, 1100, 110);
     ctx.globalAlpha = 1.0;
 
     const displaySub = subHeadline || 'សូមបំពេញចំណងជើងរងនៅទីនេះ...';
     if (!subHeadline) ctx.globalAlpha = 0.3;
-    ctx.font = '38px Koulen';
-    ctx.fillText(displaySub, canvas.width / 2, lastY + 90);
+    ctx.font = '38px Koulen'; ctx.fillText(displaySub, canvas.width / 2, lastY + 80);
     ctx.globalAlpha = 1.0;
     
     ctx.font = 'italic 42px Battambang';
@@ -208,19 +222,12 @@ export default function NewspaperGenerator() {
   };
 
   const startRecording = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    chunksRef.current = [];
-    const stream = canvas.captureStream(30);
-    
-    // Choose compatible format for mobile (Prioritize MP4 for both iOS/Android)
+    const canvas = canvasRef.current; if (!canvas) return;
+    chunksRef.current = []; const stream = canvas.captureStream(30);
     let mimeType = 'video/mp4';
     if (!MediaRecorder.isTypeSupported('video/mp4')) {
-      mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') 
-        ? 'video/webm;codecs=vp9' 
-        : 'video/webm';
+      mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
     }
-
     const mediaRecorder = new MediaRecorder(stream, { mimeType });
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
     mediaRecorder.onstop = () => {
@@ -235,14 +242,11 @@ export default function NewspaperGenerator() {
   };
 
   const downloadNewspaper = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const canvas = canvasRef.current; if (!canvas) return;
     setIsGenerating(true);
     try {
-      const link = document.createElement('a');
-      link.download = `steav-news-${template}-${Date.now()}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.92);
-      link.click();
+      const link = document.createElement('a'); link.download = `steav-news-${template}-${Date.now()}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.92); link.click();
     } catch (e) { alert('កំហុសក្នុងការទាញយក!'); } finally { setIsGenerating(false); }
   };
 
@@ -277,27 +281,8 @@ export default function NewspaperGenerator() {
                   </label>
                 </div>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងធំ</label>
-                    <input 
-                      type="text" 
-                      value={headline} 
-                      onChange={(e) => setHeadline(e.target.value)} 
-                      placeholder="សូមបំពេញចំណងជើង!" 
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none font-bold text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" 
-                      style={{ fontFamily: "'Battambang', sans-serif" }} 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងរង</label>
-                    <textarea 
-                      value={subHeadline} 
-                      onChange={(e) => setSubHeadline(e.target.value)} 
-                      placeholder="សូមបំពេញចំណងជើងរង!" 
-                      className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none h-20 resize-none text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" 
-                      style={{ fontFamily: "'Battambang', sans-serif" }} 
-                    />
-                  </div>
+                  <div><label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងធំ</label><input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="សូមបំពេញចំណងជើង!" className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none font-bold text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" style={{ fontFamily: "'Battambang', sans-serif" }} /></div>
+                  <div><label className="block text-xs font-bold text-black uppercase mb-1" style={{ fontFamily: "'Koulen', sans-serif" }}>ចំណងជើងរង</label><textarea value={subHeadline} onChange={(e) => setSubHeadline(e.target.value)} placeholder="សូមបំពេញចំណងជើងរង!" className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none h-20 resize-none text-black placeholder:text-gray-400 placeholder:font-normal text-[16px]" style={{ fontFamily: "'Battambang', sans-serif" }} /></div>
                 </div>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -305,8 +290,7 @@ export default function NewspaperGenerator() {
                 <div className="grid grid-cols-2 gap-3">
                   <button onClick={() => setTemplate('vintage_antique')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'vintage_antique' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-500'}`}>បុរាណ (Antique)</button>
                   <button onClick={() => setTemplate('vintage_classic')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'vintage_classic' ? 'border-primary bg-primary/5 text-primary' : 'border-gray-100 text-gray-500'}`}>សម័យមុន (Classic)</button>
-                  <button onClick={() => setTemplate('cuttie_pink')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'cuttie_pink' ? 'border-[#ff85a1] bg-[#fff0f3] text-[#ff4d6d]' : 'border-gray-100 text-gray-500'}`}>Cuttie Pink (HK)</button>
-                  <button onClick={() => setTemplate('cuttie_purple')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold ${template === 'cuttie_purple' ? 'border-[#7b1fa2] bg-[#f3e5f5] text-[#4a148c]' : 'border-gray-100 text-gray-500'}`}>Cuttie Purple (KM)</button>
+                  <button onClick={() => setTemplate('royal_luxury')} className={`p-3 rounded-xl border-2 transition-all text-[10px] font-bold col-span-2 ${template === 'royal_luxury' ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : 'border-gray-100 text-gray-500'}`}>Royal Luxury (មាសសន្លឹក)</button>
                 </div>
               </div>
               <div className="space-y-3">
