@@ -22,16 +22,37 @@ export default function NewspaperGenerator() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
+  // Load from LocalStorage on mount
+  useEffect(() => {
+    const savedHeadline = localStorage.getItem('sn_headline');
+    const savedSub = localStorage.getItem('sn_sub');
+    const savedImg = localStorage.getItem('sn_img');
+    const savedTemplate = localStorage.getItem('sn_template') as TemplateType;
+    
+    if (savedHeadline) setHeadline(savedHeadline);
+    if (savedSub) setSubHeadline(savedSub);
+    if (savedImg) setImagePreview(savedImg);
+    if (savedTemplate) setTemplate(savedTemplate);
+    
+    setDate(new Date().toLocaleDateString('km-KH', { day: 'numeric', month: 'long', year: 'numeric' }));
+    return () => stopCamera();
+  }, []);
+
+  // Save to LocalStorage on change
+  useEffect(() => {
+    localStorage.setItem('sn_headline', headline);
+    localStorage.setItem('sn_sub', subHeadline);
+    localStorage.setItem('sn_template', template);
+    if (imagePreview && imagePreview.length < 2000000) { // Only save if < 2MB to avoid quota issues
+      localStorage.setItem('sn_img', imagePreview);
+    }
+  }, [headline, subHeadline, template, imagePreview]);
+
   const particles = useRef<{x: number, y: number, s: number, vy: number, a: number}[]>([]);
   useEffect(() => {
     particles.current = Array.from({length: 20}, () => ({
       x: Math.random() * 1500, y: Math.random() * 2121, s: Math.random() * 5 + 2, vy: Math.random() * 2 + 1, a: Math.random()
     }));
-  }, []);
-
-  useEffect(() => {
-    setDate(new Date().toLocaleDateString('km-KH', { day: 'numeric', month: 'long', year: 'numeric' }));
-    return () => stopCamera();
   }, []);
 
   useEffect(() => {
@@ -154,34 +175,20 @@ export default function NewspaperGenerator() {
     ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
 
     const applyVintageEffect = (source: HTMLVideoElement | HTMLImageElement, dX: number, dY: number, dW: number, dH: number) => {
-      // 1. Draw original
       if (source instanceof HTMLVideoElement) {
         ctx.translate(dX + dW, dY); ctx.scale(-1, 1);
         ctx.drawImage(source, 0, 0, dW, dH);
-        ctx.scale(-1, 1); ctx.translate(-(dX + dW), -dY); // Reset for overlay
+        ctx.scale(-1, 1); ctx.translate(-(dX + dW), -dY);
       } else {
         ctx.drawImage(source, dX, dY, dW, dH);
       }
-
-      // 2. Force Grayscale (Works on ALL mobile browsers)
       if (template.includes('vintage')) {
-        ctx.save();
-        ctx.globalCompositeOperation = 'saturation';
-        ctx.fillStyle = 'black';
-        ctx.fillRect(dX, dY, dW, dH);
-        ctx.restore();
-
-        // 3. Adjust Contrast/Brightness manually via Overlay
+        ctx.save(); ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = 'black'; ctx.fillRect(dX, dY, dW, dH); ctx.restore();
         if (template === 'vintage_classic') {
-          ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = 'rgba(255,255,255,0.2)';
-          ctx.fillRect(dX, dY, dW, dH); ctx.restore();
+          ctx.save(); ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(dX, dY, dW, dH); ctx.restore();
         }
-
-        // 4. Add Sepia Tone for Antique
         if (template === 'vintage_antique') {
-          ctx.save(); ctx.globalCompositeOperation = 'color';
-          ctx.fillStyle = 'rgba(112, 66, 20, 0.35)'; // Sepia tone
-          ctx.fillRect(dX, dY, dW, dH); ctx.restore();
+          ctx.save(); ctx.globalCompositeOperation = 'color'; ctx.fillStyle = 'rgba(112, 66, 20, 0.35)'; ctx.fillRect(dX, dY, dW, dH); ctx.restore();
         }
       }
     };
@@ -272,25 +279,38 @@ export default function NewspaperGenerator() {
     const canvas = canvasRef.current; if (!canvas) return;
     setIsGenerating(true);
     try {
-      canvas.toBlob((blob) => {
+      canvas.toBlob(async (blob) => {
         if (!blob) { alert('កំហុសក្នុងការទាញយក!'); setIsGenerating(false); return; }
-        // Force octet-stream to trigger Safari's download manager more reliably
-        const safeBlob = new Blob([blob], { type: 'image/octet-stream' });
-        const url = URL.createObjectURL(safeBlob);
         
-        // Use a real link but also force location assign for mobile "wakeup"
+        const fileName = "SteavNews.jpg";
+        const file = new File([blob], fileName, { type: "image/jpeg" });
+
+        // NATIVE SHARE (Best for mobile)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'កាសែតស្ទាវញ៉ូស៍',
+              text: 'រូបភាពកាសែតដែលបានបង្កើតដោយ Steav News',
+            });
+            setIsGenerating(false);
+            return;
+          } catch (err) {
+            // Fallback if user cancelled or share failed
+          }
+        }
+
+        // FALLBACK for PC/Old phones
+        const url = URL.createObjectURL(file);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `SteavNews.jpg`;
+        link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
-        // This is the "Force Wakeup" for mobile Safari/Facebook
         if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
           window.location.assign(url);
         }
-
         setTimeout(() => setIsGenerating(false), 500);
         setTimeout(() => URL.revokeObjectURL(url), 20000);
       }, 'image/jpeg', 0.95);
@@ -322,7 +342,7 @@ export default function NewspaperGenerator() {
                     <span className="text-xs font-bold" style={{ fontFamily: "'Koulen', sans-serif" }}>{isCameraActive ? 'បិទកាមេរ៉ា' : 'បើកកាមេរ៉ា'}</span>
                   </button>
                   <label className="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-gray-100 hover:border-primary cursor-pointer">
-                    <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v12a2 2 0 002 2z" /></svg>
                     <span className="text-xs font-bold text-gray-500" style={{ fontFamily: "'Koulen', sans-serif" }}>បញ្ចូលរូបភាព</span>
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                   </label>
