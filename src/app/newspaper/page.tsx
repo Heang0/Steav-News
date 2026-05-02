@@ -243,7 +243,9 @@ export default function NewspaperGenerator() {
 
     const displaySub = subHeadline || 'សូមបំពេញចំណងជើងរងនៅទីនេះ...';
     if (!subHeadline) ctx.globalAlpha = 0.3;
-    ctx.font = '38px Koulen'; ctx.fillText(displaySub, canvas.width / 2, lastY + 80);
+    ctx.font = '38px Koulen';
+    // Use wrapText for sub-headline too
+    wrapText(displaySub, canvas.width / 2, lastY + 80, 1300, 55);
     ctx.globalAlpha = 1.0;
     
     ctx.font = 'italic 42px Battambang';
