@@ -255,15 +255,18 @@ export default function NewspaperGenerator() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `steav-news-${template}-${Date.now()}.jpg`;
+        // Short, clean filename
+        link.download = `SteavNews.jpg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        // Clean up memory after a short delay
-        setTimeout(() => URL.revokeObjectURL(url), 100);
+        // RESET UI immediately
         setIsGenerating(false);
-      }, 'image/jpeg', 0.92);
+        
+        // Clean up memory after a LONG delay (10s) to give iOS Safari time to process
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }, 'image/jpeg', 0.95);
     } catch (e) { 
       alert('កំហុសក្នុងការទាញយក!'); 
       setIsGenerating(false);
