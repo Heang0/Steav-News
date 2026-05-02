@@ -86,10 +86,8 @@ export default function NewspaperGenerator() {
       ctx.strokeStyle = '#111827'; ctx.lineWidth = 20; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
       ctx.lineWidth = 4; ctx.strokeRect(55, 55, canvas.width - 110, canvas.height - 110);
     } else if (template === 'cuttie_pink') {
-      // Hello Kitty Style
       ctx.fillStyle = '#fff0f3'; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = '#ff85a1'; ctx.lineWidth = 40; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-      // Draw Hearts
       ctx.fillStyle = '#ff4d6d';
       const drawHeart = (hx: number, hy: number, size: number) => {
         ctx.beginPath(); ctx.moveTo(hx, hy);
@@ -101,10 +99,8 @@ export default function NewspaperGenerator() {
       };
       drawHeart(150, 150, 40); drawHeart(1350, 150, 40); drawHeart(150, 1971, 40); drawHeart(1350, 1971, 40);
     } else if (template === 'cuttie_purple') {
-      // Kuromi Style
       ctx.fillStyle = '#f3e5f5'; ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.strokeStyle = '#7b1fa2'; ctx.lineWidth = 40; ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-      // Draw Stars
       ctx.fillStyle = '#4a148c';
       const drawStar = (cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number) => {
         let rot = Math.PI / 2 * 3, xPos = cx, yPos = cy, step = Math.PI / spikes;
@@ -150,10 +146,8 @@ export default function NewspaperGenerator() {
       let dW = w, dH = h, dX = x, dY = y;
       if (videoRatio > targetRatio) { dW = h * videoRatio; dX = x - (dW - w) / 2; }
       else { dH = w / videoRatio; dY = y - (dH - h) / 2; }
-      
       if (template === 'vintage_antique') ctx.filter = 'grayscale(100%) sepia(40%) contrast(110%)';
       else if (template === 'vintage_classic') ctx.filter = 'grayscale(100%) contrast(125%)';
-      
       ctx.translate(dX + dW, dY); ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, dW, dH);
     } else if (imagePreview) {
@@ -212,12 +206,19 @@ export default function NewspaperGenerator() {
     if (!canvas) return;
     chunksRef.current = [];
     const stream = canvas.captureStream(30);
-    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+    
+    // Choose compatible format for mobile (MP4 for iOS, WebM for Android)
+    let mimeType = 'video/webm;codecs=vp9';
+    if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4';
+    else if (MediaRecorder.isTypeSupported('video/webm')) mimeType = 'video/webm';
+
+    const mediaRecorder = new MediaRecorder(stream, { mimeType });
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
     mediaRecorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+      const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+      const blob = new Blob(chunksRef.current, { type: mimeType });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = `steav-news-live-${Date.now()}.webm`; link.click();
+      const link = document.createElement('a'); link.href = url; link.download = `steav-news-live-${Date.now()}.${ext}`; link.click();
       setIsRecording(false);
     };
     mediaRecorder.start(); mediaRecorderRef.current = mediaRecorder; setIsRecording(true);
@@ -229,7 +230,10 @@ export default function NewspaperGenerator() {
     if (!canvas) return;
     setIsGenerating(true);
     try {
-      const link = document.createElement('a'); link.download = `steav-news-${template}-${Date.now()}.png`; link.href = canvas.toDataURL('image/png', 1.0); link.click();
+      const link = document.createElement('a');
+      link.download = `steav-news-${template}-${Date.now()}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
+      link.click();
     } catch (e) { alert('កំហុសក្នុងការទាញយក!'); } finally { setIsGenerating(false); }
   };
 
@@ -278,8 +282,8 @@ export default function NewspaperGenerator() {
                 </div>
               </div>
               <div className="space-y-3">
-                <button onClick={downloadNewspaper} disabled={isGenerating || (!imagePreview && !isCameraActive)} className="w-full bg-primary hover:bg-primary-dark text-white font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50" style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>ទាញយកជារូបភាព</button>
-                <button onClick={startRecording} disabled={!isCameraActive || isRecording} className={`w-full font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-white'}`} style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>{isRecording ? 'កំពុងថត...' : 'ទាញយកជាវីដេអូ (Live)'}</button>
+                <button onClick={downloadNewspaper} disabled={isGenerating || (!imagePreview && !isCameraActive)} className="w-full bg-primary hover:bg-primary-dark text-white font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50" style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>ទាញយកជារូបភាព (JPG)</button>
+                <button onClick={startRecording} disabled={!isCameraActive || isRecording} className={`w-full font-black py-4 px-6 rounded-2xl shadow-lg flex items-center justify-center gap-2 transition-all ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-white'}`} style={{ fontFamily: "'Koulen', sans-serif" }}><svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>{isRecording ? 'កំពុងថត...' : 'ទាញយកជាវីដេអូ (Mobile OK)'}</button>
               </div>
             </div>
             <div className="w-full lg:w-2/3 flex flex-col items-center">
