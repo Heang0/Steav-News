@@ -10,6 +10,7 @@ const navLinks = [
   { href: '/?category=ស្នេហា', label: 'ស្នេហា' },
   { href: '/?category=ពិភពលោក', label: 'ពិភពលោក' },
   { href: '/card', label: 'ធ្វើកាត' },
+  { href: '/newspaper', label: 'ធ្វើកាសែត' },
 ];
 
 export default function Header() {

@@ -52,6 +52,8 @@ export default function Footer() {
                 { href: '/?category=សង្គម', label: 'សង្គម' },
                 { href: '/?category=ស្នេហា', label: 'ស្នេហា' },
                 { href: '/?category=ពិភពលោក', label: 'ពិភពលោក' },
+                { href: '/card', label: 'ធ្វើកាតបុគ្គលិក' },
+                { href: '/newspaper', label: 'ធ្វើកាសែត' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors flex items-center gap-2 group">
