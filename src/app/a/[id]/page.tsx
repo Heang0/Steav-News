@@ -19,9 +19,8 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
+// Enable ISR: Cache for 24 hours to save CPU
+export const revalidate = 86400; 
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
@@ -98,7 +97,7 @@ export default async function ArticlePage({ params }: PageProps) {
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-    const article: any = await findAndIncrementArticleByIdentifier(newsCollection, id);
+    const article: any = await findArticleByIdentifier(newsCollection, id);
 
     if (!article) {
       console.error('Article not found:', id);

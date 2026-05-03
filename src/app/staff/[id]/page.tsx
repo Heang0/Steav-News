@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import { getSiteUrl } from '@/lib/utils';
 import { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // Cache for 24 hours
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 async function getStaffMember(id: string) {
   try {
-    const res = await fetch(`${getSiteUrl()}/api/staff/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${getSiteUrl()}/api/staff/${id}`, { next: { revalidate: 86400 } });
     if (!res.ok) return null;
     const data = await res.json();
     return data.success ? data.data : null;

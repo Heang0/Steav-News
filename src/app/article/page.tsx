@@ -18,14 +18,14 @@ type PageProps = {
   searchParams: Promise<{ id?: string }>;
 };
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Enable ISR: Cache for 24 hours to save CPU
+export const revalidate = 86400;
 
 export async function generateMetadata(
   { searchParams }: PageProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { id } = await searchParams;
+  const { id } = await (searchParams as any);
 
   if (!id) {
     return {
@@ -92,7 +92,7 @@ export async function generateMetadata(
 }
 
 export default async function ArticlePage({ searchParams }: PageProps) {
-  const { id } = await searchParams;
+  const { id } = await (searchParams as any);
 
   if (!id) {
     return (
@@ -113,7 +113,7 @@ export default async function ArticlePage({ searchParams }: PageProps) {
   try {
     const db = await getDb();
     const newsCollection = db.collection('articles');
-    const article: any = await findAndIncrementArticleByIdentifier(newsCollection, id);
+    const article: any = await findArticleByIdentifier(newsCollection, id);
 
     if (!article) {
       return (

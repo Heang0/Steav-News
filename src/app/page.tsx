@@ -7,6 +7,8 @@ import TrendingArticles from '@/components/TrendingArticles';
 import CategorySpotlightsSection from '@/components/CategorySpotlightsSection';
 import LatestArticlesSection from '@/components/LatestArticlesSection';
 
+export const revalidate = 300; // Refresh every 5 minutes
+
 export const metadata: Metadata = {
   title: 'STEAV NEWS - ទំព័រដើម',
   description: 'Read the latest news from STEAV NEWS - Cambodia\'s trusted news source',
