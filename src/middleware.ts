@@ -27,16 +27,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. BLOCK everyone else (Redirect to a simple "Not Available" or just block)
-  // For now, let's just let them in if we aren't sure (to avoid blocking legit users), 
-  // but you can change this to block if the CPU stays high.
-  
-  // If you want to BE STRICT and block everything else, uncomment the lines below:
-  /*
+  // 4. BLOCK everyone else (STRICT MODE ENABLED)
   if (country !== 'unknown' && !ALLOWED_COUNTRIES.includes(country)) {
-     return new NextResponse('Access restricted to your region.', { status: 403 });
+     console.log(`Blocked access from: ${country}`);
+     return new NextResponse(
+       'Access restricted to your region. Steav News is currently optimizing for local traffic.', 
+       { status: 403 }
+     );
   }
-  */
 
   return NextResponse.next();
 }
