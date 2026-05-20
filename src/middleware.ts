@@ -14,7 +14,12 @@ const ALLOWED_BOTS = ['facebookexternalhit', 'facebook', 'telegrambot', 'googleb
 const BLOCKED_UA_PATTERNS = ['curl', 'python', 'java/', 'wget', 'bot', 'spider', 'scraper', 'httpclient'];
 
 export function middleware(request: NextRequest) {
-  const country = request.headers.get('x-vercel-ip-country')?.toUpperCase() || 'UNKNOWN';
+  const country = (
+    request.headers.get('x-vercel-ip-country') || 
+    request.headers.get('x-country') || 
+    request.headers.get('x-nf-country') || 
+    'UNKNOWN'
+  ).toUpperCase();
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
   if (process.env.NODE_ENV === 'development') {
