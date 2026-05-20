@@ -4,4 +4,3 @@
 
 [functions]
   node_bundler = "esbuild"
-  region = "sg" # Runs in Singapore, right next to your MongoDB cluster to make the site load instantly!
