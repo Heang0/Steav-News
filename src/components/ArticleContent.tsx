@@ -38,6 +38,19 @@ export default function ArticleContent({ article }: ArticleContentProps) {
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [showKhqr]);
+
+  // Record article view count on mount (bypasses SSR/ISR cache for accurate statistics)
+  useEffect(() => {
+    if (!article._id) return;
+    const recordView = async () => {
+      try {
+        await fetch(`/api/articles/${article._id}`);
+      } catch (err) {
+        console.error('Error recording article view:', err);
+      }
+    };
+    recordView();
+  }, [article._id]);
   const heroImage = getOptimizedImageUrl(article.image, {
     width: 1400,
     height: 900,
