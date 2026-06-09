@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Allowed countries that can access your site.
-// Set ALLOWED_COUNTRIES in Vercel environment variables as a comma-separated list if you want to change this without code deploy.
-const ALLOWED_COUNTRIES = process.env.ALLOWED_COUNTRIES
-  ? process.env.ALLOWED_COUNTRIES.split(',').map(code => code.trim().toUpperCase()).filter(Boolean)
-  : ['KH', 'TH', 'KR', 'JP', 'US'];
 
 // Allow essential bots/crawlers so previews and search indexing still work.
 const ALLOWED_BOTS = ['facebookexternalhit', 'facebook', 'telegrambot', 'googlebot', 'bingbot'];
@@ -14,12 +9,7 @@ const ALLOWED_BOTS = ['facebookexternalhit', 'facebook', 'telegrambot', 'googleb
 const BLOCKED_UA_PATTERNS = ['curl', 'python', 'java/', 'wget', 'bot', 'spider', 'scraper', 'httpclient'];
 
 export function middleware(request: NextRequest) {
-  const country = (
-    request.headers.get('x-vercel-ip-country') || 
-    request.headers.get('x-country') || 
-    request.headers.get('x-nf-country') || 
-    'UNKNOWN'
-  ).toUpperCase();
+
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
   if (process.env.NODE_ENV === 'development') {
@@ -36,12 +26,6 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Request blocked.', { status: 403 });
   }
 
-  if (!ALLOWED_COUNTRIES.includes(country)) {
-    return new NextResponse(
-      'Access restricted. Steav News is currently optimized for selected regions.',
-      { status: 403 }
-    );
-  }
 
   return NextResponse.next();
 }
