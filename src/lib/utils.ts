@@ -39,11 +39,11 @@ export function getFacebookOptimizedImageUrl(url: string): string {
     absoluteUrl = buildImageUrl(url);
   }
 
-  if (absoluteUrl.includes('imagekit.io')) {
-    const [base, query] = absoluteUrl.split('?');
-    const queryString = query ? `${query}&` : '';
-    return `${base}?${queryString}tr=w-1200,h-630,fo-auto`;
+  // Optimize for Cloudinary if it's a Cloudinary URL
+  if (absoluteUrl.includes('cloudinary.com')) {
+    return absoluteUrl.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_auto/q_auto/');
   }
+  
   return absoluteUrl;
 }
 
@@ -56,21 +56,19 @@ export function getOptimizedImageUrl(
     crop?: 'fill' | 'fit' | 'limit';
   } = {}
 ): string {
-  if (!url || !url.includes('imagekit.io')) {
+  if (!url || !url.includes('cloudinary.com')) {
     return url;
   }
 
   const transforms = [
-    options.width ? `w-${options.width}` : '',
-    options.height ? `h-${options.height}` : '',
-    options.crop ? `c-${options.crop}` : '',
-    options.quality ? `q-${options.quality}` : 'q-70',
-    'fo-auto',
+    options.crop ? `c_${options.crop}` : 'c_fill',
+    options.width ? `w_${options.width}` : '',
+    options.height ? `h_${options.height}` : '',
+    options.quality ? `q_${options.quality}` : 'q_auto',
+    'f_auto',
   ].filter(Boolean);
 
-  const [base, query] = url.split('?');
-  const queryString = query ? `${query}&` : '';
-  return `${base}?${queryString}tr=${transforms.join(',')}`;
+  return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
 }
 
 export function shouldBypassNextImageOptimization(url: string): boolean {
