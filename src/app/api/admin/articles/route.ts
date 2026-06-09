@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import { uploadImageBuffer } from '@/lib/imagekit';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 import { ObjectId } from 'mongodb';
 import { CATEGORIES } from '@/lib/utils';
 import { buildArticlePublicId, getNextShortId } from '@/lib/articles';

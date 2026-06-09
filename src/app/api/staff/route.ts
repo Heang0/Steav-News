@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { v4 as uuidv4 } from 'uuid';
-import { uploadImageBuffer } from '@/lib/imagekit';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 
 export async function POST(request: Request) {
   try {

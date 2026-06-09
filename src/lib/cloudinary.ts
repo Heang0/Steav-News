@@ -1,24 +1,22 @@
-import ImageKit from 'imagekit';
+import { v2 as cloudinary } from 'cloudinary';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 
 if (
-  !process.env.IMAGEKIT_PUBLIC_KEY ||
-  !process.env.IMAGEKIT_PRIVATE_KEY ||
-  !process.env.IMAGEKIT_URL_ENDPOINT
+  !process.env.CLOUDINARY_CLOUD_NAME ||
+  !process.env.CLOUDINARY_API_KEY ||
+  !process.env.CLOUDINARY_API_SECRET
 ) {
-  throw new Error('Please add your ImageKit credentials to .env.local');
+  console.warn('Cloudinary credentials missing - image uploads will fail if used.');
 }
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export default imagekit;
-
-export const IMAGEKIT_FOLDER = '/steav_news';
+export const CLOUDINARY_FOLDER = 'steav_news';
 const MAX_IMAGE_DIMENSION = 1600;
 const TARGET_IMAGE_SIZE_BYTES = 90 * 1024;
 const PHOTO_WIDTH_STEPS = [1600, 1440, 1280, 1120, 960, 840, 720];
@@ -110,17 +108,33 @@ export async function uploadImageBuffer(
   buffer: Buffer,
   mimeType?: string,
   originalName = 'upload'
-) {
+): Promise<{ url: string; fileId: string; name: string }> {
   const optimizedBuffer = await optimizeImageBuffer(buffer, mimeType);
   const extension = getFileExtension(mimeType);
-  const fileName = `${sanitizeFileName(originalName)}-${Date.now()}-${uuidv4()}.${extension}`;
+  const fileName = `${sanitizeFileName(originalName)}-${Date.now()}-${uuidv4()}`;
 
-  const uploadResult = await imagekit.upload({
-    file: optimizedBuffer.toString('base64'),
-    fileName,
-    folder: IMAGEKIT_FOLDER,
-    useUniqueFileName: true,
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: CLOUDINARY_FOLDER,
+        public_id: fileName,
+        resource_type: 'auto',
+        format: extension === 'gif' || extension === 'svg' ? undefined : extension,
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve({
+            url: result?.secure_url || '',
+            fileId: result?.public_id || '',
+            name: result?.original_filename || '',
+          });
+        }
+      }
+    );
+    uploadStream.end(optimizedBuffer);
   });
-
-  return uploadResult;
 }
+
+export default cloudinary;

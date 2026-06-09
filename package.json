@@ -8,13 +8,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@imagekit/nodejs": "^7.6.2",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.5.0",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
+    "cloudinary": "^2.10.0",
     "html2canvas": "^1.4.1",
-    "imagekit": "^1.4.0",
     "mongodb": "^5.9.2",
     "next": "^16.1.6",
     "postcss": "^8.5.8",

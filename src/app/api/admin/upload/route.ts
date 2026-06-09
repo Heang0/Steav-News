@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadImageBuffer } from '@/lib/imagekit';
+import { uploadImageBuffer } from '@/lib/cloudinary';
 
 function isAuthenticated(request: NextRequest): boolean {
   const sessionId = request.headers.get('x-session-id');
