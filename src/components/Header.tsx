@@ -12,6 +12,8 @@ const navLinks = [
   { href: '/newspaper', label: 'ធ្វើកាសែត' },
 ];
 
+const actionButtons = ['/newspaper'];
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -61,13 +63,13 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`relative font-bold text-sm px-4 py-2 rounded-xl transition-all duration-200 group ${
-                link.href === '/newspaper'
+                actionButtons.includes(link.href)
                   ? 'bg-white text-primary hover:bg-gray-100 hover:shadow-md ml-2 border-2 border-white'
                   : 'text-white/90 hover:text-white hover:bg-white/10'
               }`}
             >
               {link.label}
-              {link.href !== '/newspaper' && (
+              {!actionButtons.includes(link.href) && (
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-white rounded-full group-hover:w-1/2 transition-all duration-200" />
               )}
             </Link>
@@ -89,7 +91,7 @@ export default function Header() {
       {/* Mobile Menu */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-primary border-t border-white/20 shadow-lg ${
-          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="px-4 py-3 flex flex-col gap-1">
@@ -98,7 +100,7 @@ export default function Header() {
               key={link.href}
               href={link.href}
               className={`font-bold text-base py-3 px-4 rounded-xl transition-colors ${
-                link.href === '/newspaper'
+                actionButtons.includes(link.href)
                   ? 'bg-white text-primary mt-2 text-center shadow-sm border border-white'
                   : 'text-white/90 hover:bg-white/10 hover:text-white'
               }`}

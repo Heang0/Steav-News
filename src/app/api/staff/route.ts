@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { v4 as uuidv4 } from 'uuid';
-import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
+import { uploadImageBuffer } from '@/lib/imagekit';
 
 export async function POST(request: Request) {
   try {
@@ -38,19 +38,8 @@ export async function POST(request: Request) {
       if (imageFile && imageFile.size > 0) {
         const bytes = await imageFile.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const optimizedBuffer = await optimizeImageBuffer(buffer, imageFile.type);
-
-        const uploadResult = await new Promise<any>((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            commonCloudinaryParams,
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          uploadStream.end(optimizedBuffer);
-        });
-        photo = uploadResult.secure_url;
+        const uploadResult = await uploadImageBuffer(buffer, imageFile.type, 'staff-photo');
+        photo = uploadResult.url;
       }
     }
 

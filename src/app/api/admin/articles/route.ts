@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
-import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
+import { uploadImageBuffer } from '@/lib/imagekit';
 import { ObjectId } from 'mongodb';
 import { CATEGORIES } from '@/lib/utils';
 import { buildArticlePublicId, getNextShortId } from '@/lib/articles';
@@ -33,20 +33,8 @@ export async function POST(request: NextRequest) {
     if (thumbnail && thumbnail.size > 0) {
       const bytes = await thumbnail.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const optimizedBuffer = await optimizeImageBuffer(buffer, thumbnail.type);
-
-      const uploadResult = await new Promise<any>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          commonCloudinaryParams,
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        uploadStream.end(optimizedBuffer);
-      });
-
-      imagePath = uploadResult.secure_url;
+      const uploadResult = await uploadImageBuffer(buffer, thumbnail.type, 'article-thumbnail');
+      imagePath = uploadResult.url;
     } else if (imageUrl) {
       imagePath = imageUrl;
     }

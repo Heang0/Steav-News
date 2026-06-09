@@ -39,12 +39,10 @@ export function getFacebookOptimizedImageUrl(url: string): string {
     absoluteUrl = buildImageUrl(url);
   }
 
-  // Cloudinary optimization for Facebook (1200x630 is the standard)
-  if (absoluteUrl.includes('cloudinary.com')) {
-    // Ensure we use a compatible format (jpg) and extension for better scraper support
-    return absoluteUrl
-      .replace('/upload/', '/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/')
-      .replace(/\.[^/.]+$/, '.jpg');
+  if (absoluteUrl.includes('imagekit.io')) {
+    const [base, query] = absoluteUrl.split('?');
+    const queryString = query ? `${query}&` : '';
+    return `${base}?${queryString}tr=w-1200,h-630,fo-auto`;
   }
   return absoluteUrl;
 }
@@ -58,19 +56,21 @@ export function getOptimizedImageUrl(
     crop?: 'fill' | 'fit' | 'limit';
   } = {}
 ): string {
-  if (!url || !url.includes('cloudinary.com')) {
+  if (!url || !url.includes('imagekit.io')) {
     return url;
   }
 
   const transforms = [
-    options.width ? `w_${options.width}` : '',
-    options.height ? `h_${options.height}` : '',
-    options.crop ? `c_${options.crop}` : '',
-    `q_${options.quality || 'auto:best'}`, // Upgraded from auto:good to auto:best for maximum quality
-    'f_auto',
+    options.width ? `w-${options.width}` : '',
+    options.height ? `h-${options.height}` : '',
+    options.crop ? `c-${options.crop}` : '',
+    options.quality ? `q-${options.quality}` : 'q-70',
+    'fo-auto',
   ].filter(Boolean);
 
-  return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
+  const [base, query] = url.split('?');
+  const queryString = query ? `${query}&` : '';
+  return `${base}?${queryString}tr=${transforms.join(',')}`;
 }
 
 export function shouldBypassNextImageOptimization(url: string): boolean {

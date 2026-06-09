@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import cloudinary, { commonCloudinaryParams, optimizeImageBuffer } from '@/lib/cloudinary';
+import { uploadImageBuffer } from '@/lib/imagekit';
 
 function isAuthenticated(request: NextRequest): boolean {
   const sessionId = request.headers.get('x-session-id');
@@ -27,21 +27,10 @@ export async function POST(request: NextRequest) {
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const optimizedBuffer = await optimizeImageBuffer(buffer, image.type);
-
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        commonCloudinaryParams,
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      );
-      uploadStream.end(optimizedBuffer);
-    });
+    const uploadResult = await uploadImageBuffer(buffer, image.type, 'admin-upload');
 
     return NextResponse.json({
-      url: uploadResult.secure_url,
+      url: uploadResult.url,
       message: 'Image uploaded successfully! This URL is permanent.',
     });
   } catch (err) {

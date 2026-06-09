@@ -1,25 +1,24 @@
-import { v2 as cloudinary } from 'cloudinary';
+import ImageKit from 'imagekit';
 import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
 
-if (!process.env.CLOUDINARY_CLOUD_NAME) {
-  throw new Error('Please add your Cloudinary credentials to .env.local');
+if (
+  !process.env.IMAGEKIT_PUBLIC_KEY ||
+  !process.env.IMAGEKIT_PRIVATE_KEY ||
+  !process.env.IMAGEKIT_URL_ENDPOINT
+) {
+  throw new Error('Please add your ImageKit credentials to .env.local');
 }
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-export default cloudinary;
+export default imagekit;
 
-export const commonCloudinaryParams = {
-  folder: 'steav_news',
-  upload_preset: 'steav_news',
-  allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-  resource_type: 'image' as const,
-};
-
+export const IMAGEKIT_FOLDER = '/steav_news';
 const MAX_IMAGE_DIMENSION = 1600;
 const TARGET_IMAGE_SIZE_BYTES = 90 * 1024;
 const PHOTO_WIDTH_STEPS = [1600, 1440, 1280, 1120, 960, 840, 720];
@@ -38,7 +37,6 @@ export async function optimizeImageBuffer(
 
     const metadata = await sharp(buffer, { animated: true }).metadata();
 
-    // Keep animated images untouched so uploads do not lose frames.
     if ((metadata.pages ?? 1) > 1) {
       return buffer;
     }
@@ -68,18 +66,10 @@ export async function optimizeImageBuffer(
 
         const candidate = useWebp
           ? await pipeline
-              .webp({
-                quality,
-                alphaQuality: quality,
-                effort: 6,
-              })
+              .webp({ quality, alphaQuality: quality, effort: 6 })
               .toBuffer()
           : await pipeline
-              .jpeg({
-                quality,
-                mozjpeg: true,
-                progressive: true,
-              })
+              .jpeg({ quality, mozjpeg: true, progressive: true })
               .toBuffer();
 
         if (candidate.length < bestBuffer.length) {
@@ -97,4 +87,40 @@ export async function optimizeImageBuffer(
     console.error('Error optimizing upload image:', error);
     return buffer;
   }
+}
+
+function getFileExtension(mimeType?: string): string {
+  if (!mimeType) return 'jpg';
+  if (mimeType === 'image/gif') return 'gif';
+  if (mimeType === 'image/webp') return 'webp';
+  if (mimeType === 'image/png') return 'webp';
+  if (mimeType === 'image/svg+xml') return 'svg';
+  return 'jpg';
+}
+
+function sanitizeFileName(name: string): string {
+  return name
+    .trim()
+    .replace(/[^a-zA-Z0-9-_\.]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'image';
+}
+
+export async function uploadImageBuffer(
+  buffer: Buffer,
+  mimeType?: string,
+  originalName = 'upload'
+) {
+  const optimizedBuffer = await optimizeImageBuffer(buffer, mimeType);
+  const extension = getFileExtension(mimeType);
+  const fileName = `${sanitizeFileName(originalName)}-${Date.now()}-${uuidv4()}.${extension}`;
+
+  const uploadResult = await imagekit.upload({
+    file: optimizedBuffer.toString('base64'),
+    fileName,
+    folder: IMAGEKIT_FOLDER,
+    useUniqueFileName: true,
+  });
+
+  return uploadResult;
 }

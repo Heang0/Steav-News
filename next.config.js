@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        hostname: 'ik.imagekit.io',
         pathname: '/**',
       },
       {
@@ -28,6 +28,21 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.steavnews.site',
+          },
+        ],
+        destination: 'https://steavnews.site/:path*',
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [
