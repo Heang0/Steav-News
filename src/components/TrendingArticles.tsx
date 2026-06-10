@@ -1,38 +1,53 @@
 import { getTrendingArticles } from '@/lib/article-queries';
-import ArticleCard from './ArticleCard';
- 
+import Link from 'next/link';
+import Image from 'next/image';
+import { getOptimizedImageUrl } from '@/lib/utils';
+
 export default async function TrendingArticles() {
   const trendingArticles = await getTrendingArticles(5);
 
   return (
     <aside className="sticky top-[80px] mb-8">
       {/* Header */}
-      <div className="section-title-bar mb-4">
-        <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 flex items-center gap-2">
-          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13 3a1 1 0 00-1.928-.375l-3 9A1 1 0 009 13h2v1a1 1 0 002 0v-1h1a1 1 0 00.928-1.375l-2-6z"/>
-            <path fillRule="evenodd" d="M4.5 4.5A1.5 1.5 0 006 6h12a1.5 1.5 0 001.5-1.5v-1A1.5 1.5 0 0018 2H6A1.5 1.5 0 004.5 3.5v1zM6 20.5A1.5 1.5 0 014.5 22v-8A1.5 1.5 0 016 12.5h12a1.5 1.5 0 011.5 1.5v8A1.5 1.5 0 0118 22H6z" clipRule="evenodd"/>
-          </svg>
-          Trending Now
+      <div className="section-title-bar mb-5">
+        <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          កំពុងពេញនិយម
         </h2>
       </div>
 
       {trendingArticles.length === 0 ? (
         <p className="text-gray-400 text-center text-sm py-6">No trending articles.</p>
       ) : (
-        <ul className="divide-y divide-gray-50">
+        <ul className="flex flex-col">
           {trendingArticles.map((article, index) => (
-            <div key={article._id} className="relative">
-              {/* Rank badge */}
-              <span className={`absolute top-3 left-0 z-10 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold leading-none
-                ${index === 0 ? 'bg-primary text-white' : index === 1 ? 'bg-gray-700 text-white' : index === 2 ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-500'}
-              `}>
-                {index + 1}
-              </span>
-              <div className="pl-6">
-                <ArticleCard article={article} variant="trending" />
-              </div>
-            </div>
+            <li key={article._id} className="group border-b border-gray-200 last:border-0 py-4">
+              <Link href={`/a/${article.publicId || article._id}`} className="flex gap-3 items-start">
+                {/* Big Red Number */}
+                <div className="text-[28px] font-bold text-primary mt-[-2px] leading-none w-5 flex-shrink-0 text-center" style={{ fontFamily: "'Outfit', sans-serif" }}>
+                  {index + 1}
+                </div>
+                
+                {/* Small Image Thumbnail */}
+                {article.image && (
+                  <div className="relative w-16 h-16 flex-shrink-0 rounded-none overflow-hidden bg-gray-100">
+                    <Image
+                      src={getOptimizedImageUrl(article.image, { width: 150, height: 150, crop: 'fill' }) || '/uploads/images/LOGO.jpg'}
+                      alt={article.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized={!article.image?.startsWith('http')}
+                    />
+                  </div>
+                )}
+
+                {/* Headline */}
+                <div className="flex-grow">
+                  <span className="block font-bold text-gray-900 text-[14px] leading-snug group-hover:text-primary transition-colors line-clamp-3">
+                    {article.title}
+                  </span>
+                </div>
+              </Link>
+            </li>
           ))}
         </ul>
       )}

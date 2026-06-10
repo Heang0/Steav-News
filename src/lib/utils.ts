@@ -86,3 +86,21 @@ export function getSiteUrl(): string {
 }
 
 export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'ស្នេហា', 'ពិភពលោក'];
+
+export const CATEGORY_SLUG_TO_KHMER: Record<string, string> = {
+  'entertainment': 'កម្សាន្ត',
+  'society': 'សង្គម',
+  'love': 'ស្នេហា',
+  'world': 'ពិភពលោក',
+};
+
+export const KHMER_TO_CATEGORY_SLUG: Record<string, string> = {
+  'កម្សាន្ត': 'entertainment',
+  'សង្គម': 'society',
+  'ស្នេហា': 'love',
+  'ពិភពលោក': 'world',
+};
+
+export function getCategorySlug(khmerCategory: string): string {
+  return KHMER_TO_CATEGORY_SLUG[khmerCategory] || encodeURIComponent(khmerCategory);
+}

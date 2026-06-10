@@ -8,9 +8,10 @@ interface ArticleListOptions {
   search?: string | null;
   page?: number;
   limit?: number;
+  excludeId?: string;
 }
 
-function buildArticleQuery({ category, search }: Pick<ArticleListOptions, 'category' | 'search'>) {
+function buildArticleQuery({ category, search, excludeId }: Pick<ArticleListOptions, 'category' | 'search' | 'excludeId'>) {
   const query: Record<string, unknown> = {};
   const processedSearch = search?.trim() || '';
 
@@ -23,6 +24,11 @@ function buildArticleQuery({ category, search }: Pick<ArticleListOptions, 'categ
 
   if (category) {
     query.category = category;
+  }
+
+  if (excludeId) {
+    const { ObjectId } = require('mongodb');
+    query._id = { $ne: ObjectId.isValid(excludeId) ? new ObjectId(excludeId) : excludeId };
   }
 
   return query;
@@ -41,14 +47,24 @@ export async function getTrendingArticles(limit = 5): Promise<Article[]> {
   return articles.map(serializeArticle);
 }
 
-export async function getCategorySpotlights(): Promise<Article[]> {
+export async function getCategorySpotlights(excludeIds?: string[]): Promise<Article[]> {
   const db = await getDb();
   const newsCollection = db.collection('articles');
+  const categoriesCollection = db.collection('categories');
+
+  const { ObjectId } = require('mongodb');
+  const excludeObjectIds = (excludeIds || []).map(id => ObjectId.isValid(id) ? new ObjectId(id) : id);
+
+  const categoriesDb = await categoriesCollection.find({}).sort({ createdAt: -1 }).toArray();
+  const categoryNames = categoriesDb.length > 0 ? categoriesDb.map(c => c.name) : CATEGORIES;
 
   const articles = await Promise.all(
-    CATEGORIES.map((category) =>
+    categoryNames.map((category) =>
       newsCollection.findOne(
-        { category },
+        { 
+          category,
+          ...(excludeObjectIds.length > 0 ? { _id: { $nin: excludeObjectIds } } : {})
+        },
         { sort: { createdAt: -1 } }
       )
     )
@@ -62,11 +78,12 @@ export async function getArticleList({
   search,
   page = 1,
   limit = 6,
+  excludeId,
 }: ArticleListOptions = {}) {
   const currentPage = Math.max(1, page);
   const articlesPerPage = Math.max(1, limit);
   const offset = (currentPage - 1) * articlesPerPage;
-  const query = buildArticleQuery({ category, search });
+  const query = buildArticleQuery({ category, search, excludeId });
 
   const db = await getDb();
   const newsCollection = db.collection('articles');

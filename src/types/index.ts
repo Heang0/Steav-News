@@ -18,6 +18,8 @@ export interface Article {
   likes: number;
   views: number;
   category: string;
+  authorId?: string;
+  author?: Staff;
   comments: Comment[];
   updatedAt?: string;
 }

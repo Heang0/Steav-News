@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { uploadImageBuffer } from '@/lib/cloudinary';
 import { ObjectId } from 'mongodb';
-import { CATEGORIES } from '@/lib/utils';
 
 function isAuthenticated(request: NextRequest): boolean {
   const sessionId = request.headers.get('x-session-id');
@@ -38,6 +37,7 @@ export async function PUT(
     const trending = formData.get('trending') as string;
     const imageUrl = formData.get('imageUrl') as string;
     const category = formData.get('category') as string;
+    const authorId = formData.get('authorId') as string;
 
     const updateDoc: Record<string, any> = {
       title,
@@ -45,6 +45,7 @@ export async function PUT(
       content,
       trending: trending === 'true',
       category: category || 'កម្សាន្ត',
+      ...(authorId !== undefined && { authorId }),
     };
 
     if (thumbnail && thumbnail.size > 0) {

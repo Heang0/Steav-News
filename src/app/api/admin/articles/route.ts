@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { uploadImageBuffer } from '@/lib/cloudinary';
 import { ObjectId } from 'mongodb';
-import { CATEGORIES } from '@/lib/utils';
 import { buildArticlePublicId, getNextShortId } from '@/lib/articles';
 
 function isAuthenticated(request: NextRequest): boolean {
@@ -27,6 +26,7 @@ export async function POST(request: NextRequest) {
     const trending = formData.get('trending') as string;
     const imageUrl = formData.get('imageUrl') as string;
     const category = formData.get('category') as string;
+    const authorId = formData.get('authorId') as string;
 
     let imagePath = '/images/default_og_image.jpg';
 
@@ -39,12 +39,6 @@ export async function POST(request: NextRequest) {
       imagePath = imageUrl;
     }
 
-    if (category && !CATEGORIES.includes(category)) {
-      return NextResponse.json(
-        { error: 'Invalid category provided' },
-        { status: 400 }
-      );
-    }
 
     const db = await getDb();
     const newsCollection = db.collection('articles');
@@ -64,6 +58,7 @@ export async function POST(request: NextRequest) {
       likes: 0,
       views: 0,
       category: category || 'កម្សាន្ត',
+      authorId: authorId || null,
       comments: [] as any[],
       shortId,
       publicId,

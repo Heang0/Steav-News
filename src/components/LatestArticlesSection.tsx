@@ -3,23 +3,27 @@ import ArticleCard from './ArticleCard';
 import Pagination from './Pagination';
 
 interface LatestArticlesSectionProps {
-  category: string | null;
-  search: string | null;
-  page: number;
+  category?: string | null;
+  search?: string | null;
+  page?: number;
+  titleOverride?: string;
+  excludeId?: string;
 }
 
-export default async function LatestArticlesSection({ category, search, page }: LatestArticlesSectionProps) {
+export default async function LatestArticlesSection({ category, search, page = 1, titleOverride, excludeId }: LatestArticlesSectionProps) {
   const { articles, currentPage, totalPages } = await getArticleList({
     limit: 6,
     category,
     search,
     page,
+    excludeId,
   });
 
   const getSectionTitle = () => {
+    if (titleOverride) return titleOverride;
     if (category) return category;
-    if (search) return `Search Results for "${search}"`;
-    return 'Latest Articles';
+    if (search) return `លទ្ធផលស្វែងរកសម្រាប់ "${search}"`;
+    return 'ព័ត៌មានថ្មីៗ';
   };
 
   return (

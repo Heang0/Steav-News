@@ -34,6 +34,8 @@ export function serializeArticle(article: any): Article {
     likes: article.likes || 0,
     views: article.views || 0,
     category: article.category || '',
+    authorId: article.authorId || undefined,
+    author: article.author || undefined,
     comments: (article.comments || []).map((comment: any) => ({
       _id: comment._id?.toString() || '',
       author: comment.author || '',

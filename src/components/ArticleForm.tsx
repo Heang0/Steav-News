@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { CATEGORIES } from '@/lib/utils';
+import { useState, useEffect, useRef } from 'react';
 
 interface ArticleFormProps {
   article?: Article | null;
@@ -22,7 +21,20 @@ interface Article {
   likes: number;
   views: number;
   category: string;
+  authorId?: string;
   comments: any[];
+}
+
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
+interface Staff {
+  _id: string;
+  name: string;
+  role: string;
 }
 
 export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {
@@ -35,7 +47,8 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
     }
     return new Date().toISOString().split('T')[0];
   });
-  const [category, setCategory] = useState(article?.category || CATEGORIES[0]);
+  const [category, setCategory] = useState(article?.category || '');
+  const [authorId, setAuthorId] = useState(article?.authorId || '');
   const [trending, setTrending] = useState(article?.trending || false);
   const [imageUrl, setImageUrl] = useState(article?.image || '');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -43,6 +56,35 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catRes, staffRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/staff')
+        ]);
+        const catData = await catRes.json();
+        const staffData = await staffRes.json();
+        
+        if (catData.success) {
+          setCategories(catData.data);
+          if (!article?.category && catData.data.length > 0) {
+            setCategory(catData.data[0].name);
+          }
+        }
+        if (staffData.success) {
+          setStaff(staffData.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch form data', err);
+      }
+    };
+    fetchData();
+  }, [article]);
 
   const isEditing = !!article;
 
@@ -70,6 +112,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       formData.append('date', date);
       formData.append('content', content);
       formData.append('category', category);
+      if (authorId) formData.append('authorId', authorId);
       formData.append('trending', trending.toString());
       formData.append('imageUrl', imageUrl);
       
@@ -110,7 +153,8 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         setTitle('');
         setDate(new Date().toISOString().split('T')[0]);
         setContent('');
-        setCategory(CATEGORIES[0]);
+        setCategory(categories.length > 0 ? categories[0].name : '');
+        setAuthorId('');
         setTrending(false);
         setImageUrl('');
         setThumbnail(null);
@@ -146,7 +190,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       type="button"
       onClick={onClick}
       title={title}
-      className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 shadow-sm hover:shadow-md"
+      className="flex items-center justify-center w-9 h-9 rounded-none border border-gray-200 bg-white text-gray-700 hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 shadow-none hover:shadow-none"
     >
       {children}
     </button>
@@ -174,7 +218,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-none">
           <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
           </svg>
@@ -183,7 +227,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       )}
 
       {successMessage && (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-none">
           <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
@@ -233,9 +277,28 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
             onChange={(e) => setCategory(e.target.value)}
             className="input-field"
           >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <label htmlFor="author" className="block text-sm font-semibold text-gray-700">
+            Author
+          </label>
+          <select
+            id="author"
+            value={authorId}
+            onChange={(e) => setAuthorId(e.target.value)}
+            className="input-field"
+          >
+            <option value="">-- No specific author --</option>
+            {staff.map((s) => (
+              <option key={s._id} value={s._id}>
+                {s.name} ({s.role})
               </option>
             ))}
           </select>
@@ -247,9 +310,9 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         <label className="block text-sm font-semibold text-gray-700">
           Thumbnail Image
         </label>
-        <div className="flex items-start gap-4">
-          <label className="flex-1 cursor-pointer">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+        <div className="flex flex-col sm:flex-row items-start gap-4">
+          <label className="flex-1 cursor-pointer w-full">
+            <div className="border-2 border-dashed border-gray-300 rounded-none p-6 text-center hover:border-primary transition-colors">
               <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -267,7 +330,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
           </label>
           
           {thumbnailPreview && (
-            <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+            <div className="relative w-full sm:w-32 h-48 sm:h-32 rounded-none overflow-hidden border border-gray-200 shadow-none">
               <img
                 src={thumbnailPreview}
                 alt="Thumbnail preview"
@@ -310,7 +373,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         </label>
         
         {/* Formatting Toolbar */}
-        <div className="flex flex-wrap gap-1.5 p-3 bg-gray-50 rounded-t-xl border border-gray-200 border-b-0">
+        <div className="flex flex-wrap gap-1.5 p-3 bg-gray-50 border border-gray-200 border-b-0 rounded-none">
           {/* Spacing Group - Moved to start for visibility */}
           <ToolbarButton onClick={() => insertHtml('<p>', '</p>')} title="Paragraph (ចុះបន្ទាត់)">
             <span className="font-bold text-sm">P</span>
@@ -384,7 +447,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       </div>
 
       {/* Trending Toggle */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-none">
         <div className="flex items-center gap-3">
           <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
             <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
@@ -413,7 +476,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-none hover:bg-gray-50 transition-colors"
           >
             Cancel
           </button>
@@ -421,7 +484,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         <button
           type="submit"
           disabled={submitting}
-          className="px-8 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+          className="px-8 py-2.5 text-sm font-semibold text-white bg-primary rounded-none hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-none"
         >
           {submitting ? (
             <span className="flex items-center gap-2">

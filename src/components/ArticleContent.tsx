@@ -118,20 +118,32 @@ export default function ArticleContent({ article }: ArticleContentProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const totalHeight = document.body.scrollHeight - window.innerHeight;
+      if (totalHeight <= 0) {
+        setScrollProgress(0);
+        return;
+      }
       const currentScroll = window.scrollY;
-      setScrollProgress((currentScroll / totalHeight) * 100);
+      setScrollProgress(Math.min(100, Math.max(0, (currentScroll / totalHeight) * 100)));
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Initial call
+    handleScroll();
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   return (
     <>
       {/* Reading Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-1 z-[100] pointer-events-none">
+      <div className="fixed top-0 left-0 w-full h-[3px] z-[9999] pointer-events-none">
         <div 
-          className="h-full bg-primary shadow-[0_0_8px_rgba(230,0,0,0.6)] transition-all duration-150 ease-out"
+          className="h-full bg-primary shadow-[0_0_8px_rgba(230,0,0,0.8)] transition-all duration-75 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
@@ -205,13 +217,25 @@ export default function ArticleContent({ article }: ArticleContentProps) {
       )}
 
 
-      <article className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden w-full">
+      <article className="bg-white rounded-none shadow-none border-none overflow-hidden w-full">
         {/* Article Header */}
-        <div className="p-5 sm:p-7 md:p-10 pb-0">
+        <div className="p-4 sm:p-6 md:p-8 pb-0">
           {/* Category + Meta row */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
             {article.category && (
               <span className="category-badge">{article.category}</span>
+            )}
+            {article.author && (
+              <span className="text-gray-900 font-bold text-sm flex items-center gap-2 border-r border-gray-300 pr-3 mr-1" style={{ fontFamily: "'Noto Sans Khmer', 'Battambang', sans-serif" }}>
+                {article.author.photo ? (
+                   <Image src={article.author.photo} alt={article.author.name} width={24} height={24} className="w-6 h-6 rounded-full object-cover" unoptimized={article.author.photo.startsWith('http')} />
+                ) : (
+                   <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500 font-bold">
+                     {article.author.name.charAt(0)}
+                   </div>
+                )}
+                {article.author.name}
+              </span>
             )}
             <span className="text-gray-400 text-xs sm:text-sm flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,30 +259,28 @@ export default function ArticleContent({ article }: ArticleContentProps) {
           </div>
 
           {/* Title */}
-          <h1 className="text-[1.4rem] sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-5 leading-tight" style={{ lineHeight: '1.25' }}>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-gray-900 mb-5 leading-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h1>
         </div>
 
         {/* Hero Image */}
         {article.image && (
-          <div className="relative w-full h-[220px] sm:h-[340px] md:h-[460px] mt-2">
+          <div className="relative w-full aspect-[16/9] bg-gray-100">
             <Image
-              src={heroImage || 'https://placehold.co/800x400/cccccc/ffffff?text=No+Image'}
+              src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill' })}
               alt={article.title}
               fill
               className="object-cover"
+              sizes="100vw"
               priority
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
-              unoptimized={unoptimizedHero}
+              unoptimized={!article.image?.startsWith('http')}
             />
-            {/* Subtle bottom gradient for smooth transition */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
           </div>
         )}
 
         {/* Article Body */}
-        <div className="p-5 sm:p-7 md:p-10 pt-4 sm:pt-6">
+        <div className="p-4 sm:p-6 md:p-8 pt-4 sm:pt-6">
           <div
             className="article-body-content"
             dangerouslySetInnerHTML={{ __html: article.content }}
@@ -272,10 +294,10 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               <button
                 onClick={handleLike}
                 disabled={hasLiked}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-none font-bold text-sm sm:text-base transition-all duration-200 shadow-none hover:bg-gray-50 active:translate-y-0
                 ${hasLiked
-                    ? 'bg-green-50 text-green-600 border border-green-200 cursor-default'
-                    : 'bg-primary text-white hover:bg-primary-dark'
+                    ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
+                    : 'bg-primary text-white border border-primary hover:bg-primary-dark hover:border-primary-dark'
                   }`}
               >
                 <svg className={`w-4 h-4 sm:w-5 sm:h-5 ${hasLiked ? 'fill-green-500' : 'fill-white'}`} viewBox="0 0 24 24">
@@ -289,14 +311,14 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                 <span className="text-gray-500 text-xs sm:text-sm font-medium">Share:</span>
                 <button
                   onClick={() => handleShare('facebook')}
-                  className="flex items-center gap-1.5 bg-[#1877f2] hover:bg-[#1565c0] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                  className="flex items-center gap-1.5 bg-[#1877f2] hover:bg-[#1565c0] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-none font-bold text-xs sm:text-sm transition-all shadow-none"
                 >
                   <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" /></svg>
                   <span className="hidden xs:inline">Facebook</span>
                 </button>
                 <button
                   onClick={() => handleShare('twitter')}
-                  className="flex items-center gap-1.5 bg-black hover:bg-gray-800 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                  className="flex items-center gap-1.5 bg-black hover:bg-gray-800 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-none font-bold text-xs sm:text-sm transition-all shadow-none"
                 >
                   <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" /></svg>
                   <span className="hidden xs:inline">Twitter</span>
@@ -308,7 +330,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                     navigator.clipboard.writeText(cleanUrl);
                     alert('Link copied to clipboard!');
                   }}
-                  className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all shadow-sm hover:shadow-md ml-1"
+                  className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-none border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 transition-all shadow-none ml-1"
                   title="Copy link"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,9 +343,9 @@ export default function ArticleContent({ article }: ArticleContentProps) {
         </div>
 
         {/* Comments Section */}
-        <div className="border-t border-gray-100 px-5 sm:px-7 md:px-10 py-6 sm:py-8">
+        <div className="border-t border-gray-100 px-4 sm:px-6 md:px-8 py-6 sm:py-8">
           <div className="section-title-bar mb-6">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
               Comments ({comments.length})
             </h2>
           </div>
@@ -331,7 +353,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
           {/* Comment List */}
           <div className="space-y-3 sm:space-y-4 max-h-[360px] overflow-y-auto pr-1 mb-6 sm:mb-8">
             {comments.length === 0 ? (
-              <div className="text-center py-8 sm:py-10 bg-gray-50 rounded-xl">
+              <div className="text-center py-8 sm:py-10 border-y border-gray-200 rounded-none bg-white">
                 <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -341,7 +363,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               comments.map((comment: Comment) => (
                 <div
                   key={comment._id}
-                  className="bg-gray-50 border border-gray-100 rounded-xl p-3.5 sm:p-4 hover:bg-gray-100/60 transition-colors"
+                  className="border-b border-gray-200 p-3.5 sm:p-4 hover:bg-gray-50 transition-colors rounded-none bg-white"
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -361,7 +383,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
           </div>
 
           {/* Comment Form */}
-          <form onSubmit={handleSubmitComment} className="bg-gray-50 rounded-2xl p-4 sm:p-6 border border-gray-100">
+          <form onSubmit={handleSubmitComment} className="bg-white border-y border-gray-200 rounded-none p-4 sm:p-6 mt-6">
             <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">Leave a Comment</h3>
             <div className="space-y-3 sm:space-y-4">
               <div>
@@ -373,7 +395,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                   id="author"
                   value={commentAuthor}
                   onChange={(e) => setCommentAuthor(e.target.value)}
-                  className="input-field text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-none bg-white focus:outline-none focus:border-primary transition-all duration-200 text-base"
                   placeholder="Your name"
                   maxLength={50}
                 />
@@ -386,7 +408,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                   id="comment"
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className="input-field min-h-[90px] sm:min-h-[110px] resize-vertical text-base"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-none bg-white focus:outline-none focus:border-primary transition-all duration-200 min-h-[90px] sm:min-h-[110px] resize-vertical text-base"
                   placeholder="Write your comment..."
                   required
                 />
@@ -394,7 +416,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               <button
                 type="submit"
                 disabled={submittingComment || !commentText.trim()}
-                className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-6 py-2.5 sm:py-3 rounded-xl font-semibold transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-sm sm:text-base shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-none font-bold transition-all shadow-none disabled:opacity-50 text-sm sm:text-base"
               >
                 {submittingComment ? (
                   <span className="flex items-center gap-2 justify-center">

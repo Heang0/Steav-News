@@ -1,22 +1,23 @@
 import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 import { escapeHtml, stripHtml, getFacebookOptimizedImageUrl, getSiteUrl } from '@/lib/utils';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrendingArticles from '@/components/TrendingArticles';
 import ArticleContent from '@/components/ArticleContent';
-import RelatedArticles from '@/components/RelatedArticles';
+import LatestArticlesSection from '@/components/LatestArticlesSection';
 import {
   findArticleByIdentifier,
   findAndIncrementArticleByIdentifier,
   getArticlePublicId,
-  getRelatedArticles,
   serializeArticle,
 } from '@/lib/articles';
 import type { Metadata } from 'next';
 
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
 // Enable ISR: Cache for 24 hours to save CPU
@@ -89,8 +90,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function ArticlePage({ params }: PageProps) {
+export default async function ArticlePage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const pageParam = Number.parseInt(resolvedSearchParams.page || '1', 10);
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   console.log('Article lookup - ID:', id);
 
@@ -112,8 +116,20 @@ export default async function ArticlePage({ params }: PageProps) {
       console.log('Found by ObjectId:', id, '->', article?.title?.substring(0, 50) || 'Unknown Title');
     }
 
+    if (article.authorId) {
+      try {
+        const staffCollection = db.collection('staff');
+        const author = await staffCollection.findOne({ _id: new ObjectId(article.authorId) });
+        if (author) {
+          author._id = author._id.toString();
+          article.author = author;
+        }
+      } catch (err) {
+        console.error('Failed to fetch author for article', err);
+      }
+    }
+
     const serializedArticle = serializeArticle(article);
-    const relatedArticles = await getRelatedArticles(newsCollection, article, 6);
 
     return (
       <div className="min-h-screen flex flex-col">
@@ -152,12 +168,19 @@ export default async function ArticlePage({ params }: PageProps) {
           }}
         />
 
-        <main className="flex-grow pt-[60px] sm:pt-[65px] md:pt-[70px]">
+        <main className="flex-grow pt-20 sm:pt-24">
           <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <div className="article-main-content-wrapper flex-1 min-w-0">
                 <ArticleContent article={serializedArticle} />
-                <RelatedArticles articles={relatedArticles} />
+                <div className="mt-10 pt-8 border-t-4 border-gray-900">
+                  <LatestArticlesSection 
+                    category={serializedArticle.category} 
+                    excludeId={serializedArticle._id} 
+                    titleOverride="អត្ថបទពាក់ព័ន្ធ" 
+                    page={currentPage} 
+                  />
+                </div>
               </div>
 
               <div className="lg:w-80 xl:w-96 flex-shrink-0">

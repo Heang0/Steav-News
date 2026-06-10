@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getCategorySlug } from '@/lib/utils';
 
 interface PaginationProps {
   currentPage: number;
@@ -13,11 +14,19 @@ export default function Pagination({ currentPage, totalPages, category, search }
   const buildPageHref = (page: number) => {
     const params = new URLSearchParams();
 
-    if (category) params.set('category', category);
-    if (search) params.set('search', search);
-    if (page > 1) params.set('page', String(page));
+    if (search) {
+      if (page > 1) params.set('page', String(page));
+      const query = params.toString();
+      return `/search/${encodeURIComponent(search)}${query ? `?${query}` : ''}`;
+    }
 
+    if (page > 1) params.set('page', String(page));
     const query = params.toString();
+
+    if (category) {
+      return `/category/${getCategorySlug(category)}${query ? `?${query}` : ''}`;
+    }
+
     return query ? `/?${query}` : '/';
   };
 
@@ -42,10 +51,10 @@ export default function Pagination({ currentPage, totalPages, category, search }
       <Link
         key={`page-${page}`}
         href={buildPageHref(page)}
-        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-sm font-bold transition-all duration-200
+        className={`flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-none text-sm font-bold transition-all duration-200 border
           ${isActive
-            ? 'bg-primary text-white shadow-md shadow-red-200'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:-translate-y-0.5 hover:shadow-sm'
+            ? 'bg-primary text-white border-primary shadow-none'
+            : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200 shadow-none'
           }`}
         aria-current={isActive ? 'page' : undefined}
       >
@@ -113,7 +122,7 @@ export default function Pagination({ currentPage, totalPages, category, search }
       <span
         key={direction}
         aria-disabled="true"
-        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm bg-gray-100 text-gray-300 cursor-not-allowed"
+        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-none font-semibold text-sm bg-gray-50 text-gray-300 border border-gray-200 cursor-not-allowed"
       >
         {direction === 'prev' ? (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -130,7 +139,7 @@ export default function Pagination({ currentPage, totalPages, category, search }
         key={direction}
         href={buildPageHref(page)}
         aria-label={direction === 'prev' ? 'Previous page' : 'Next page'}
-        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-semibold text-sm transition-all duration-200 bg-gray-100 hover:bg-primary hover:text-white text-gray-600 hover:shadow-md hover:-translate-y-0.5"
+        className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-none border border-gray-200 font-semibold text-sm transition-all duration-200 bg-white hover:bg-primary hover:text-white hover:border-primary text-gray-600 shadow-none"
       >
         {direction === 'prev' ? (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>

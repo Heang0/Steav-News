@@ -2,54 +2,72 @@ import type { Metadata } from 'next';
 import '@/app/globals.css';
 import { getSiteUrl } from '@/lib/utils';
 
-export const metadata: Metadata = {
-  title: {
-    default: 'STEAV NEWS',
-    template: '%s - STEAV NEWS',
-  },
-  description: 'Read the latest news from STEAV NEWS - Cambodia\'s trusted news source',
-  keywords: ['news', 'cambodia', 'entertainment', 'society', 'sports', 'world', 'kpop'],
-  authors: [{ name: 'STEAV NEWS' }],
-  creator: 'STEAV NEWS',
-  publisher: 'STEAV NEWS',
-  robots: {
-    index: true,
-    follow: true,
-  },
-  metadataBase: new URL(getSiteUrl()),
-  alternates: {
-    canonical: '/',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'km_KH',
-    siteName: 'STEAV NEWS',
-    url: getSiteUrl(),
-    images: [
-      {
-        url: '/uploads/images/banner1.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'STEAV NEWS',
-      },
-    ],
-  },
-  facebook: {
-    appId: '966242223397117',
-  },
-  twitter: {
-    card: 'summary_large_image',
-  },
-  icons: {
-    icon: '/uploads/images/favicon.jpg',
-  },
-  verification: {
-    google: 'your-google-verification-id', // Placeholder, user should update if they have one
-    other: {
-      'msvalidate.01': '63DE1EBAADD223E17DB668D905F5AE56',
+import { getDb } from '@/lib/mongodb';
+
+export async function generateMetadata(): Promise<Metadata> {
+  let siteTitle = 'STEAV NEWS';
+  let defaultSeoDescription = 'Read the latest news from STEAV NEWS - Cambodia\'s trusted news source';
+  
+  try {
+    const db = await getDb();
+    const settings = await db.collection('settings').findOne({ _id: 'global' });
+    if (settings) {
+      siteTitle = settings.siteTitle || siteTitle;
+      defaultSeoDescription = settings.defaultSeoDescription || defaultSeoDescription;
+    }
+  } catch (err) {
+    console.error('Failed to fetch global settings for metadata:', err);
+  }
+
+  return {
+    title: {
+      default: siteTitle,
+      template: `%s - ${siteTitle}`,
     },
-  },
-};
+    description: defaultSeoDescription,
+    keywords: ['news', 'cambodia', 'entertainment', 'society', 'sports', 'world', 'kpop'],
+    authors: [{ name: siteTitle }],
+    creator: siteTitle,
+    publisher: siteTitle,
+    robots: {
+      index: true,
+      follow: true,
+    },
+    metadataBase: new URL(getSiteUrl()),
+    alternates: {
+      canonical: '/',
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'km_KH',
+      siteName: siteTitle,
+      url: getSiteUrl(),
+      images: [
+        {
+          url: '/uploads/images/banner1.jpg',
+          width: 1200,
+          height: 630,
+          alt: siteTitle,
+        },
+      ],
+    },
+    facebook: {
+      appId: '966242223397117',
+    },
+    twitter: {
+      card: 'summary_large_image',
+    },
+    icons: {
+      icon: '/uploads/images/favicon.jpg',
+    },
+    verification: {
+      google: 'your-google-verification-id',
+      other: {
+        'msvalidate.01': '63DE1EBAADD223E17DB668D905F5AE56',
+      },
+    },
+  };
+}
 
 import ScrollToTop from '@/components/ScrollToTop';
 

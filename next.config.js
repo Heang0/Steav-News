@@ -4,6 +4,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'ik.imagekit.io',
         pathname: '/**',
       },
@@ -25,6 +30,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'steavnewspic.netlify.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.fbcdn.net',
         pathname: '/**',
       },
     ],
