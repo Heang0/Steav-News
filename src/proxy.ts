@@ -8,7 +8,7 @@ const ALLOWED_BOTS = ['facebookexternalhit', 'facebook', 'telegrambot', 'googleb
 // Suspicious user agents that should be blocked when not a known bot.
 const BLOCKED_UA_PATTERNS = ['curl', 'python', 'java/', 'wget', 'bot', 'spider', 'scraper', 'httpclient'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
 
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
 
