@@ -37,7 +37,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
 
   // Fetch top headlines for the big hero section
-  const { articles: headlineArticles } = await getArticleList({ limit: 2, category: null, search: null, page: 1 });
+  const { articles: headlineArticles } = await getArticleList({ limit: 5, category: null, search: null, page: 1 });
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -47,15 +47,25 @@ export default async function Home({ searchParams }: HomeProps) {
         
         {/* BBC TOP STORIES GRID */}
         {!category && !search && currentPage === 1 && headlineArticles.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-primary" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
-              ព័ត៌មានលេចធ្លោ
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-[3px] border-gray-900" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+              <span className="text-primary mr-2">/</span>ព័ត៌មានលេចធ្លោ
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 border-b border-gray-200 pb-8">
-              {headlineArticles.map((article) => (
-                <ArticleCard key={article._id} article={article} variant="default" />
-              ))}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-b border-gray-200 pb-8">
+              {/* Main Hero Story */}
+              <div className="lg:col-span-8 pr-0 lg:pr-6 lg:border-r border-gray-200">
+                {headlineArticles[0] && (
+                  <ArticleCard article={headlineArticles[0]} variant="bbc-hero" />
+                )}
+              </div>
+              
+              {/* Stacked Side Stories */}
+              <div className="lg:col-span-4 flex flex-col">
+                {headlineArticles.slice(1).map((article) => (
+                  <ArticleCard key={article._id} article={article} variant="bbc-list" />
+                ))}
+              </div>
             </div>
           </div>
         )}

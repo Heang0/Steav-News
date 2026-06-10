@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Article, Comment } from '@/types';
 import { formatDate, getOptimizedImageUrl, getSiteUrl, shouldBypassNextImageOptimization, stripHtml } from '@/lib/utils';
 
@@ -226,7 +227,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               <span className="category-badge">{article.category}</span>
             )}
             {article.author && (
-              <span className="text-gray-900 font-bold text-sm flex items-center gap-2 border-r border-gray-300 pr-3 mr-1" style={{ fontFamily: "'Noto Sans Khmer', 'Battambang', sans-serif" }}>
+              <Link href={`/staff/${article.author.publicId || article.author._id || article.authorId}`} className="text-gray-900 font-bold text-sm flex items-center gap-2 border-r border-gray-300 pr-3 mr-1 hover:text-primary transition-colors cursor-pointer" style={{ fontFamily: "'Noto Sans Khmer', 'Battambang', sans-serif" }}>
                 {article.author.photo ? (
                    <Image src={article.author.photo} alt={article.author.name} width={24} height={24} className="w-6 h-6 rounded-full object-cover" unoptimized={article.author.photo.startsWith('http')} />
                 ) : (
@@ -235,7 +236,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                    </div>
                 )}
                 {article.author.name}
-              </span>
+              </Link>
             )}
             <span className="text-gray-400 text-xs sm:text-sm flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">

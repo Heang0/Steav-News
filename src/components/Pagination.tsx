@@ -6,9 +6,10 @@ interface PaginationProps {
   totalPages: number;
   category?: string | null;
   search?: string | null;
+  baseUrl?: string;
 }
 
-export default function Pagination({ currentPage, totalPages, category, search }: PaginationProps) {
+export default function Pagination({ currentPage, totalPages, category, search, baseUrl }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const buildPageHref = (page: number) => {
@@ -22,6 +23,10 @@ export default function Pagination({ currentPage, totalPages, category, search }
 
     if (page > 1) params.set('page', String(page));
     const query = params.toString();
+
+    if (baseUrl) {
+      return `${baseUrl}${query ? `?${query}` : ''}`;
+    }
 
     if (category) {
       return `/category/${getCategorySlug(category)}${query ? `?${query}` : ''}`;

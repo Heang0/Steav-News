@@ -35,6 +35,8 @@ interface Staff {
   _id: string;
   name: string;
   role: string;
+  department?: string;
+  bio?: string;
 }
 
 export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFormProps) {

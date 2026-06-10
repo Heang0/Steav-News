@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     let photo = '';
     let dob = '';
     let validUntil = '';
+    let bio = '';
 
     // Handle both JSON and FormData
     const contentType = request.headers.get('content-type') || '';
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
       photo = body.photo;
       dob = body.dob;
       validUntil = body.validUntil;
+      bio = body.bio;
     } else {
       const formData = await request.formData();
       name = formData.get('name') as string;
@@ -33,6 +35,7 @@ export async function POST(request: Request) {
       photo = (formData.get('photo') as string) || '';
       dob = (formData.get('dob') as string) || '';
       validUntil = (formData.get('validUntil') as string) || '';
+      bio = (formData.get('bio') as string) || '';
       const imageFile = formData.get('image') as File | null;
 
       if (imageFile && imageFile.size > 0) {
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
       photo: photo || '',
       dob: dob || '',
       validUntil: validUntil || '',
+      bio: bio || '',
       createdAt: new Date().toISOString(),
     };
 

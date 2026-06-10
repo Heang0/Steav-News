@@ -1,120 +1,194 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
+import { getDb } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
+import { getArticleList } from '@/lib/article-queries';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ArticleCard from '@/components/ArticleCard';
+import Image from 'next/image';
 import { getSiteUrl } from '@/lib/utils';
-import { Metadata } from 'next';
+import Pagination from '@/components/Pagination';
+import type { Metadata } from 'next';
 
-export const revalidate = 86400; // Cache for 24 hours
+type PageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
+};
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+export const revalidate = 300;
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  return {
-    title: `Staff Verification - STEAV NEWS`,
-    description: `Verify official staff credentials for STEAV NEWS.`,
-  };
-}
-
-async function getStaffMember(id: string) {
   try {
-    const res = await fetch(`${getSiteUrl()}/api/staff/${id}`, { next: { revalidate: 86400 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.success ? data.data : null;
-  } catch (error) {
-    console.error('Error fetching staff member:', error);
-    return null;
+    const db = await getDb();
+    const staffCollection = db.collection('staff');
+    
+    const query = {
+      $or: [
+        { publicId: id },
+        { staffId: id },
+        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : [])
+      ]
+    };
+
+    const staff = await staffCollection.findOne(query);
+
+    if (!staff) {
+      return { title: 'Staff Not Found - STEAV NEWS' };
+    }
+
+    return {
+      title: `${staff.name} - ${staff.role} | STEAV NEWS`,
+      description: `Read articles written by ${staff.name}, ${staff.role} at STEAV NEWS.`,
+      openGraph: {
+        title: `${staff.name} - STEAV NEWS`,
+        description: `Read articles written by ${staff.name}`,
+        images: staff.photo ? [{ url: staff.photo }] : [],
+      }
+    };
+  } catch (err) {
+    return { title: 'STEAV NEWS' };
   }
 }
 
-export default async function StaffVerificationPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function StaffProfilePage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const staff = await getStaffMember(id);
+  const resolvedSearchParams = await searchParams;
+  const pageParam = Number.parseInt(resolvedSearchParams.page || '1', 10);
+  const currentPage = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+
+  let staff;
+  try {
+    const db = await getDb();
+    const staffCollection = db.collection('staff');
+    
+    const query = {
+      $or: [
+        { publicId: id },
+        { staffId: id },
+        ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : [])
+      ]
+    };
+
+    staff = await staffCollection.findOne(query);
+  } catch (error) {
+    console.error('Error fetching staff member:', error);
+  }
 
   if (!staff) {
     notFound();
   }
 
-  const dateIssued = new Date(staff.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  // Fetch articles by this author
+  const { articles, totalPages } = await getArticleList({
+    authorId: staff._id.toString(),
+    page: currentPage,
+    limit: 12
   });
+
+  // Premium stock newsroom background as fallback
+  const coverImage = staff.coverImage || staff.background || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80';
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
-      <main className="flex-grow pt-[80px] sm:pt-[100px] pb-12 flex items-center justify-center">
-        <div className="w-full max-w-md px-4">
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-            {/* Status Header */}
-            <div className="bg-green-500 py-4 px-6 flex items-center justify-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h1 className="text-white font-black text-xl tracking-wide uppercase">Verified Staff</h1>
+      <main className="flex-grow pt-14 sm:pt-16">
+        {/* HERO BANNER SECTION */}
+        <div className="relative w-full h-[250px] sm:h-[320px] bg-gray-900">
+          <Image 
+            src={coverImage}
+            alt="Newsroom Background"
+            fill
+            className="object-cover opacity-60"
+            priority
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        </div>
+
+        {/* PROFILE INFO OVERLAP */}
+        <div className="container mx-auto px-4 max-w-[1000px] relative -mt-16 sm:-mt-24 mb-12 z-10">
+          <div className="bg-white border-t-4 border-t-primary shadow-2xl p-6 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-10 items-center md:items-start">
+            
+            {/* Profile Picture */}
+            <div className="relative w-32 h-32 sm:w-48 sm:h-48 rounded-none border-4 border-white shadow-lg bg-gray-100 flex-shrink-0 -mt-20 sm:-mt-28 overflow-hidden">
+              {staff.photo ? (
+                <Image 
+                  src={staff.photo} 
+                  alt={staff.name} 
+                  fill 
+                  className="object-cover"
+                  unoptimized={staff.photo.startsWith('http')}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-primary text-white text-5xl font-bold">
+                  {staff.name.charAt(0)}
+                </div>
+              )}
             </div>
 
-            <div className="p-8 flex flex-col items-center">
-              {/* Profile Photo */}
-              <div className="relative w-32 h-32 rounded-full shadow-lg border-4 border-gray-50 overflow-hidden mb-6 bg-gray-100">
-                {staff.photo ? (
-                  <Image 
-                    src={staff.photo} 
-                    alt={staff.name} 
-                    fill 
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <svg className="w-16 h-16 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-
-              {/* Details */}
-              <h2 className="text-3xl font-black text-gray-900 mb-1 text-center" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {staff.name}
-              </h2>
-              <p className="text-primary font-bold text-lg uppercase tracking-wider mb-6 text-center">
-                {staff.role}
-              </p>
-
-              <div className="w-full space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-500 font-semibold text-sm">Staff ID</span>
-                  <span className="font-bold text-gray-900">{staff.staffId}</span>
+            {/* Details & Bio */}
+            <div className="flex-grow text-center md:text-left w-full">
+              <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4 mb-4">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+                    {staff.name}
+                  </h1>
+                  <p className="text-sm sm:text-base text-primary font-bold uppercase tracking-widest mb-1">
+                    {staff.role || 'Journalist'} {staff.department && <span className="text-gray-400 font-normal">| {staff.department}</span>}
+                  </p>
+                  {staff.staffId && (
+                    <span className="text-xs text-gray-400 font-mono block">ID: {staff.staffId}</span>
+                  )}
                 </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-500 font-semibold text-sm">Phone</span>
-                  <span className="font-bold text-gray-900">{staff.phone || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-500 font-semibold text-sm">Date Issued</span>
-                  <span className="font-bold text-gray-900">{dateIssued}</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                  <span className="text-gray-500 font-semibold text-sm">Status</span>
-                  <span className="font-bold text-green-600 flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-md">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Active
-                  </span>
+                
+                {/* Stats */}
+                <div className="flex flex-col items-center md:items-end bg-gray-50 px-6 py-3 rounded-none border border-gray-100">
+                  <span className="text-2xl sm:text-3xl font-black text-gray-900 leading-none">{articles.length}</span>
+                  <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Articles</span>
                 </div>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-gray-100 w-full text-center">
-                <p className="text-xs text-gray-400 leading-relaxed">
-                  This page confirms that the individual above is an officially recognized staff member of STEAV NEWS. If you have any concerns, please contact us immediately.
-                </p>
-              </div>
+              {/* Bio Section */}
+              {staff.bio && (
+                <div className="mt-6 pt-6 border-t border-gray-100 text-left">
+                  <p className="text-sm sm:text-[15px] leading-relaxed text-gray-700" style={{ fontFamily: "'Noto Sans Khmer', 'Battambang', sans-serif" }}>
+                    {staff.bio}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+
+        {/* ARTICLES GRID */}
+        <div className="container mx-auto px-4 max-w-[1300px] pb-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-[3px] border-gray-900" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+            <span className="text-primary mr-2">/</span>អត្ថបទដោយអ្នកនិពន្ធរូបនេះ
+          </h2>
+          
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+              {articles.map(article => (
+                <ArticleCard key={article._id} article={article} variant="default" />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 p-12 text-center">
+              <p className="text-gray-500 text-lg font-bold">This author hasn't published any articles yet.</p>
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                baseUrl={`/staff/${id}`}
+              />
+            </div>
+          )}
         </div>
       </main>
 

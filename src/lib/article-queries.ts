@@ -9,9 +9,10 @@ interface ArticleListOptions {
   page?: number;
   limit?: number;
   excludeId?: string;
+  authorId?: string;
 }
 
-function buildArticleQuery({ category, search, excludeId }: Pick<ArticleListOptions, 'category' | 'search' | 'excludeId'>) {
+function buildArticleQuery({ category, search, excludeId, authorId }: Pick<ArticleListOptions, 'category' | 'search' | 'excludeId' | 'authorId'>) {
   const query: Record<string, unknown> = {};
   const processedSearch = search?.trim() || '';
 
@@ -29,6 +30,10 @@ function buildArticleQuery({ category, search, excludeId }: Pick<ArticleListOpti
   if (excludeId) {
     const { ObjectId } = require('mongodb');
     query._id = { $ne: ObjectId.isValid(excludeId) ? new ObjectId(excludeId) : excludeId };
+  }
+
+  if (authorId) {
+    query.authorId = authorId;
   }
 
   return query;
@@ -79,11 +84,12 @@ export async function getArticleList({
   page = 1,
   limit = 6,
   excludeId,
+  authorId,
 }: ArticleListOptions = {}) {
   const currentPage = Math.max(1, page);
   const articlesPerPage = Math.max(1, limit);
   const offset = (currentPage - 1) * articlesPerPage;
-  const query = buildArticleQuery({ category, search, excludeId });
+  const query = buildArticleQuery({ category, search, excludeId, authorId });
 
   const db = await getDb();
   const newsCollection = db.collection('articles');

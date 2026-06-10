@@ -33,6 +33,8 @@ export interface Staff {
   photo: string;
   dob?: string;
   validUntil?: string;
+  department?: string;
+  bio?: string;
   createdAt: string;
 }
 

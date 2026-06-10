@@ -8,6 +8,7 @@ export default function StaffManagement() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   // Form State
@@ -15,6 +16,8 @@ export default function StaffManagement() {
   const [role, setRole] = useState('Writer');
   const [phone, setPhone] = useState('');
   const [dob, setDob] = useState('');
+  const [department, setDepartment] = useState('');
+  const [bio, setBio] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,30 +50,61 @@ export default function StaffManagement() {
       formData.append('role', role);
       formData.append('phone', phone);
       formData.append('dob', dob);
+      formData.append('department', department);
+      formData.append('bio', bio);
       if (image) formData.append('image', image);
 
-      const res = await fetch('/api/staff', {
-        method: 'POST',
+      const url = editingId ? `/api/staff/${editingId}` : '/api/staff';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         body: formData,
       });
 
       const json = await res.json();
       if (json.success) {
         setIsAdding(false);
+        setEditingId(null);
         // Reset form
         setName('');
         setRole('Writer');
         setPhone('');
         setDob('');
+        setDepartment('');
+        setBio('');
         setImage(null);
         fetchStaff();
       } else {
-        setError(json.message || 'Failed to add staff');
+        setError(json.message || 'Failed to save staff');
       }
     } catch (err) {
       setError('An error occurred while saving staff');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (s: Staff) => {
+    setEditingId(s._id || null);
+    setName(s.name);
+    setRole(s.role);
+    setPhone(s.phone || '');
+    setDob(s.dob || '');
+    setDepartment(s.department || '');
+    setBio(s.bio || '');
+    setImage(null);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this staff member?')) return;
+    try {
+      const res = await fetch(`/api/staff/${id}`, { method: 'DELETE' });
+      if (res.ok) fetchStaff();
+    } catch (err) {
+      console.error('Failed to delete staff:', err);
     }
   };
 
@@ -83,7 +117,20 @@ export default function StaffManagement() {
       <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
         <h2 className="text-xl font-bold text-gray-800">Staff Management</h2>
         <button 
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => {
+            if (isAdding) {
+              setIsAdding(false);
+              setEditingId(null);
+              setName('');
+              setRole('Writer');
+              setPhone('');
+              setDob('');
+              setDepartment('');
+              setBio('');
+            } else {
+              setIsAdding(true);
+            }
+          }}
           className="btn-primary py-2 px-4 text-sm"
         >
           {isAdding ? 'Cancel' : '+ Add Staff'}
@@ -93,7 +140,7 @@ export default function StaffManagement() {
       {isAdding && (
         <div className="p-6 border-b border-gray-200 bg-white">
           <form onSubmit={handleSubmit} className="max-w-2xl">
-            <h3 className="text-lg font-bold mb-4">Add New Staff Member</h3>
+            <h3 className="text-lg font-bold mb-4">{editingId ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
             
             {error && <div className="mb-4 text-red-600 bg-red-50 p-3 text-sm">{error}</div>}
 
@@ -118,6 +165,20 @@ export default function StaffManagement() {
                 <label className="block text-sm font-semibold mb-1">Date of Birth</label>
                 <input type="date" value={dob} onChange={e => setDob(e.target.value)} className="input-field py-2" />
               </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">Department</label>
+                <input type="text" value={department} onChange={e => setDepartment(e.target.value)} className="input-field py-2" placeholder="Department" />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-semibold mb-1">Bio (Optional)</label>
+              <textarea 
+                value={bio} 
+                onChange={e => setBio(e.target.value)} 
+                className="input-field py-2 min-h-[100px] resize-y" 
+                placeholder="Author's biography or catchphrase..." 
+              />
             </div>
 
             <div className="mb-4">
@@ -141,6 +202,7 @@ export default function StaffManagement() {
               <th className="p-4 font-semibold">Phone</th>
               <th className="p-4 font-semibold">ID</th>
               <th className="p-4 font-semibold">Joined</th>
+              <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -178,6 +240,14 @@ export default function StaffManagement() {
                   <td className="p-4 text-gray-500 text-sm font-mono">{s.staffId}</td>
                   <td className="p-4 text-gray-500 text-sm">
                     {new Date(s.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => handleEdit(s)} className="text-blue-600 hover:text-blue-800 font-semibold text-sm mr-4">
+                      Edit
+                    </button>
+                    <button onClick={() => s._id && handleDelete(s._id)} className="text-red-600 hover:text-red-800 font-semibold text-sm">
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
