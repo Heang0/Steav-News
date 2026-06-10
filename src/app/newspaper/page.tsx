@@ -364,7 +364,7 @@ export default function NewspaperGenerator() {
             <h1 className="text-2xl font-normal text-gray-900 tracking-tight mb-2" style={{ fontFamily: "'Moul', serif" }}>កម្មវិធីបង្កើតគំរូកាសែត</h1>
             <p className="text-gray-500 font-medium text-sm" style={{ fontFamily: "'Battambang', sans-serif" }}>ជ្រើសរើសស្ទីលតាមចំណង់ចំណូលចិត្តរបស់អ្នក។</p>
           </div>
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <div className="flex flex-col-reverse lg:flex-row gap-8 items-start">
             <div className="w-full lg:w-1/3 space-y-6">
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"><span className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center text-sm">1</span>ជ្រើសរើសរូបថត</h3>
@@ -398,7 +398,7 @@ export default function NewspaperGenerator() {
               </div>
             </div>
             <div className="w-full lg:w-2/3 flex flex-col items-center">
-              <div className="sticky top-[100px] w-full flex flex-col items-center">
+              <div className="lg:sticky lg:top-[100px] w-full flex flex-col items-center">
                 <div className="bg-white p-4 rounded-3xl shadow-2xl border border-gray-100 mb-6 max-w-[500px] w-full">
                   <canvas ref={canvasRef} className="w-full h-auto rounded-xl shadow-inner bg-slate-100" style={{ aspectRatio: '1/1.414' }} />
                 </div>
