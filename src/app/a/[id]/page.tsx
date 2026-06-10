@@ -121,8 +121,7 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
         const staffCollection = db.collection('staff');
         const author = await staffCollection.findOne({ _id: new ObjectId(article.authorId) });
         if (author) {
-          author._id = author._id.toString();
-          article.author = author;
+          article.author = { ...author, _id: author._id.toString() };
         }
       } catch (err) {
         console.error('Failed to fetch author for article', err);
