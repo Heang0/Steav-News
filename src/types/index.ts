@@ -26,6 +26,7 @@ export interface Article {
 
 export interface Staff {
   _id?: string;
+  publicId?: string;
   staffId: string;
   name: string;
   role: string;
