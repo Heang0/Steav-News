@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 const navLinks = [
   { href: '/', label: 'ទំព័រដើម' },
@@ -21,7 +21,6 @@ export default function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
