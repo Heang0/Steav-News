@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   try {
     const db = await getDb();
-    const settings = await db.collection('settings').findOne({ _id: 'global' });
+    const settings = await db.collection('settings').findOne({ _id: 'global' as any });
     if (settings) {
       siteTitle = settings.siteTitle || siteTitle;
       defaultSeoDescription = settings.defaultSeoDescription || defaultSeoDescription;

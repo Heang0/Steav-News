@@ -7,7 +7,7 @@ export async function GET() {
     const settingsCollection = db.collection('settings');
     
     // We only need one global settings document
-    const settings = await settingsCollection.findOne({ _id: 'global' });
+    const settings = await settingsCollection.findOne({ _id: 'global' as any });
 
     return NextResponse.json({ 
       success: true, 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
     // Upsert the global settings document
     await settingsCollection.updateOne(
-      { _id: 'global' },
+      { _id: 'global' as any },
       { 
         $set: { 
           siteTitle, 
