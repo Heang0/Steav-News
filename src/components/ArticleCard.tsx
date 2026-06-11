@@ -5,7 +5,7 @@ import { formatDate, getOptimizedImageUrl, shouldBypassNextImageOptimization } f
 
 interface ArticleCardProps {
   article: Article;
-  variant?: 'default' | 'spotlight' | 'trending' | 'compact' | 'bbc-hero' | 'bbc-list';
+  variant?: 'default' | 'spotlight' | 'trending' | 'compact' | 'bbc-hero' | 'bbc-list' | 'video';
 }
 
 export default function ArticleCard({ article, variant = 'default' }: ArticleCardProps) {
@@ -130,6 +130,47 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           </span>
         </Link>
       </li>
+    );
+  }
+
+  if (variant === 'video') {
+    return (
+      <Link href={articleHref} className="block group h-full hover:-translate-y-1 transition-transform duration-300">
+        <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-800 mb-3 rounded-lg shadow-md border border-gray-800 group-hover:border-primary transition-colors">
+          <Image
+            src={cardImage || 'https://placehold.co/400x300/111111/ffffff?text=No+Image'}
+            alt={article.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
+            unoptimized={unoptimizedImage}
+          />
+          {/* Play Button Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-all duration-300 backdrop-blur-sm">
+              <svg className="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col px-1">
+          <h3 data-nosnippet className="text-base sm:text-lg font-bold text-white line-clamp-3 leading-snug group-hover:text-primary transition-colors mb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+            {article.title}
+          </h3>
+          <div className="flex items-center gap-2 text-gray-400 text-[11px] sm:text-xs font-semibold mt-1">
+            {article.category && (
+              <>
+                <span className="text-primary font-bold">{article.category}</span>
+                <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+              </>
+            )}
+            <span className="flex items-center">
+              {articleDate}
+            </span>
+          </div>
+        </div>
+      </Link>
     );
   }
 

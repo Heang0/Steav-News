@@ -10,9 +10,10 @@ interface ArticleListOptions {
   limit?: number;
   excludeId?: string;
   authorId?: string;
+  hasVideo?: boolean;
 }
 
-function buildArticleQuery({ category, search, excludeId, authorId }: Pick<ArticleListOptions, 'category' | 'search' | 'excludeId' | 'authorId'>) {
+function buildArticleQuery({ category, search, excludeId, authorId, hasVideo }: Pick<ArticleListOptions, 'category' | 'search' | 'excludeId' | 'authorId' | 'hasVideo'>) {
   const query: Record<string, unknown> = {};
   const processedSearch = search?.trim() || '';
 
@@ -34,6 +35,10 @@ function buildArticleQuery({ category, search, excludeId, authorId }: Pick<Artic
 
   if (authorId) {
     query.authorId = authorId;
+  }
+
+  if (hasVideo) {
+    query.facebookVideoUrl = { $exists: true, $ne: '' };
   }
 
   return query;
@@ -85,11 +90,12 @@ export async function getArticleList({
   limit = 6,
   excludeId,
   authorId,
+  hasVideo,
 }: ArticleListOptions = {}) {
   const currentPage = Math.max(1, page);
   const articlesPerPage = Math.max(1, limit);
   const offset = (currentPage - 1) * articlesPerPage;
-  const query = buildArticleQuery({ category, search, excludeId, authorId });
+  const query = buildArticleQuery({ category, search, excludeId, authorId, hasVideo });
 
   const db = await getDb();
   const newsCollection = db.collection('articles');

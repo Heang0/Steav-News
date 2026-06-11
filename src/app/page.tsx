@@ -5,6 +5,7 @@ import TrendingArticles from '@/components/TrendingArticles';
 import LatestArticlesSection from '@/components/LatestArticlesSection';
 import CategorySpotlights from '@/components/CategorySpotlights';
 import ArticleCard from '@/components/ArticleCard';
+import VideoNewsSection from '@/components/VideoNewsSection';
 import { getArticleList } from '@/lib/article-queries';
 
 export const revalidate = 300; // Refresh every 5 minutes
@@ -79,6 +80,11 @@ export default async function Home({ searchParams }: HomeProps) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* DEDICATED VIDEO NEWS SECTION */}
+        {(!category && !search && currentPage === 1) && (
+          <VideoNewsSection />
         )}
 
         <div className="container mx-auto px-4 max-w-[1300px] py-8">
