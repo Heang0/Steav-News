@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
     const imageUrl = getFacebookOptimizedImageUrl(article.image, article.applyWatermark);
-    const articleUrl = `${getSiteUrl()}/a/${getArticlePublicId(article)}`;
+    const articleUrl = `${getSiteUrl()}/articles/${getArticlePublicId(article)}`;
 
     return {
       title: `${title} - STEAV NEWS`,
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         url: articleUrl,
       },
       alternates: {
-        canonical: `/a/${getArticlePublicId(article)}`,
+        canonical: `/articles/${getArticlePublicId(article)}`,
       },
       facebook: {
         appId: '966242223397117', // Common placeholder or user's app ID if available
@@ -104,7 +104,6 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
     const article: any = await findArticleByIdentifier(newsCollection, id);
 
     if (!article) {
-      console.error('Article not found:', id);
       notFound();
     }
 

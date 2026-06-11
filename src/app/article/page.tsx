@@ -51,7 +51,7 @@ export async function generateMetadata(
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
     const imageUrl = getFacebookOptimizedImageUrl(article.image);
-    const articleUrl = `${getSiteUrl()}/a/${getArticlePublicId(article)}`;
+    const articleUrl = `${getSiteUrl()}/articles/${getArticlePublicId(article)}`;
 
     return {
       title: `${title} - STEAV NEWS`,

@@ -21,7 +21,7 @@ export default async function TrendingArticles() {
         <ul className="flex flex-col">
           {trendingArticles.map((article, index) => (
             <li key={article._id} className="group border-b border-gray-200 last:border-0 py-4">
-              <Link href={`/a/${article.publicId || article._id}`} className="flex gap-3 items-start">
+              <Link href={`/articles/${article.publicId || article._id}`} className="flex gap-3 items-start">
                 {/* Big Red Number */}
                 <div className="text-[28px] font-bold text-primary mt-[-2px] leading-none w-5 flex-shrink-0 text-center" style={{ fontFamily: "'Outfit', sans-serif" }}>
                   {index + 1}

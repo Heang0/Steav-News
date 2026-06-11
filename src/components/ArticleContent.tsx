@@ -77,7 +77,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
     const baseUrl = typeof window !== 'undefined'
       ? window.location.origin
       : getSiteUrl();
-    const cleanUrl = `${baseUrl}/a/${article.publicId || article._id}`;
+    const cleanUrl = `${baseUrl}/articles/${article.publicId || article._id}`;
     const url = encodeURIComponent(cleanUrl);
     const title = encodeURIComponent(article.title);
     const shareUrls: Record<string, string> = {
@@ -340,7 +340,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
                 <button
                   onClick={() => {
                     const baseUrl = typeof window !== 'undefined' ? window.location.origin : getSiteUrl();
-                    const cleanUrl = `${baseUrl}/a/${article.publicId || article._id}`;
+                    const cleanUrl = `${baseUrl}/articles/${article.publicId || article._id}`;
                     navigator.clipboard.writeText(cleanUrl);
                     alert('Link copied to clipboard!');
                   }}

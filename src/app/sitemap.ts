@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .toArray();
 
   const articleEntries = articles.map((article) => ({
-    url: `${baseUrl}/a/${getArticlePublicId(article as any)}`,
+    url: `${baseUrl}/articles/${getArticlePublicId(article as any)}`,
     lastModified: article.updatedAt || article.createdAt || new Date(),
     changeFrequency: 'daily' as const,
     priority: 0.7,

@@ -21,7 +21,7 @@ export default function ArticleCard({ article, variant = 'default', priority = f
   });
   const unoptimizedImage = shouldBypassNextImageOptimization(cardImage);
 
-  const articleHref = `/a/${article.publicId || article._id}`;
+  const articleHref = `/articles/${article.publicId || article._id}`;
 
   if (variant === 'bbc-hero') {
     return (
