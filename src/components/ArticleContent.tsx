@@ -276,6 +276,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               frameBorder="0"
               allowFullScreen={true}
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              loading="lazy"
             ></iframe>
           </div>
         ) : article.image ? (

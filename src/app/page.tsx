@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 {/* Main Hero Story */}
                 <div className="xl:col-span-8">
                   {headlineArticles[0] && (
-                    <ArticleCard article={headlineArticles[0]} variant="bbc-hero" />
+                    <ArticleCard article={headlineArticles[0]} variant="bbc-hero" priority={true} />
                   )}
                 </div>
                 

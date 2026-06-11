@@ -33,6 +33,7 @@
   }
 
   body {
+    scroll-behavior: smooth;
     font-family: 'Outfit', 'Battambang', 'Noto Sans Khmer', Arial, sans-serif;
     background: var(--surface-alt);
     color: var(--text-primary);

@@ -6,9 +6,10 @@ import { formatDate, getOptimizedImageUrl, shouldBypassNextImageOptimization } f
 interface ArticleCardProps {
   article: Article;
   variant?: 'default' | 'spotlight' | 'trending' | 'compact' | 'bbc-hero' | 'bbc-list' | 'video' | 'video-light';
+  priority?: boolean;
 }
 
-export default function ArticleCard({ article, variant = 'default' }: ArticleCardProps) {
+export default function ArticleCard({ article, variant = 'default', priority = false }: ArticleCardProps) {
   const articleDate = article.createdAt
     ? formatDate(article.createdAt)
     : article.date || 'Unknown Date';
@@ -31,6 +32,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 1024px) 100vw, 800px"
+            priority={priority}
             unoptimized={unoptimizedImage}
           />
         </div>
