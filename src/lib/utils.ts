@@ -32,7 +32,7 @@ export function buildImageUrl(imagePath: string): string {
   return `${siteUrl}/uploads${cleanPath}`;
 }
 
-export function getFacebookOptimizedImageUrl(url: string): string {
+export function getFacebookOptimizedImageUrl(url: string, applyWatermark?: boolean): string {
   if (!url) return buildImageUrl('');
   
   let absoluteUrl = url;
@@ -42,7 +42,9 @@ export function getFacebookOptimizedImageUrl(url: string): string {
 
   // Optimize for Cloudinary if it's a Cloudinary URL
   if (absoluteUrl.includes('cloudinary.com')) {
-    return absoluteUrl.replace('/upload/', '/upload/c_fill,w_1200,h_630,f_auto/q_auto/');
+    const watermarkTransform = applyWatermark ? '/l_steav_news_watermark,w_1.0,h_1.0,c_scale,fl_relative/fl_layer_apply' : '';
+    // Use q_auto:best for maximum clarity on Facebook shares
+    return absoluteUrl.replace('/upload/', `/upload/c_fill,w_1200,h_630${watermarkTransform}/f_auto,q_auto:best/`);
   }
   
   return absoluteUrl;
@@ -55,6 +57,7 @@ export function getOptimizedImageUrl(
     height?: number;
     quality?: string | number;
     crop?: 'fill' | 'fit' | 'limit';
+    applyWatermark?: boolean;
   } = {}
 ): string {
   if (!url || !url.includes('cloudinary.com')) {
@@ -64,15 +67,32 @@ export function getOptimizedImageUrl(
     return url;
   }
 
-  const transforms = [
-    options.crop ? `c_${options.crop}` : 'c_fill',
-    options.width ? `w_${options.width}` : '',
-    options.height ? `h_${options.height}` : '',
-    options.quality ? `q_${options.quality}` : 'q_auto',
-    'f_auto',
-  ].filter(Boolean);
+  // Step 1: Standardize base canvas to 1200x630 for consistent templating
+  const baseScale = 'c_fill,w_1200,h_630';
 
-  return url.replace('/upload/', `/upload/${transforms.join(',')}/`);
+  // Step 2: Inject the transparent watermark/template
+  const watermarkTransform = options.applyWatermark ? '/l_steav_news_watermark,w_1.0,h_1.0,c_scale,fl_relative/fl_layer_apply' : '';
+
+  // Step 4: Scale down to the actually requested device size
+  let finalScale = '';
+  if (options.width || options.height) {
+    const scaleParams = [
+      options.crop ? `c_${options.crop}` : 'c_scale',
+      options.width ? `w_${options.width}` : '',
+      options.height ? `h_${options.height}` : '',
+    ].filter(Boolean);
+    finalScale = `/${scaleParams.join(',')}`;
+  }
+
+  // Step 5: Format and Quality
+  const formatTransform = `/q_${options.quality || 'auto'},f_auto`;
+
+  if (options.applyWatermark) {
+    return url.replace('/upload/', `/upload/${baseScale}${watermarkTransform}${finalScale}${formatTransform}/`);
+  } else {
+    // If no watermark is applied, just do standard scaling without forcing 1200x630 base canvas
+    return url.replace('/upload/', `/upload${finalScale}${formatTransform}/`);
+  }
 }
 
 export function shouldBypassNextImageOptimization(url: string): boolean {

@@ -24,6 +24,7 @@ interface Article {
   category: string;
   authorId?: string;
   comments: any[];
+  applyWatermark?: boolean;
 }
 
 interface Category {
@@ -54,6 +55,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
   const [authorId, setAuthorId] = useState(article?.authorId || '');
   const [trending, setTrending] = useState(article?.trending || false);
   const [imageUrl, setImageUrl] = useState(article?.image || '');
+  const [applyWatermark, setApplyWatermark] = useState(article?.applyWatermark ?? true); // Default to true for new articles
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -117,6 +119,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       formData.append('category', category);
       if (authorId) formData.append('authorId', authorId);
       formData.append('trending', trending.toString());
+      formData.append('applyWatermark', applyWatermark.toString());
       formData.append('imageUrl', imageUrl);
       
       if (thumbnail) {
@@ -352,6 +355,19 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
             </div>
           )}
         </div>
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="applyWatermark"
+            checked={applyWatermark}
+            onChange={(e) => setApplyWatermark(e.target.checked)}
+            className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+          />
+          <label htmlFor="applyWatermark" className="text-sm font-semibold text-gray-700 cursor-pointer">
+            Apply Steav News Watermark Template
+          </label>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Uncheck this if your thumbnail already has a logo baked into it from Photoshop.</p>
       </div>
 
       {/* Image URL */}

@@ -17,6 +17,7 @@ export default function ArticleCard({ article, variant = 'default', priority = f
     width: variant === 'spotlight' ? 1200 : (variant === 'trending' ? 160 : 800),
     height: variant === 'spotlight' ? 630 : (variant === 'trending' ? 160 : 450),
     crop: 'fill',
+    applyWatermark: article.applyWatermark,
   });
   const unoptimizedImage = shouldBypassNextImageOptimization(cardImage);
 
@@ -27,7 +28,7 @@ export default function ArticleCard({ article, variant = 'default', priority = f
       <Link href={articleHref} className="flex flex-col group w-full h-full pb-4">
         <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 flex-shrink-0 mb-4 border-b-4 border-transparent group-hover:border-primary transition-colors">
           <Image
-            src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill' }) || 'https://placehold.co/1200x675/cccccc/ffffff?text=No+Image'}
+            src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill', applyWatermark: article.applyWatermark }) || 'https://placehold.co/1200x675/cccccc/ffffff?text=No+Image'}
             alt={article.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -76,7 +77,7 @@ export default function ArticleCard({ article, variant = 'default', priority = f
         {article.image && (
           <div className="relative w-[130px] aspect-[16/9] flex-shrink-0 bg-gray-100 overflow-hidden border border-gray-200 group-hover:border-primary transition-colors">
             <Image
-              src={getOptimizedImageUrl(article.image, { width: 260, height: 146, crop: 'fill' }) || 'https://placehold.co/260x146/cccccc/ffffff?text=No+Image'}
+              src={getOptimizedImageUrl(article.image, { width: 260, height: 146, crop: 'fill', applyWatermark: article.applyWatermark }) || 'https://placehold.co/260x146/cccccc/ffffff?text=No+Image'}
               alt={article.title}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -199,7 +200,7 @@ export default function ArticleCard({ article, variant = 'default', priority = f
         {article.image && (
           <div className="relative w-[100px] sm:w-[120px] aspect-[4/3] flex-shrink-0 bg-gray-100">
             <Image
-              src={getOptimizedImageUrl(article.image, { width: 300, height: 225, crop: 'fill' }) || 'https://placehold.co/300x225/cccccc/ffffff?text=No+Image'}
+              src={getOptimizedImageUrl(article.image, { width: 300, height: 225, crop: 'fill', applyWatermark: article.applyWatermark }) || 'https://placehold.co/300x225/cccccc/ffffff?text=No+Image'}
               alt={article.title}
               fill
               className="object-cover"

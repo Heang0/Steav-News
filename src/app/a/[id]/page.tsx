@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const description = escapeHtml(
       stripHtml(article.content || 'Read the latest STEAV NEWS here.').slice(0, 180)
     );
-    const imageUrl = getFacebookOptimizedImageUrl(article.image);
+    const imageUrl = getFacebookOptimizedImageUrl(article.image, article.applyWatermark);
     const articleUrl = `${getSiteUrl()}/a/${getArticlePublicId(article)}`;
 
     return {

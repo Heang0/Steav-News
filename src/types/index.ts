@@ -16,6 +16,7 @@ export interface Article {
   content: string;
   createdAt: string;
   trending: boolean;
+  applyWatermark?: boolean;
   likes: number;
   views: number;
   category: string;

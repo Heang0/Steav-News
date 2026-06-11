@@ -268,7 +268,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
 
         {/* Hero Media (Facebook Video or Image) */}
         {article.facebookVideoUrl ? (
-          <div className="relative w-full h-[250px] sm:h-[350px] lg:h-[400px] bg-black flex items-center justify-center">
+          <div className="relative w-full h-[450px] sm:h-[600px] md:h-[700px] lg:h-[80vh] bg-black flex items-center justify-center">
             <iframe
               src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(article.facebookVideoUrl)}&show_text=0&width=auto`}
               className="absolute top-0 left-0 w-full h-full border-none overflow-hidden"
@@ -282,7 +282,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
         ) : article.image ? (
           <div className="relative w-full aspect-[16/9] bg-gray-100">
             <Image
-              src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill' })}
+              src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill', applyWatermark: article.applyWatermark })}
               alt={article.title}
               fill
               className="object-cover"

@@ -214,7 +214,7 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="h-16 w-24 relative rounded overflow-hidden">
                       <Image
-                        src={getOptimizedImageUrl(article.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image', { width: 150, quality: 60 })}
+                        src={getOptimizedImageUrl(article.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image', { width: 150, quality: 60, applyWatermark: article.applyWatermark })}
                         alt={article.title}
                         fill
                         className="object-cover"

@@ -31,7 +31,7 @@ export default async function TrendingArticles() {
                 {article.image && (
                   <div className="relative w-16 h-16 flex-shrink-0 rounded-none overflow-hidden bg-gray-100">
                     <Image
-                      src={getOptimizedImageUrl(article.image, { width: 150, height: 150, crop: 'fill' }) || '/uploads/images/LOGO.jpg'}
+                      src={getOptimizedImageUrl(article.image, { width: 150, height: 150, crop: 'fill', applyWatermark: article.applyWatermark }) || '/uploads/images/LOGO.jpg'}
                       alt={article.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"

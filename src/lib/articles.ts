@@ -32,6 +32,7 @@ export function serializeArticle(article: any): Article {
     content: article.content || '',
     createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,
     trending: article.trending || false,
+    applyWatermark: article.applyWatermark ?? false,
     likes: article.likes || 0,
     views: article.views || 0,
     category: article.category || '',

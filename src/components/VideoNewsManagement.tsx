@@ -18,6 +18,7 @@ export default function VideoNewsManagement() {
   const [facebookVideoUrl, setFacebookVideoUrl] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [scrapedImageUrl, setScrapedImageUrl] = useState('');
+  const [applyWatermark, setApplyWatermark] = useState(true);
   const [isScraping, setIsScraping] = useState(false);
   const [authorId, setAuthorId] = useState('');
   const [staffList, setStaffList] = useState<any[]>([]);
@@ -61,6 +62,7 @@ export default function VideoNewsManagement() {
       formData.append('facebookVideoUrl', facebookVideoUrl);
       formData.append('category', 'វីដេអូ'); // Default category for videos
       formData.append('content', `<p>សូមទស្សនាវីដេអូខាងក្រោម៖</p>`); // Dummy content
+      formData.append('applyWatermark', applyWatermark.toString());
       if (image) {
         formData.append('thumbnail', image);
       } else if (scrapedImageUrl) {
@@ -90,6 +92,7 @@ export default function VideoNewsManagement() {
         setFacebookVideoUrl('');
         setImage(null);
         setScrapedImageUrl('');
+        setApplyWatermark(true);
         setAuthorId('');
         fetchVideos();
       } else {
@@ -108,6 +111,7 @@ export default function VideoNewsManagement() {
     setFacebookVideoUrl(v.facebookVideoUrl || '');
     setImage(null);
     setScrapedImageUrl(v.image || '');
+    setApplyWatermark(v.applyWatermark ?? true);
     setAuthorId(v.authorId || '');
     setIsAdding(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -152,6 +156,7 @@ export default function VideoNewsManagement() {
               setFacebookVideoUrl('');
               setImage(null);
               setScrapedImageUrl('');
+              setApplyWatermark(true);
               setAuthorId('');
             } else {
               setIsAdding(true);
@@ -249,7 +254,20 @@ export default function VideoNewsManagement() {
                   onChange={e => setImage(e.target.files?.[0] || null)} 
                   className="input-field py-2" 
                 />
-                <p className="text-xs text-gray-500 mt-1">If empty, it will use the default logo.</p>
+                
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="applyWatermarkVideo"
+                    checked={applyWatermark}
+                    onChange={(e) => setApplyWatermark(e.target.checked)}
+                    className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                  />
+                  <label htmlFor="applyWatermarkVideo" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                    Apply Steav News Watermark Template
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Uncheck this if your thumbnail already has a logo baked into it.</p>
               </div>
 
               <div>

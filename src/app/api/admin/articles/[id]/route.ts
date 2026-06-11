@@ -34,8 +34,9 @@ export async function PUT(
     const title = formData.get('title') as string;
     const date = formData.get('date') as string;
     const content = formData.get('content') as string;
-    const trending = formData.get('trending') as string;
-    const imageUrl = formData.get('imageUrl');
+    let trending = formData.get('trending') === 'true';
+    let applyWatermark = formData.get('applyWatermark') === 'true';
+    let imageUrl = formData.get('imageUrl') as string;
     const facebookVideoUrl = formData.get('facebookVideoUrl');
     const category = formData.get('category') as string;
     const authorId = formData.get('authorId') as string;
@@ -44,9 +45,11 @@ export async function PUT(
       title,
       date,
       content,
-      trending: trending === 'true',
+      trending,
+      applyWatermark,
       category: category || 'កម្សាន្ត',
       ...(authorId !== undefined && { authorId }),
+      updatedAt: new Date().toISOString(),
     };
 
     if (thumbnail && thumbnail.size > 0) {

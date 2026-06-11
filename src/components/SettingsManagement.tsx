@@ -8,6 +8,14 @@ export default function SettingsManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [isUploadingWatermark, setIsUploadingWatermark] = useState(false);
+  const [watermarkUrl, setWatermarkUrl] = useState('');
+
+  // Fetch current watermark on load
+  useEffect(() => {
+    // We append a random timestamp to bypass browser caching
+    setWatermarkUrl(`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dpaq3ova2'}/image/upload/steav_news_watermark.png?v=${Date.now()}`);
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -93,6 +101,66 @@ export default function SettingsManagement() {
             className="input-field py-3 min-h-[120px] resize-y" 
             required
           />
+        </div>
+
+        <div className="pt-6 border-t border-gray-200">
+          <label className="block text-sm font-bold text-gray-900 mb-2 uppercase tracking-wider">News Template / Watermark</label>
+          <p className="text-gray-500 text-sm mb-4">
+            Upload a 1200x630 transparent PNG template containing your logo, sponsors, or borders. 
+            This template will automatically be overlaid onto all article thumbnails across the website, so you don't have to use Photoshop!
+            To disable it, upload a completely transparent (blank) image.
+          </p>
+          <div className="flex items-center gap-4">
+            <input 
+              type="file" 
+              accept="image/png"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setIsUploadingWatermark(true);
+                setMessage({ text: '', type: '' });
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                  const res = await fetch('/api/admin/upload-watermark', {
+                    method: 'POST',
+                    body: formData,
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    setMessage({ text: 'Template uploaded successfully! It will now be applied to all article thumbnails.', type: 'success' });
+                    setWatermarkUrl(data.result?.secure_url || `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dpaq3ova2'}/image/upload/steav_news_watermark.png?v=${Date.now()}`);
+                  } else {
+                    setMessage({ text: 'Failed to upload template.', type: 'error' });
+                  }
+                } catch (err) {
+                  setMessage({ text: 'Error uploading template.', type: 'error' });
+                } finally {
+                  setIsUploadingWatermark(false);
+                  setTimeout(() => setMessage({ text: '', type: '' }), 5000);
+                }
+              }}
+              className="input-field py-2" 
+            />
+            {isUploadingWatermark && <span className="text-sm font-bold text-primary animate-pulse">Uploading...</span>}
+          </div>
+          
+          {watermarkUrl && (
+            <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 relative aspect-[1200/630] max-w-lg">
+              <div className="absolute inset-0 flex items-center justify-center text-gray-300 font-bold text-2xl" style={{ backgroundImage: 'linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' }}>
+                Base Image Preview
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={watermarkUrl} 
+                alt="Template Preview" 
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="pt-4 border-t border-gray-200">

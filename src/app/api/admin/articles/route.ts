@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     const date = formData.get('date') as string;
     const content = formData.get('content') as string;
     let trending = formData.get('trending') === 'true';
+    let applyWatermark = formData.get('applyWatermark') === 'true';
     let imageUrl = formData.get('imageUrl') as string;
     let facebookVideoUrl = (formData.get('facebookVideoUrl') as string) || '';
     const category = formData.get('category') as string;
@@ -55,8 +56,9 @@ export async function POST(request: NextRequest) {
       date,
       content,
       facebookVideoUrl,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       trending,
+      applyWatermark,
       likes: 0,
       views: 0,
       category: category || 'កម្សាន្ត',
