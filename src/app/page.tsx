@@ -38,7 +38,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
 
   // Fetch top headlines for the big hero section
-  const { articles: headlineArticles } = await getArticleList({ limit: 5, category: null, search: null, page: 1 });
+  const { articles: headlineArticles } = await getArticleList({ limit: 5, category: null, search: null, page: 1, hasVideo: false });
 
   return (
     <div className="min-h-screen flex flex-col bg-white">

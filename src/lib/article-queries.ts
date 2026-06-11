@@ -37,8 +37,13 @@ function buildArticleQuery({ category, search, excludeId, authorId, hasVideo }: 
     query.authorId = authorId;
   }
 
-  if (hasVideo) {
+  if (hasVideo === true) {
     query.facebookVideoUrl = { $exists: true, $ne: '' };
+  } else if (hasVideo === false) {
+    query.$or = [
+      { facebookVideoUrl: { $exists: false } },
+      { facebookVideoUrl: '' }
+    ];
   }
 
   return query;
