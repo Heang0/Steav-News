@@ -27,6 +27,7 @@ export function serializeArticle(article: any): Article {
     publicId: getArticlePublicId(article),
     title: article.title || '',
     image: article.image || '',
+    facebookVideoUrl: article.facebookVideoUrl || '',
     date: article.date || '',
     content: article.content || '',
     createdAt: article.createdAt instanceof Date ? article.createdAt.toISOString() : article.createdAt,

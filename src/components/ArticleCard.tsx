@@ -5,7 +5,7 @@ import { formatDate, getOptimizedImageUrl, shouldBypassNextImageOptimization } f
 
 interface ArticleCardProps {
   article: Article;
-  variant?: 'default' | 'spotlight' | 'trending' | 'compact' | 'bbc-hero' | 'bbc-list' | 'video';
+  variant?: 'default' | 'spotlight' | 'trending' | 'compact' | 'bbc-hero' | 'bbc-list' | 'video' | 'video-light';
 }
 
 export default function ArticleCard({ article, variant = 'default' }: ArticleCardProps) {
@@ -35,7 +35,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           />
         </div>
         <div className="flex flex-col px-2">
-          <h3 data-nosnippet className="text-2xl sm:text-3xl md:text-[36px] font-black text-gray-900 leading-[1.2] group-hover:text-primary transition-colors mb-3 tracking-tight group-hover:underline decoration-2 underline-offset-4" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h3 data-nosnippet className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-black text-gray-900 leading-[1.3] group-hover:text-primary transition-colors mb-3 tracking-tight group-hover:underline decoration-2 underline-offset-4 line-clamp-3" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h3>
           <div className="flex items-center gap-3 text-gray-600 text-sm font-semibold">
@@ -58,7 +58,7 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
     return (
       <Link href={articleHref} className="flex gap-4 group items-start py-4 border-b border-gray-200 hover:bg-gray-50 transition-colors -mx-4 px-4 last:border-0">
         <div className="flex-grow pr-2">
-          <h3 data-nosnippet className="text-base sm:text-lg font-bold text-gray-900 leading-snug group-hover:text-primary transition-colors mb-2 group-hover:underline decoration-2 underline-offset-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h3 data-nosnippet className="text-sm sm:text-base font-bold text-gray-900 leading-snug group-hover:text-primary transition-colors mb-2 group-hover:underline decoration-2 underline-offset-2 line-clamp-3" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h3>
           <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold">
@@ -133,15 +133,16 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
     );
   }
 
-  if (variant === 'video') {
+  if (variant === 'video' || variant === 'video-light') {
+    const isLight = variant === 'video-light';
     return (
       <Link href={articleHref} className="block group h-full hover:-translate-y-1 transition-transform duration-300">
-        <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-800 mb-3 rounded-lg shadow-md border border-gray-800 group-hover:border-primary transition-colors">
+        <div className={`relative w-full aspect-[16/9] overflow-hidden mb-3 rounded-lg shadow-md border ${isLight ? 'border-gray-200 bg-gray-100 group-hover:border-primary' : 'bg-gray-800 border-gray-800 group-hover:border-primary'} transition-colors`}>
           <Image
             src={cardImage || 'https://placehold.co/400x300/111111/ffffff?text=No+Image'}
             alt={article.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+            className={`object-cover group-hover:scale-105 transition-transform duration-500 ${isLight ? '' : 'opacity-80 group-hover:opacity-100'}`}
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
             unoptimized={unoptimizedImage}
           />
@@ -155,14 +156,14 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           </div>
         </div>
         <div className="flex flex-col px-1">
-          <h3 data-nosnippet className="text-base sm:text-lg font-bold text-white line-clamp-3 leading-snug group-hover:text-primary transition-colors mb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h3 data-nosnippet className={`text-base sm:text-lg font-bold line-clamp-3 leading-snug group-hover:text-primary transition-colors mb-2 ${isLight ? 'text-gray-900' : 'text-white'}`} style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h3>
-          <div className="flex items-center gap-2 text-gray-400 text-[11px] sm:text-xs font-semibold mt-1">
+          <div className={`flex items-center gap-2 text-[11px] sm:text-xs font-semibold mt-1 ${isLight ? 'text-gray-500' : 'text-gray-400'}`}>
             {article.category && (
               <>
                 <span className="text-primary font-bold">{article.category}</span>
-                <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                <span className={`w-1 h-1 rounded-full ${isLight ? 'bg-gray-300' : 'bg-gray-600'}`}></span>
               </>
             )}
             <span className="flex items-center">

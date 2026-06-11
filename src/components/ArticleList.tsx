@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Article } from '@/types';
-import { formatDate, shouldBypassNextImageOptimization } from '@/lib/utils';
+import { formatDate, shouldBypassNextImageOptimization, getOptimizedImageUrl } from '@/lib/utils';
 
 interface ArticleListProps {
   onEdit: (article: Article) => void;
@@ -20,19 +20,62 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 10;
 
+  // Search & Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+
+  // Debounced search term for API call
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Fetch categories once
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+            setCategories(data.data.map((c: any) => c.name));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const fetchArticles = async () => {
     setLoading(true);
     try {
+      const offset = (currentPage - 1) * pageSize;
+
+      // Build query string
+      const params = new URLSearchParams({
+        limit: pageSize.toString(),
+        offset: offset.toString(),
+        excludeVideo: 'true'
+      });
+      if (debouncedSearch) params.append('search', debouncedSearch);
+      if (selectedCategory) params.append('category', selectedCategory);
+
       // Fetch total count first
-      const countRes = await fetch('/api/articles/count');
+      const countRes = await fetch(`/api/articles/count?${params.toString()}`);
       if (countRes.ok) {
         const countData = await countRes.json();
         setTotalCount(countData.count);
       }
 
       // Fetch page data
-      const offset = (currentPage - 1) * pageSize;
-      const res = await fetch(`/api/articles?limit=${pageSize}&offset=${offset}`);
+      const res = await fetch(`/api/articles?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch articles');
       const data = await res.json();
       setArticles(data);
@@ -44,8 +87,12 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
   };
 
   useEffect(() => {
+    setCurrentPage(1); // Reset page on filter change
+  }, [debouncedSearch, selectedCategory]);
+
+  useEffect(() => {
     fetchArticles();
-  }, [currentPage]);
+  }, [currentPage, debouncedSearch, selectedCategory]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
@@ -96,7 +143,38 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-x-auto">
+      
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <div className="flex-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Search articles by title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+          />
+        </div>
+        <div className="w-full sm:w-64">
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary"
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl shadow-sm border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -136,7 +214,7 @@ export default function ArticleList({ onEdit }: ArticleListProps) {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="h-16 w-24 relative rounded overflow-hidden">
                       <Image
-                        src={article.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image'}
+                        src={getOptimizedImageUrl(article.image || 'https://placehold.co/100x60/cccccc/ffffff?text=No+Image', { width: 150, quality: 60 })}
                         alt={article.title}
                         fill
                         className="object-cover"

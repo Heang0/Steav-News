@@ -70,7 +70,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 
                 {/* Stacked Side Stories */}
                 <div className="xl:col-span-4 flex flex-col bg-white border border-gray-200 shadow-sm p-4 h-full">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">Top Picks</h3>
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>ជម្រើសកំពូល</h3>
                   <div className="flex flex-col gap-2">
                     {headlineArticles.slice(1).map((article) => (
                       <ArticleCard key={article._id} article={article} variant="bbc-list" />

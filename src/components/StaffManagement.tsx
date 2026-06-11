@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Staff } from '@/types';
 import Image from 'next/image';
+import { getOptimizedImageUrl } from '@/lib/utils';
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -217,7 +218,7 @@ export default function StaffManagement() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gray-200 overflow-hidden relative flex-shrink-0">
                         {s.photo ? (
-                          <Image src={s.photo} alt={s.name} fill className="object-cover" unoptimized={s.photo.startsWith('http')} />
+                          <Image src={getOptimizedImageUrl(s.photo, { width: 150, quality: 60 })} alt={s.name} fill className="object-cover" unoptimized={s.photo.startsWith('http')} sizes="40px" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold">
                             {s.name.charAt(0)}

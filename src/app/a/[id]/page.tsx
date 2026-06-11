@@ -167,8 +167,8 @@ export default async function ArticlePage({ params, searchParams }: PageProps) {
           }}
         />
 
-        <main className="flex-grow pt-20 sm:pt-24">
-          <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-[1300px]">
+        <main className="flex-grow bg-white mt-14 sm:mt-16">
+          <div className="article-page container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-[1300px]">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
               <div className="article-main-content-wrapper flex-1 min-w-0">
                 <ArticleContent article={serializedArticle} />

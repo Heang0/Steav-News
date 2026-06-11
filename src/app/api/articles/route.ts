@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const tag = searchParams.get('tag');
+    const excludeVideo = searchParams.get('excludeVideo');
+    const onlyVideos = searchParams.get('onlyVideos');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
@@ -25,6 +29,20 @@ export async function GET(request: NextRequest) {
     }
     if (category) query.category = category;
     if (tag) query.tags = tag;
+    
+    if (excludeVideo === 'true') {
+      query.$and = [
+        ...(query.$and || []),
+        { $or: [{ facebookVideoUrl: { $exists: false } }, { facebookVideoUrl: '' }] }
+      ];
+    }
+    
+    if (onlyVideos === 'true') {
+      query.$and = [
+        ...(query.$and || []),
+        { facebookVideoUrl: { $exists: true, $ne: '' } }
+      ];
+    }
 
     let articlesQuery = newsCollection.find(query).sort({ createdAt: -1 });
 

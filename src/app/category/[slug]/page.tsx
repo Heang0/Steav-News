@@ -41,7 +41,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      <main className="flex-grow container mx-auto px-4 max-w-[1300px] py-6 bg-white mt-20 sm:mt-24">
+      <main className="flex-grow container mx-auto px-4 max-w-[1300px] py-6 bg-white mt-14 sm:mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left: Latest Updates */}
           <div className="lg:col-span-8 pr-0 lg:pr-6 border-r-0 lg:border-r border-gray-200">

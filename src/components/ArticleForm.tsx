@@ -54,7 +54,6 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
   const [authorId, setAuthorId] = useState(article?.authorId || '');
   const [trending, setTrending] = useState(article?.trending || false);
   const [imageUrl, setImageUrl] = useState(article?.image || '');
-  const [facebookVideoUrl, setFacebookVideoUrl] = useState(article?.facebookVideoUrl || '');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -119,7 +118,6 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
       if (authorId) formData.append('authorId', authorId);
       formData.append('trending', trending.toString());
       formData.append('imageUrl', imageUrl);
-      formData.append('facebookVideoUrl', facebookVideoUrl);
       
       if (thumbnail) {
         formData.append('thumbnail', thumbnail);
@@ -162,7 +160,6 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         setAuthorId('');
         setTrending(false);
         setImageUrl('');
-        setFacebookVideoUrl('');
         setThumbnail(null);
         setThumbnailPreview(null);
       }
@@ -357,35 +354,19 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
         </div>
       </div>
 
-      {/* Image & Video URLs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label htmlFor="imageUrl" className="block text-sm font-semibold text-gray-700">
-            Or Use Image URL
-          </label>
-          <input
-            type="url"
-            id="imageUrl"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="input-field"
-            placeholder="https://example.com/image.jpg"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="facebookVideoUrl" className="block text-sm font-semibold text-gray-700">
-            Facebook Video URL (Optional)
-          </label>
-          <input
-            type="url"
-            id="facebookVideoUrl"
-            value={facebookVideoUrl}
-            onChange={(e) => setFacebookVideoUrl(e.target.value)}
-            className="input-field"
-            placeholder="https://www.facebook.com/watch/?v=12345"
-          />
-        </div>
+      {/* Image URL */}
+      <div className="space-y-2">
+        <label htmlFor="imageUrl" className="block text-sm font-semibold text-gray-700">
+          Or Use Image URL
+        </label>
+        <input
+          type="url"
+          id="imageUrl"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          className="input-field"
+          placeholder="https://example.com/image.jpg"
+        />
       </div>
 
       {/* Content Editor */}

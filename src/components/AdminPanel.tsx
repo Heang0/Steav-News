@@ -8,6 +8,7 @@ import Dashboard from '@/components/Dashboard';
 import StaffManagement from '@/components/StaffManagement';
 import CategoryManagement from '@/components/CategoryManagement';
 import SettingsManagement from '@/components/SettingsManagement';
+import VideoNewsManagement from '@/components/VideoNewsManagement';
 import { Article } from '@/types';
 
 export default function AdminPanel() {
@@ -16,7 +17,7 @@ export default function AdminPanel() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'create' | 'edit' | 'list' | 'staff' | 'categories' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'create' | 'edit' | 'list' | 'videos' | 'staff' | 'categories' | 'settings'>('dashboard');
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const router = useRouter();
@@ -250,6 +251,20 @@ export default function AdminPanel() {
                 Create New
               </button>
               <button
+                onClick={() => setActiveTab('videos')}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+                  activeTab === 'videos'
+                    ? 'text-primary border-primary bg-primary/5'
+                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Video News
+              </button>
+              <button
                 onClick={() => setActiveTab('staff')}
                 className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
                   activeTab === 'staff'
@@ -312,6 +327,10 @@ export default function AdminPanel() {
             
             {activeTab === 'list' && (
               <ArticleList onEdit={handleEditArticle} />
+            )}
+
+            {activeTab === 'videos' && (
+              <VideoNewsManagement />
             )}
 
             {activeTab === 'staff' && (

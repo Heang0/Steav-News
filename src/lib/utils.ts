@@ -58,6 +58,9 @@ export function getOptimizedImageUrl(
   } = {}
 ): string {
   if (!url || !url.includes('cloudinary.com')) {
+    if (url === '/images/default_og_image.jpg') {
+      return '/uploads/images/LOGO.jpg';
+    }
     return url;
   }
 
@@ -86,13 +89,14 @@ export function getSiteUrl(): string {
   return 'https://steavnews.site';
 }
 
-export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'ស្នេហា', 'ពិភពលោក'];
+export const CATEGORIES = ['កម្សាន្ត', 'សង្គម', 'ស្នេហា', 'ពិភពលោក', 'វីដេអូ'];
 
 export const CATEGORY_SLUG_TO_KHMER: Record<string, string> = {
   'entertainment': 'កម្សាន្ត',
   'society': 'សង្គម',
   'love': 'ស្នេហា',
   'world': 'ពិភពលោក',
+  'videos': 'វីដេអូ',
 };
 
 export const KHMER_TO_CATEGORY_SLUG: Record<string, string> = {
@@ -100,6 +104,7 @@ export const KHMER_TO_CATEGORY_SLUG: Record<string, string> = {
   'សង្គម': 'society',
   'ស្នេហា': 'love',
   'ពិភពលោក': 'world',
+  'វីដេអូ': 'videos',
 };
 
 export function getCategorySlug(khmerCategory: string): string {

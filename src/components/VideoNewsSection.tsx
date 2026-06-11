@@ -1,5 +1,6 @@
 import { getArticleList } from '@/lib/article-queries';
 import ArticleCard from './ArticleCard';
+import Link from 'next/link';
 
 export default async function VideoNewsSection() {
   // Fetch up to 4 articles that have a Facebook Video URL
@@ -21,9 +22,12 @@ export default async function VideoNewsSection() {
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             <span className="text-primary">▶</span> វីដេអូព័ត៌មាន
           </h2>
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
-            Watch Now
-          </div>
+          <Link href="/category/videos" className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">
+            មើលទាំងអស់
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
         </div>
 
         {/* Video Grid */}

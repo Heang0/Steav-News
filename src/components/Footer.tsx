@@ -84,6 +84,9 @@ export default function Footer() {
               <li className="text-gray-400 text-sm flex items-center gap-2">
                 +855 96 392 5127
               </li>
+              <li className="text-gray-400 text-sm flex items-start gap-2 leading-relaxed">
+                Russian Federation Blvd (110), Phnom Penh
+              </li>
             </ul>
           </div>
 

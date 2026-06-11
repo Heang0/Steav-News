@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const category = formData.get('category') as string;
     const authorId = formData.get('authorId') as string;
 
-    let imagePath = '/images/default_og_image.jpg';
+    let imagePath = '/uploads/images/LOGO.jpg';
 
     if (thumbnail && thumbnail.size > 0) {
       const bytes = await thumbnail.arrayBuffer();

@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
 import Image from 'next/image';
-import { getSiteUrl } from '@/lib/utils';
+import { getSiteUrl, getOptimizedImageUrl } from '@/lib/utils';
 import Pagination from '@/components/Pagination';
 import type { Metadata } from 'next';
 
@@ -115,11 +115,12 @@ export default async function StaffProfilePage({ params, searchParams }: PagePro
             <div className="relative w-32 h-32 sm:w-48 sm:h-48 rounded-none border-4 border-white shadow-lg bg-gray-100 flex-shrink-0 -mt-20 sm:-mt-28 overflow-hidden">
               {staff.photo ? (
                 <Image 
-                  src={staff.photo} 
+                  src={getOptimizedImageUrl(staff.photo, { width: 400, quality: 80 })} 
                   alt={staff.name} 
                   fill 
                   className="object-cover"
                   unoptimized={staff.photo.startsWith('http')}
+                  sizes="(max-width: 640px) 128px, 192px"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-primary text-white text-5xl font-bold">

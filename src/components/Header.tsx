@@ -99,6 +99,7 @@ export default function Header() {
                   src="/uploads/images/LOGO.jpg"
                   alt="STEAV NEWS Logo"
                   fill
+                  sizes="(max-width: 640px) 100px, 150px"
                   className="object-contain object-center md:object-left"
                   priority
                 />

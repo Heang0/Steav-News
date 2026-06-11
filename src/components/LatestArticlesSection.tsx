@@ -36,7 +36,7 @@ export default async function LatestArticlesSection({ category, search, page = 1
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-4">
+      <div className="grid gap-2 sm:gap-4 grid-cols-2">
         {articles.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <svg className="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +48,11 @@ export default async function LatestArticlesSection({ category, search, page = 1
           </div>
         ) : (
           articles.map((article) => (
-            <ArticleCard key={article._id} article={article} />
+            <ArticleCard 
+              key={article._id} 
+              article={article} 
+              variant={article.facebookVideoUrl ? 'video-light' : 'default'} 
+            />
           ))
         )}
       </div>

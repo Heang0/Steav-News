@@ -219,6 +219,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
 
 
       <article className="bg-white rounded-none shadow-none border-none overflow-hidden w-full">
+
         {/* Article Header */}
         <div className="p-4 sm:p-6 md:p-8 pb-0">
           {/* Category + Meta row */}
@@ -260,14 +261,14 @@ export default function ArticleContent({ article }: ArticleContentProps) {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-gray-900 mb-5 leading-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h1 className="text-xl sm:text-2xl lg:text-[28px] font-bold text-gray-900 mb-4 leading-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h1>
         </div>
 
-        {/* Hero Media (Image or Facebook Video) */}
+        {/* Hero Media (Facebook Video or Image) */}
         {article.facebookVideoUrl ? (
-          <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+          <div className="relative w-full h-[250px] sm:h-[350px] lg:h-[400px] bg-black flex items-center justify-center">
             <iframe
               src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(article.facebookVideoUrl)}&show_text=0&width=auto`}
               className="absolute top-0 left-0 w-full h-full border-none overflow-hidden"
