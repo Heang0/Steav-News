@@ -51,7 +51,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="container mx-auto px-4 max-w-[1300px]">
               <div className="flex items-center justify-between mb-6 pb-2 border-b-4 border-gray-900">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
-                  <span className="text-primary mr-2">⚡</span>ព័ត៌មានលេចធ្លោប្រចាំថ្ងៃ
+                  <span className="text-primary mr-2">/</span>ព័ត៌មានលេចធ្លោប្រចាំថ្ងៃ
                 </h2>
                 <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
