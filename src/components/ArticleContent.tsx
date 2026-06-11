@@ -288,7 +288,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               className="object-cover"
               sizes="100vw"
               priority
-              unoptimized={!article.image?.startsWith('http')}
+              unoptimized={shouldBypassNextImageOptimization(article.image || '')}
             />
           </div>
         ) : null}

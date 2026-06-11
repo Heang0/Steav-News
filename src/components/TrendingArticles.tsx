@@ -1,7 +1,7 @@
 import { getTrendingArticles } from '@/lib/article-queries';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getOptimizedImageUrl } from '@/lib/utils';
+import { getOptimizedImageUrl, shouldBypassNextImageOptimization } from '@/lib/utils';
 
 export default async function TrendingArticles() {
   const trendingArticles = await getTrendingArticles(5);
@@ -35,7 +35,7 @@ export default async function TrendingArticles() {
                       alt={article.title}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      unoptimized={!article.image?.startsWith('http')}
+                      unoptimized={shouldBypassNextImageOptimization(article.image || '')}
                     />
                   </div>
                 )}
