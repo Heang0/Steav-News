@@ -20,7 +20,10 @@ export default async function VideoNewsSection() {
         {/* Section Header */}
         <div className="flex items-center justify-between mb-8 pb-3 border-b-2 border-gray-800">
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
-            <span className="text-primary">▶</span> វីដេអូព័ត៌មាន
+            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-primary shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            វីដេអូព័ត៌មាន
           </h2>
           <Link href="/category/videos" className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white uppercase tracking-widest transition-colors">
             មើលទាំងអស់

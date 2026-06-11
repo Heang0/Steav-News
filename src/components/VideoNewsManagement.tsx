@@ -138,7 +138,10 @@ export default function VideoNewsManagement() {
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <span className="text-primary">▶</span> Video News Management
+          <svg className="w-6 h-6 text-primary shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Video News Management
         </h2>
         <button 
           onClick={() => {
