@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const db = await getDb();
     const newsCollection = db.collection('articles');
 
-    const query: Record<string, unknown> = {};
+    const query: any = {};
     const processedSearch = search?.trim() || '';
 
     if (processedSearch) {
