@@ -43,34 +43,46 @@ export default async function Home({ searchParams }: HomeProps) {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-grow container mx-auto px-4 max-w-[1300px] py-6 bg-white mt-20 sm:mt-24">
+      <main className="flex-grow bg-white mt-14 sm:mt-16">
         
-        {/* BBC TOP STORIES GRID */}
+        {/* TOP STORIES HERO SECTION - Premium Look */}
         {!category && !search && currentPage === 1 && headlineArticles.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-[3px] border-gray-900" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
-              <span className="text-primary mr-2">/</span>ព័ត៌មានលេចធ្លោ
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 border-b border-gray-200 pb-8">
-              {/* Main Hero Story */}
-              <div className="lg:col-span-8 pr-0 lg:pr-6 lg:border-r border-gray-200">
-                {headlineArticles[0] && (
-                  <ArticleCard article={headlineArticles[0]} variant="bbc-hero" />
-                )}
+          <div className="bg-gray-50 border-b border-gray-200 w-full pt-8 pb-10">
+            <div className="container mx-auto px-4 max-w-[1300px]">
+              <div className="flex items-center justify-between mb-6 pb-2 border-b-4 border-gray-900">
+                <h2 className="text-3xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+                  <span className="text-primary mr-2">⚡</span>ព័ត៌មានលេចធ្លោប្រចាំថ្ងៃ
+                </h2>
+                <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  Trending Now
+                </div>
               </div>
               
-              {/* Stacked Side Stories */}
-              <div className="lg:col-span-4 flex flex-col">
-                {headlineArticles.slice(1).map((article) => (
-                  <ArticleCard key={article._id} article={article} variant="bbc-list" />
-                ))}
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                {/* Main Hero Story */}
+                <div className="xl:col-span-8">
+                  {headlineArticles[0] && (
+                    <ArticleCard article={headlineArticles[0]} variant="bbc-hero" />
+                  )}
+                </div>
+                
+                {/* Stacked Side Stories */}
+                <div className="xl:col-span-4 flex flex-col bg-white border border-gray-200 shadow-sm p-4 h-full">
+                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2">Top Picks</h3>
+                  <div className="flex flex-col gap-2">
+                    {headlineArticles.slice(1).map((article) => (
+                      <ArticleCard key={article._id} article={article} variant="bbc-list" />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* BOTTOM ROW: BBC Split Layout */}
+        <div className="container mx-auto px-4 max-w-[1300px] py-8">
+          {/* BOTTOM ROW: Split Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Left: Content Area */}

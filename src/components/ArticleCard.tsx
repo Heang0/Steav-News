@@ -24,18 +24,18 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
   if (variant === 'bbc-hero') {
     return (
       <Link href={articleHref} className="flex flex-col group w-full h-full pb-4">
-        <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 flex-shrink-0 mb-4">
+        <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 flex-shrink-0 mb-4 border-b-4 border-transparent group-hover:border-primary transition-colors">
           <Image
             src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill' }) || 'https://placehold.co/1200x675/cccccc/ffffff?text=No+Image'}
             alt={article.title}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 1024px) 100vw, 800px"
             unoptimized={unoptimizedImage}
           />
         </div>
         <div className="flex flex-col px-2">
-          <h3 data-nosnippet className="text-2xl sm:text-3xl md:text-[34px] font-extrabold text-gray-900 leading-[1.25] group-hover:text-primary transition-colors mb-3 tracking-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h3 data-nosnippet className="text-2xl sm:text-3xl md:text-[36px] font-black text-gray-900 leading-[1.2] group-hover:text-primary transition-colors mb-3 tracking-tight group-hover:underline decoration-2 underline-offset-4" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h3>
           <div className="flex items-center gap-3 text-gray-600 text-sm font-semibold">
@@ -56,9 +56,9 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
 
   if (variant === 'bbc-list') {
     return (
-      <Link href={articleHref} className="flex gap-4 group items-start py-4 border-b border-gray-200 last:border-0">
+      <Link href={articleHref} className="flex gap-4 group items-start py-4 border-b border-gray-200 hover:bg-gray-50 transition-colors -mx-4 px-4 last:border-0">
         <div className="flex-grow pr-2">
-          <h3 data-nosnippet className="text-base sm:text-lg font-bold text-gray-900 leading-snug group-hover:text-primary transition-colors mb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+          <h3 data-nosnippet className="text-base sm:text-lg font-bold text-gray-900 leading-snug group-hover:text-primary transition-colors mb-2 group-hover:underline decoration-2 underline-offset-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
             {article.title}
           </h3>
           <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold">
@@ -72,12 +72,12 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
           </div>
         </div>
         {article.image && (
-          <div className="relative w-[130px] aspect-[16/9] flex-shrink-0 bg-gray-100">
+          <div className="relative w-[130px] aspect-[16/9] flex-shrink-0 bg-gray-100 overflow-hidden border border-gray-200 group-hover:border-primary transition-colors">
             <Image
               src={getOptimizedImageUrl(article.image, { width: 260, height: 146, crop: 'fill' }) || 'https://placehold.co/260x146/cccccc/ffffff?text=No+Image'}
               alt={article.title}
               fill
-              className="object-cover"
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
               sizes="130px"
               unoptimized={unoptimizedImage}
             />
@@ -170,19 +170,19 @@ export default function ArticleCard({ article, variant = 'default' }: ArticleCar
 
   // Default
   return (
-    <Link href={articleHref} className="block group h-full">
-      <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 mb-2">
+    <Link href={articleHref} className="block group h-full hover:bg-gray-50 transition-colors -mx-2 p-2 sm:-mx-4 sm:p-4 border border-transparent hover:border-gray-100">
+      <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100 mb-3 border-b-2 border-transparent group-hover:border-primary transition-colors">
         <Image
           src={cardImage || 'https://placehold.co/400x300/cccccc/ffffff?text=No+Image'}
           alt={article.title}
           fill
-          className="object-cover"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
           unoptimized={unoptimizedImage}
         />
       </div>
       <div className="flex flex-col">
-        <h3 data-nosnippet className="text-base sm:text-lg font-bold text-gray-900 line-clamp-3 leading-snug group-hover:text-primary transition-colors mb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+        <h3 data-nosnippet className="text-base sm:text-lg font-bold text-gray-900 line-clamp-3 leading-snug group-hover:text-primary transition-colors mb-2 group-hover:underline decoration-1 underline-offset-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
           {article.title}
         </h3>
         <div className="flex items-center gap-2 text-gray-500 text-[11px] sm:text-xs font-semibold mt-1">
