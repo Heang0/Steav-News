@@ -35,7 +35,8 @@ export async function PUT(
     const date = formData.get('date') as string;
     const content = formData.get('content') as string;
     const trending = formData.get('trending') as string;
-    const imageUrl = formData.get('imageUrl') as string;
+    const imageUrl = formData.get('imageUrl');
+    const facebookVideoUrl = formData.get('facebookVideoUrl');
     const category = formData.get('category') as string;
     const authorId = formData.get('authorId') as string;
 
@@ -53,8 +54,12 @@ export async function PUT(
       const buffer = Buffer.from(bytes);
       const uploadResult = await uploadImageBuffer(buffer, thumbnail.type, 'article-thumbnail');
       updateDoc.image = uploadResult.url;
-    } else if (imageUrl) {
-      updateDoc.image = imageUrl;
+    } else if (imageUrl !== null) {
+      updateDoc.image = imageUrl as string;
+    }
+
+    if (facebookVideoUrl !== null) {
+      updateDoc.facebookVideoUrl = facebookVideoUrl as string;
     }
 
     const db = await getDb();

@@ -23,8 +23,9 @@ export async function POST(request: NextRequest) {
     const title = formData.get('title') as string;
     const date = formData.get('date') as string;
     const content = formData.get('content') as string;
-    const trending = formData.get('trending') as string;
-    const imageUrl = formData.get('imageUrl') as string;
+    let trending = formData.get('trending') === 'true';
+    let imageUrl = formData.get('imageUrl') as string;
+    let facebookVideoUrl = (formData.get('facebookVideoUrl') as string) || '';
     const category = formData.get('category') as string;
     const authorId = formData.get('authorId') as string;
 
@@ -53,8 +54,9 @@ export async function POST(request: NextRequest) {
       image: imagePath,
       date,
       content,
-      createdAt: new Date(),
-      trending: trending === 'true',
+      facebookVideoUrl,
+      createdAt: new Date().toISOString(),
+      trending,
       likes: 0,
       views: 0,
       category: category || 'កម្សាន្ត',

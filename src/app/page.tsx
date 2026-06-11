@@ -100,6 +100,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
 
         </div>
+        </div>
       </main>
 
       <Footer />

@@ -265,8 +265,19 @@ export default function ArticleContent({ article }: ArticleContentProps) {
           </h1>
         </div>
 
-        {/* Hero Image */}
-        {article.image && (
+        {/* Hero Media (Image or Facebook Video) */}
+        {article.facebookVideoUrl ? (
+          <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+            <iframe
+              src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(article.facebookVideoUrl)}&show_text=0&width=auto`}
+              className="absolute top-0 left-0 w-full h-full border-none overflow-hidden"
+              scrolling="no"
+              frameBorder="0"
+              allowFullScreen={true}
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            ></iframe>
+          </div>
+        ) : article.image ? (
           <div className="relative w-full aspect-[16/9] bg-gray-100">
             <Image
               src={getOptimizedImageUrl(article.image, { width: 1200, height: 675, crop: 'fill' })}
@@ -278,7 +289,7 @@ export default function ArticleContent({ article }: ArticleContentProps) {
               unoptimized={!article.image?.startsWith('http')}
             />
           </div>
-        )}
+        ) : null}
 
         {/* Article Body */}
         <div className="p-4 sm:p-6 md:p-8 pt-4 sm:pt-6">

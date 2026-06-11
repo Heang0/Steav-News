@@ -11,6 +11,7 @@ export interface Article {
   publicId: string;
   title: string;
   image: string;
+  facebookVideoUrl?: string;
   date: string;
   content: string;
   createdAt: string;
