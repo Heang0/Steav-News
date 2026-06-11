@@ -43,8 +43,9 @@ export function getFacebookOptimizedImageUrl(url: string, applyWatermark?: boole
   // Optimize for Cloudinary if it's a Cloudinary URL
   if (absoluteUrl.includes('cloudinary.com')) {
     const watermarkTransform = applyWatermark ? '/l_steav_news_watermark,w_1.0,h_1.0,c_scale,fl_relative/fl_layer_apply' : '';
-    // Use q_auto:best for maximum clarity on Facebook shares
-    return absoluteUrl.replace('/upload/', `/upload/c_fill,w_1200,h_630${watermarkTransform}/f_auto,q_auto:best/`);
+    // Force f_jpg instead of f_auto because Telegram bots sometimes fail to render WebP/AVIF. 
+    // Use standard q_auto as colons (q_auto:best) can break some strict URL parsers.
+    return absoluteUrl.replace('/upload/', `/upload/c_fill,w_1200,h_630${watermarkTransform}/f_jpg,q_auto/`);
   }
   
   return absoluteUrl;
