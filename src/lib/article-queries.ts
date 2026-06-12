@@ -1,5 +1,6 @@
 import { getDb } from '@/lib/mongodb';
 import { serializeArticle } from '@/lib/articles';
+import { unstable_cache } from 'next/cache';
 import { CATEGORIES } from '@/lib/utils';
 import { Article } from '@/types';
 
@@ -50,75 +51,92 @@ function buildArticleQuery({ category, search, excludeId, authorId, hasVideo }: 
 }
 
 export async function getTrendingArticles(limit = 5): Promise<Article[]> {
-  const db = await getDb();
-  const newsCollection = db.collection('articles');
+  return unstable_cache(
+    async () => {
+      const db = await getDb();
+      const newsCollection = db.collection('articles');
 
-  const articles = await newsCollection
-    .find({ trending: true })
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .toArray();
+      const articles = await newsCollection
+        .find({ trending: true })
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .toArray();
 
-  return articles.map(serializeArticle);
+      return articles.map(serializeArticle);
+    },
+    [`trending-articles-${limit}`],
+    { revalidate: 60, tags: ['articles', 'trending'] }
+  )();
 }
 
 export async function getCategorySpotlights(excludeIds?: string[]): Promise<Article[]> {
-  const db = await getDb();
-  const newsCollection = db.collection('articles');
-  const categoriesCollection = db.collection('categories');
+  const excludeKey = excludeIds ? excludeIds.join('-') : 'none';
+  
+  return unstable_cache(
+    async () => {
+      const db = await getDb();
+      const newsCollection = db.collection('articles');
+      const categoriesCollection = db.collection('categories');
 
-  const { ObjectId } = require('mongodb');
-  const excludeObjectIds = (excludeIds || []).map(id => ObjectId.isValid(id) ? new ObjectId(id) : id);
+      const { ObjectId } = require('mongodb');
+      const excludeObjectIds = (excludeIds || []).map(id => ObjectId.isValid(id) ? new ObjectId(id) : id);
 
-  const categoriesDb = await categoriesCollection.find({}).sort({ createdAt: -1 }).toArray();
-  const categoryNames = categoriesDb.length > 0 ? categoriesDb.map(c => c.name) : CATEGORIES;
+      const categoriesDb = await categoriesCollection.find({}).sort({ createdAt: -1 }).toArray();
+      const categoryNames = categoriesDb.length > 0 ? categoriesDb.map(c => c.name) : CATEGORIES;
 
-  const articles = await Promise.all(
-    categoryNames.map((category) =>
-      newsCollection.findOne(
-        { 
-          category,
-          ...(excludeObjectIds.length > 0 ? { _id: { $nin: excludeObjectIds } } : {})
-        },
-        { sort: { createdAt: -1 } }
-      )
-    )
-  );
+      const articles = await Promise.all(
+        categoryNames.map((category) =>
+          newsCollection.findOne(
+            { 
+              category,
+              ...(excludeObjectIds.length > 0 ? { _id: { $nin: excludeObjectIds } } : {})
+            },
+            { sort: { createdAt: -1 } }
+          )
+        )
+      );
 
-  return articles.filter(Boolean).map(serializeArticle);
+      return articles.filter(Boolean).map(serializeArticle);
+    },
+    [`category-spotlights-${excludeKey}`],
+    { revalidate: 60, tags: ['articles', 'categories'] }
+  )();
 }
 
-export async function getArticleList({
-  category,
-  search,
-  page = 1,
-  limit = 6,
-  excludeId,
-  authorId,
-  hasVideo,
-}: ArticleListOptions = {}) {
+export async function getArticleList(options: ArticleListOptions = {}) {
+  const { category, search, page = 1, limit = 6, excludeId, authorId, hasVideo } = options;
   const currentPage = Math.max(1, page);
   const articlesPerPage = Math.max(1, limit);
-  const offset = (currentPage - 1) * articlesPerPage;
-  const query = buildArticleQuery({ category, search, excludeId, authorId, hasVideo });
+  
+  // Create a unique cache key based on the exact query parameters
+  const cacheKey = `article-list-${category || 'all'}-${search || 'none'}-${currentPage}-${articlesPerPage}-${excludeId || 'none'}-${authorId || 'none'}-${hasVideo !== undefined ? hasVideo : 'any'}`;
 
-  const db = await getDb();
-  const newsCollection = db.collection('articles');
+  return unstable_cache(
+    async () => {
+      const offset = (currentPage - 1) * articlesPerPage;
+      const query = buildArticleQuery({ category, search, excludeId, authorId, hasVideo });
 
-  const [articles, totalArticles] = await Promise.all([
-    newsCollection
-      .find(query)
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(articlesPerPage)
-      .toArray(),
-    newsCollection.countDocuments(query),
-  ]);
+      const db = await getDb();
+      const newsCollection = db.collection('articles');
 
-  return {
-    articles: articles.map(serializeArticle),
-    totalArticles,
-    totalPages: Math.max(1, Math.ceil(totalArticles / articlesPerPage)),
-    currentPage,
-  };
+      const [articles, totalArticles] = await Promise.all([
+        newsCollection
+          .find(query)
+          .sort({ createdAt: -1 })
+          .skip(offset)
+          .limit(articlesPerPage)
+          .toArray(),
+        newsCollection.countDocuments(query),
+      ]);
+
+      return {
+        articles: articles.map(serializeArticle),
+        totalArticles,
+        totalPages: Math.max(1, Math.ceil(totalArticles / articlesPerPage)),
+        currentPage,
+      };
+    },
+    [cacheKey],
+    { revalidate: 60, tags: ['articles'] }
+  )();
 }

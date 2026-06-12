@@ -6,6 +6,8 @@ import LatestArticlesSection from '@/components/LatestArticlesSection';
 import CategorySpotlights from '@/components/CategorySpotlights';
 import ArticleCard from '@/components/ArticleCard';
 import VideoNewsSection from '@/components/VideoNewsSection';
+import BreakingNewsTicker from '@/components/BreakingNewsTicker';
+import AdPlaceholder from '@/components/AdPlaceholder';
 import { getArticleList } from '@/lib/article-queries';
 
 export const revalidate = 300; // Refresh every 5 minutes
@@ -37,7 +39,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const page = Number.parseInt(resolvedSearchParams.page || '1', 10);
   const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
 
-  // Fetch top headlines for the big hero section
+  // Fetch top headlines for the big hero section and ticker
   const { articles: headlineArticles } = await getArticleList({ limit: 5, category: null, search: null, page: 1, hasVideo: false });
 
   return (
@@ -46,11 +48,16 @@ export default async function Home({ searchParams }: HomeProps) {
 
       <main className="flex-grow bg-white mt-14 sm:mt-16">
         
+        {/* BREAKING NEWS TICKER */}
+        {!category && !search && currentPage === 1 && headlineArticles.length > 0 && (
+          <BreakingNewsTicker articles={headlineArticles} />
+        )}
+
         {/* TOP STORIES HERO SECTION - Premium Look */}
         {!category && !search && currentPage === 1 && headlineArticles.length > 0 && (
           <div className="bg-gray-50 border-b border-gray-200 w-full pt-8 pb-10">
             <div className="container mx-auto px-4 max-w-[1300px]">
-              <div className="flex items-center justify-between mb-6 pb-2 border-b-4 border-gray-900">
+              <div className="flex items-center justify-between mb-6 pb-2 border-b-[3px] border-gray-900">
                 <h2 className="text-3xl font-black text-gray-900 tracking-tight" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
                   <span className="text-primary mr-2">/</span>ព័ត៌មានលេចធ្លោប្រចាំថ្ងៃ
                 </h2>
@@ -60,25 +67,34 @@ export default async function Home({ searchParams }: HomeProps) {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                {/* Main Hero Story */}
-                <div className="xl:col-span-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Main Hero Story (Left, Col 8) */}
+                <div className="lg:col-span-8 border-b lg:border-b-0 lg:border-r border-gray-200 pb-6 lg:pb-0 lg:pr-8">
                   {headlineArticles[0] && (
                     <ArticleCard article={headlineArticles[0]} variant="bbc-hero" priority={true} />
                   )}
                 </div>
                 
-                {/* Stacked Side Stories */}
-                <div className="xl:col-span-4 flex flex-col bg-white border border-gray-200 shadow-sm p-4 h-full">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-gray-100 pb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>ជម្រើសកំពូល</h3>
-                  <div className="flex flex-col gap-2">
-                    {headlineArticles.slice(1).map((article) => (
+                {/* Stacked Side Stories (Right, Col 4) */}
+                <div className="lg:col-span-4 flex flex-col bg-white h-full">
+                  <h3 className="text-sm font-bold text-primary uppercase tracking-widest mb-4 border-b border-gray-100 pb-2" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+                    <span className="mr-2">/</span>ជម្រើសកំពូល
+                  </h3>
+                  <div className="flex flex-col gap-5">
+                    {headlineArticles.slice(1, 5).map((article) => (
                       <ArticleCard key={article._id} article={article} variant="bbc-list" />
                     ))}
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TOP AD LEADERBOARD */}
+        {(!category && !search && currentPage === 1) && (
+          <div className="w-full bg-white py-6 border-b border-gray-100 flex justify-center">
+            <AdPlaceholder width="w-[728px] max-w-[95%]" height="h-[90px]" />
           </div>
         )}
 
@@ -100,9 +116,14 @@ export default async function Home({ searchParams }: HomeProps) {
             )}
           </div>
 
-          {/* Right: Mostly Viewed */}
-          <div className="lg:col-span-4">
+          {/* Right: Mostly Viewed & Ads */}
+          <div className="lg:col-span-4 flex flex-col gap-8 sticky top-24 self-start">
             <TrendingArticles />
+            
+            {/* SIDEBAR AD RECTANGLE */}
+            <div className="hidden lg:flex justify-center w-full bg-white p-4 border border-gray-100 shadow-sm">
+              <AdPlaceholder width="w-[300px]" height="h-[250px]" />
+            </div>
           </div>
 
         </div>

@@ -79,11 +79,20 @@ export default async function StaffProfilePage({ params, searchParams }: PagePro
     notFound();
   }
 
-  // Fetch articles by this author
-  const { articles, totalPages } = await getArticleList({
+  // Fetch normal articles by this author
+  const { articles: normalArticles, totalPages } = await getArticleList({
     authorId: staff._id.toString(),
     page: currentPage,
-    limit: 12
+    limit: 12,
+    hasVideo: false
+  });
+
+  // Fetch video news by this author
+  const { articles: videoArticles } = await getArticleList({
+    authorId: staff._id.toString(),
+    page: 1,
+    limit: 8,
+    hasVideo: true
   });
 
   // Premium stock newsroom background as fallback
@@ -146,7 +155,7 @@ export default async function StaffProfilePage({ params, searchParams }: PagePro
                 
                 {/* Stats */}
                 <div className="flex flex-col items-center md:items-end bg-gray-50 px-6 py-3 rounded-none border border-gray-100">
-                  <span className="text-2xl sm:text-3xl font-black text-gray-900 leading-none">{articles.length}</span>
+                  <span className="text-2xl sm:text-3xl font-black text-gray-900 leading-none">{normalArticles.length + videoArticles.length}</span>
                   <span className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Articles</span>
                 </div>
               </div>
@@ -169,9 +178,9 @@ export default async function StaffProfilePage({ params, searchParams }: PagePro
             <span className="text-primary mr-2">/</span>អត្ថបទដោយអ្នកនិពន្ធរូបនេះ
           </h2>
           
-          {articles.length > 0 ? (
+          {normalArticles.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {articles.map(article => (
+              {normalArticles.map(article => (
                 <ArticleCard key={article._id} article={article} variant="default" />
               ))}
             </div>
@@ -191,6 +200,23 @@ export default async function StaffProfilePage({ params, searchParams }: PagePro
             </div>
           )}
         </div>
+
+        {/* VIDEOS GRID */}
+        {videoArticles.length > 0 && (
+          <div className="container mx-auto px-4 max-w-[1300px] pb-16">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-[3px] border-primary" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>
+              <span className="text-primary mr-2">/</span>វីដេអូព័ត៌មាន (Video News)
+            </h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+              {videoArticles.map(article => (
+                <ArticleCard key={article._id} article={article} variant="default" />
+              ))}
+            </div>
+          </div>
+        )}
+
+
       </main>
 
       <Footer />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ThumbnailMaker from './ThumbnailMaker';
 
 interface ArticleFormProps {
   article?: Article | null;
@@ -61,6 +62,7 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [showThumbnailMaker, setShowThumbnailMaker] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -317,23 +319,34 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
           Thumbnail Image
         </label>
         <div className="flex flex-col sm:flex-row items-start gap-4">
-          <label className="flex-1 cursor-pointer w-full">
-            <div className="border-2 border-dashed border-gray-300 rounded-none p-6 text-center hover:border-primary transition-colors">
-              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <p className="mt-2 text-sm text-gray-600">
-                <span className="font-medium text-primary">Click to upload</span> or drag and drop
-              </p>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleThumbnailChange}
-              className="hidden"
-            />
-          </label>
+          <div className="flex-1 flex flex-col gap-3 w-full">
+            <label className="cursor-pointer w-full block">
+              <div className="border-2 border-dashed border-gray-300 bg-white rounded-none p-6 text-center hover:border-primary transition-colors">
+                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p className="mt-2 text-sm text-gray-600">
+                  <span className="font-medium text-primary">Click to upload</span> standard image
+                </p>
+                <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                className="hidden"
+              />
+            </label>
+            
+            <button
+              type="button"
+              onClick={() => setShowThumbnailMaker(true)}
+              className="w-full py-3 px-4 bg-gray-900 text-white text-sm font-bold shadow hover:bg-black transition-colors flex items-center justify-center gap-2"
+            >
+              <span className="text-lg">🎨</span> Launch Custom Thumbnail Maker
+            </button>
+          </div>
+
           
           {thumbnailPreview && (
             <div className="relative w-full sm:w-32 h-48 sm:h-32 rounded-none overflow-hidden border border-gray-200 shadow-none">
@@ -518,6 +531,17 @@ export default function ArticleForm({ article, onSuccess, onCancel }: ArticleFor
           )}
         </button>
       </div>
+
+      {showThumbnailMaker && (
+        <ThumbnailMaker
+          onSave={(file, previewUrl) => {
+            setThumbnail(file);
+            setThumbnailPreview(previewUrl);
+            setShowThumbnailMaker(false);
+          }}
+          onCancel={() => setShowThumbnailMaker(false)}
+        />
+      )}
     </form>
   );
 }
