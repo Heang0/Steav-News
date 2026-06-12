@@ -65,6 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
       google: 'your-google-verification-id',
       other: {
         'msvalidate.01': '63DE1EBAADD223E17DB668D905F5AE56',
+        'google-adsense-account': 'ca-pub-6134759270953813',
       },
     },
   };
