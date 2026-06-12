@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import '@/app/globals.css';
 import { getSiteUrl } from '@/lib/utils';
 
@@ -91,10 +92,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
-        <script
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6134759270953813"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
         {/* Facebook Page Link for News Integrity */}
         <meta property="article:publisher" content="https://www.facebook.com/steavnews" />
