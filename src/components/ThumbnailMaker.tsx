@@ -14,6 +14,16 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
   const [image1Url, setImage1Url] = useState<string | null>(null);
   const [image2Url, setImage2Url] = useState<string | null>(null);
   
+  // Image 1 Controls
+  const [img1Zoom, setImg1Zoom] = useState(1);
+  const [img1PanX, setImg1PanX] = useState(0);
+  const [img1PanY, setImg1PanY] = useState(0);
+
+  // Image 2 Controls
+  const [img2Zoom, setImg2Zoom] = useState(1);
+  const [img2PanX, setImg2PanX] = useState(0);
+  const [img2PanY, setImg2PanY] = useState(0);
+  
   const [text, setText] = useState('');
   const [textColor, setTextColor] = useState('#ffffff');
   const [strokeColor, setStrokeColor] = useState('#e60000');
@@ -48,6 +58,12 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
         if (parsed.shapeSize !== undefined) setShapeSize(parsed.shapeSize);
         if (parsed.shapeColor !== undefined) setShapeColor(parsed.shapeColor);
         if (parsed.shapeThickness !== undefined) setShapeThickness(parsed.shapeThickness);
+        if (parsed.img1Zoom !== undefined) setImg1Zoom(parsed.img1Zoom);
+        if (parsed.img1PanX !== undefined) setImg1PanX(parsed.img1PanX);
+        if (parsed.img1PanY !== undefined) setImg1PanY(parsed.img1PanY);
+        if (parsed.img2Zoom !== undefined) setImg2Zoom(parsed.img2Zoom);
+        if (parsed.img2PanX !== undefined) setImg2PanX(parsed.img2PanX);
+        if (parsed.img2PanY !== undefined) setImg2PanY(parsed.img2PanY);
       }
     } catch(e) {}
   }, []);
@@ -56,10 +72,11 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
   useEffect(() => {
     const settings = {
       textColor, strokeColor, strokeWidth, fontSize, textXOffset, textYOffset,
-      shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness
+      shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness,
+      img1Zoom, img1PanX, img1PanY, img2Zoom, img2PanX, img2PanY
     };
     localStorage.setItem('thumbnailSettings', JSON.stringify(settings));
-  }, [textColor, strokeColor, strokeWidth, fontSize, textXOffset, textYOffset, shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness]);
+  }, [textColor, strokeColor, strokeWidth, fontSize, textXOffset, textYOffset, shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness, img1Zoom, img1PanX, img1PanY, img2Zoom, img2PanX, img2PanY]);
   // Canvas target dimensions (standard 16:9 HD thumbnail)
   const CANVAS_WIDTH = 1280;
   const CANVAS_HEIGHT = 720;
@@ -83,24 +100,23 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
     if (!ctx) return;
 
     // Helper to draw image covering an area
-    const drawCoverImage = (img: HTMLImageElement, x: number, y: number, w: number, h: number) => {
+    const drawCoverImage = (img: HTMLImageElement, x: number, y: number, w: number, h: number, zoom: number, panX: number, panY: number) => {
       const imgRatio = img.width / img.height;
       const targetRatio = w / h;
       let drawW, drawH, drawX, drawY;
 
       if (imgRatio > targetRatio) {
         // Image is wider than target area
-        drawH = h;
-        drawW = h * imgRatio;
-        drawX = x + (w - drawW) / 2;
-        drawY = y;
+        drawH = h * zoom;
+        drawW = h * imgRatio * zoom;
       } else {
         // Image is taller than target area
-        drawW = w;
-        drawH = w / imgRatio;
-        drawX = x;
-        drawY = y + (h - drawH) / 2;
+        drawW = w * zoom;
+        drawH = (w / imgRatio) * zoom;
       }
+
+      drawX = x + (w - drawW) / 2 + panX;
+      drawY = y + (h - drawH) / 2 + panY;
 
       ctx.save();
       ctx.beginPath();
@@ -111,9 +127,8 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
     };
 
     const renderCanvas = async () => {
-      // Clear canvas
-      ctx.fillStyle = '#111';
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      // Wait for fonts to be completely loaded and parsed by the browser
+      await document.fonts.ready;
 
       // Load Images
       const img1 = new Image();
@@ -137,12 +152,16 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
 
       await Promise.all(loadPromises);
 
+      // Clear canvas NOW, so it doesn't flicker while waiting for images to load!
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
       // Draw Images
       if (mode === 'single' && image1Url) {
-        drawCoverImage(img1, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        drawCoverImage(img1, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, img1Zoom, img1PanX, img1PanY);
       } else if (mode === 'split') {
-        if (image1Url) drawCoverImage(img1, 0, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT);
-        if (image2Url) drawCoverImage(img2, CANVAS_WIDTH / 2, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT);
+        if (image1Url) drawCoverImage(img1, 0, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT, img1Zoom, img1PanX, img1PanY);
+        if (image2Url) drawCoverImage(img2, CANVAS_WIDTH / 2, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT, img2Zoom, img2PanX, img2PanY);
         
         // Draw separation line
         ctx.beginPath();
@@ -204,7 +223,7 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
     };
 
     renderCanvas();
-  }, [mode, image1Url, image2Url, text, textColor, strokeColor, strokeWidth, fontSize, textXOffset, textYOffset, shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness]);
+  }, [mode, image1Url, image2Url, text, textColor, strokeColor, strokeWidth, fontSize, textXOffset, textYOffset, shapeType, shapeX, shapeY, shapeSize, shapeColor, shapeThickness, img1Zoom, img1PanX, img1PanY, img2Zoom, img2PanX, img2PanY]);
 
   const handleSave = () => {
     const canvas = canvasRef.current;
@@ -256,12 +275,48 @@ export default function ThumbnailMaker({ onSave, onCancel }: ThumbnailMakerProps
                 {mode === 'split' ? 'Left Image' : 'Main Image'}
               </label>
               <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, false)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark cursor-pointer border border-gray-300" />
+              {image1Url && (
+                <div className="pt-2 pb-2 space-y-2 border-l-2 border-primary pl-3 ml-1 mt-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-gray-600">Zoom: {img1Zoom.toFixed(2)}x</label>
+                    <input type="range" min="0.5" max="3" step="0.05" value={img1Zoom} onChange={e => setImg1Zoom(Number(e.target.value))} className="w-full accent-primary" />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-xs font-bold text-gray-600">Move X</label>
+                      <input type="range" min="-600" max="600" value={img1PanX} onChange={e => setImg1PanX(Number(e.target.value))} className="w-full accent-primary" />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-xs font-bold text-gray-600">Move Y</label>
+                      <input type="range" min="-600" max="600" value={img1PanY} onChange={e => setImg1PanY(Number(e.target.value))} className="w-full accent-primary" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {mode === 'split' && (
-              <div className="space-y-1">
+              <div className="space-y-1 pt-2">
                 <label className="text-sm font-bold text-gray-700">Right Image</label>
                 <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, true)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-black cursor-pointer border border-gray-300" />
+                {image2Url && (
+                  <div className="pt-2 pb-2 space-y-2 border-l-2 border-gray-800 pl-3 ml-1 mt-2">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-bold text-gray-600">Zoom: {img2Zoom.toFixed(2)}x</label>
+                      <input type="range" min="0.5" max="3" step="0.05" value={img2Zoom} onChange={e => setImg2Zoom(Number(e.target.value))} className="w-full accent-gray-800" />
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-xs font-bold text-gray-600">Move X</label>
+                        <input type="range" min="-600" max="600" value={img2PanX} onChange={e => setImg2PanX(Number(e.target.value))} className="w-full accent-gray-800" />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-xs font-bold text-gray-600">Move Y</label>
+                        <input type="range" min="-600" max="600" value={img2PanY} onChange={e => setImg2PanY(Number(e.target.value))} className="w-full accent-gray-800" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
