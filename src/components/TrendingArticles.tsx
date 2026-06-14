@@ -7,7 +7,7 @@ export default async function TrendingArticles() {
   const trendingArticles = await getTrendingArticles(5);
 
   return (
-    <aside className="sticky top-[80px] mb-8">
+    <aside className="sticky top-[80px] mb-8" data-nosnippet>
       {/* Header */}
       <div className="section-title-bar mb-5">
         <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "'Outfit', 'Battambang', sans-serif" }}>

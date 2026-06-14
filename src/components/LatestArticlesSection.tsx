@@ -27,7 +27,7 @@ export default async function LatestArticlesSection({ category, search, page = 1
   };
 
   return (
-    <section className="mb-8">
+    <section className="mb-8" data-nosnippet>
       {/* Section Header */}
       <div className="section-title-bar mb-4 sm:mb-6 px-1">
         <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
