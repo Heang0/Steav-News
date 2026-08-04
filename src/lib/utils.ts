@@ -43,9 +43,15 @@ export function getFacebookOptimizedImageUrl(url: string, applyWatermark?: boole
   // Optimize for Cloudinary if it's a Cloudinary URL
   if (absoluteUrl.includes('cloudinary.com')) {
     const watermarkTransform = applyWatermark ? '/l_steav_news_watermark,w_1.0,h_1.0,c_scale,fl_relative/fl_layer_apply' : '';
-    // Force f_jpg instead of f_auto because Telegram bots sometimes fail to render WebP/AVIF. 
-    // Use standard q_auto as colons (q_auto:best) can break some strict URL parsers.
-    return absoluteUrl.replace('/upload/', `/upload/c_fill,w_1200,h_630${watermarkTransform}/f_jpg,q_auto/`);
+    
+    // Telegram strictly requires image URLs to end with .jpg extension!
+    // Replace any .webp/.png/.gif extension at the end of the URL with .jpg
+    let cleanUrl = absoluteUrl.replace(/\.(webp|png|gif|jpeg)$/i, '.jpg');
+    if (!cleanUrl.endsWith('.jpg')) {
+      cleanUrl = `${cleanUrl}.jpg`;
+    }
+    
+    return cleanUrl.replace('/upload/', `/upload/c_fill,w_1200,h_630${watermarkTransform}/f_jpg,q_auto/`);
   }
   
   return absoluteUrl;
