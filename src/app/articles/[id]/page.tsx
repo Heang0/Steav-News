@@ -20,8 +20,8 @@ type PageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
-// Enable ISR: Cache for 24 hours to save CPU
-export const revalidate = 86400; 
+// Enable ISR: Revalidate metadata after 60 seconds
+export const revalidate = 60; 
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
