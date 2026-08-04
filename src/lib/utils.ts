@@ -74,7 +74,7 @@ export function getOptimizedImageUrl(
   // Step 2: Inject the transparent watermark/template
   const watermarkTransform = options.applyWatermark ? '/l_steav_news_watermark,w_1.0,h_1.0,c_scale,fl_relative/fl_layer_apply' : '';
 
-  // Step 4: Scale down to the actually requested device size
+  // Step 4: Scale down to requested size or default max 960px limit to save bandwidth
   let finalScale = '';
   if (options.width || options.height) {
     const scaleParams = [
@@ -83,15 +83,17 @@ export function getOptimizedImageUrl(
       options.height ? `h_${options.height}` : '',
     ].filter(Boolean);
     finalScale = `/${scaleParams.join(',')}`;
+  } else if (!options.applyWatermark) {
+    finalScale = '/c_limit,w_960';
   }
 
-  // Step 5: Format and Quality
-  const formatTransform = `/q_${options.quality || 'auto'},f_auto`;
+  // Step 5: Format and Quality (q_auto:eco delivers WebP/AVIF at max bandwidth efficiency)
+  const qualityVal = options.quality || 'auto:eco';
+  const formatTransform = `/q_${qualityVal},f_auto`;
 
   if (options.applyWatermark) {
     return url.replace('/upload/', `/upload/${baseScale}${watermarkTransform}${finalScale}${formatTransform}/`);
   } else {
-    // If no watermark is applied, just do standard scaling without forcing 1200x630 base canvas
     return url.replace('/upload/', `/upload${finalScale}${formatTransform}/`);
   }
 }

@@ -44,10 +44,15 @@
 
   /* Elegant base heading sizes */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', 'Battambang', 'Noto Sans Khmer', sans-serif;
+    font-family: 'Battambang', 'Noto Sans Khmer', 'Outfit', sans-serif;
     font-weight: 700;
     line-height: 1.3;
     letter-spacing: -0.01em;
+  }
+
+  /* Force form controls to use Battambang Khmer font */
+  input, textarea, select, button {
+    font-family: 'Battambang', 'Noto Sans Khmer', sans-serif;
   }
 }
 

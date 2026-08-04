@@ -1,13 +1,15 @@
 import { v2 as cloudinary } from 'cloudinary';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import path from 'path';
 
 if (
   !process.env.CLOUDINARY_CLOUD_NAME ||
   !process.env.CLOUDINARY_API_KEY ||
   !process.env.CLOUDINARY_API_SECRET
 ) {
-  console.warn('Cloudinary credentials missing - image uploads will fail if used.');
+  console.warn('Cloudinary credentials missing - image uploads will fallback to local storage.');
 }
 
 cloudinary.config({
@@ -39,48 +41,26 @@ export async function optimizeImageBuffer(
       return buffer;
     }
 
-    if (buffer.length <= TARGET_IMAGE_SIZE_BYTES) {
-      return buffer;
-    }
+    // Fast 1-pass optimization: Max 1200px width/height, WebP/JPEG quality 80 (Fast <0.2s processing time)
+    const useWebp = mimeType === 'image/png' || Boolean(metadata.hasAlpha) || mimeType === 'image/webp';
+    const pipeline = sharp(buffer)
+      .rotate()
+      .resize({
+        width: 1200,
+        height: 1200,
+        fit: 'inside',
+        withoutEnlargement: true,
+      });
 
-    const useWebp = mimeType === 'image/png' || Boolean(metadata.hasAlpha);
-    const widths = useWebp ? GRAPHIC_WIDTH_STEPS : PHOTO_WIDTH_STEPS;
-    const qualities = useWebp ? GRAPHIC_QUALITY_STEPS : PHOTO_QUALITY_STEPS;
+    const optimized = useWebp
+      ? await pipeline
+          .webp({ quality: 80, effort: 4 })
+          .toBuffer()
+      : await pipeline
+          .jpeg({ quality: 80, mozjpeg: true, progressive: true })
+          .toBuffer();
 
-    let bestBuffer = buffer;
-
-    for (const width of widths) {
-      const boundedWidth = Math.min(width, MAX_IMAGE_DIMENSION);
-
-      for (const quality of qualities) {
-        const pipeline = sharp(buffer)
-          .rotate()
-          .resize({
-            width: boundedWidth,
-            height: boundedWidth,
-            fit: 'inside',
-            withoutEnlargement: true,
-          });
-
-        const candidate = useWebp
-          ? await pipeline
-              .webp({ quality, alphaQuality: quality, effort: 6 })
-              .toBuffer()
-          : await pipeline
-              .jpeg({ quality, mozjpeg: true, progressive: true })
-              .toBuffer();
-
-        if (candidate.length < bestBuffer.length) {
-          bestBuffer = candidate;
-        }
-
-        if (candidate.length <= TARGET_IMAGE_SIZE_BYTES) {
-          return candidate;
-        }
-      }
-    }
-
-    return bestBuffer;
+    return optimized.length < buffer.length ? optimized : buffer;
   } catch (error) {
     console.error('Error optimizing upload image:', error);
     return buffer;
@@ -104,6 +84,28 @@ function sanitizeFileName(name: string): string {
     .replace(/^_+|_+$/g, '') || 'image';
 }
 
+async function uploadToLocalStorage(
+  optimizedBuffer: Buffer,
+  extension: string,
+  fileName: string
+): Promise<{ url: string; fileId: string; name: string }> {
+  const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'images');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  const fullFileName = `${fileName}.${extension}`;
+  const filePath = path.join(uploadsDir, fullFileName);
+  await fs.promises.writeFile(filePath, optimizedBuffer);
+
+  const localUrl = `/uploads/images/${fullFileName}`;
+  return {
+    url: localUrl,
+    fileId: fullFileName,
+    name: fullFileName,
+  };
+}
+
 export async function uploadImageBuffer(
   buffer: Buffer,
   mimeType?: string,
@@ -113,28 +115,43 @@ export async function uploadImageBuffer(
   const extension = getFileExtension(mimeType);
   const fileName = `${sanitizeFileName(originalName)}-${Date.now()}-${uuidv4()}`;
 
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: CLOUDINARY_FOLDER,
-        public_id: fileName,
-        resource_type: 'auto',
-        format: extension === 'gif' || extension === 'svg' ? undefined : extension,
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve({
-            url: result?.secure_url || '',
-            fileId: result?.public_id || '',
-            name: result?.original_filename || '',
-          });
+  // If STORAGE_TYPE is set to 'local' or Cloudinary is not configured, save locally
+  if (
+    process.env.STORAGE_TYPE === 'local' ||
+    !process.env.CLOUDINARY_CLOUD_NAME ||
+    !process.env.CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET
+  ) {
+    return uploadToLocalStorage(optimizedBuffer, extension, fileName);
+  }
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: CLOUDINARY_FOLDER,
+          public_id: fileName,
+          resource_type: 'auto',
+          format: extension === 'gif' || extension === 'svg' ? undefined : extension,
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve({
+              url: result?.secure_url || '',
+              fileId: result?.public_id || '',
+              name: result?.original_filename || '',
+            });
+          }
         }
-      }
-    );
-    uploadStream.end(optimizedBuffer);
-  });
+      );
+      uploadStream.end(optimizedBuffer);
+    });
+  } catch (err) {
+    console.warn('Cloudinary upload failed, falling back to local storage:', err);
+    return uploadToLocalStorage(optimizedBuffer, extension, fileName);
+  }
 }
 
 export default cloudinary;
